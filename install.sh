@@ -46,13 +46,19 @@ isCommandExist() {
 
 SetupGoIfDoesNotExist() {
     if ! isCommandExist "go"; then
-        print_indicate "Golang does not exist !!"
+        print_fail "Golang does not exist !!"
         print_status "Install Golang"
-        wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz
-        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.8.linux-amd64.tar.gz
-        SetupGoIfDoesNotExist
+        wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz &>/dev/null
+        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.8.linux-amd64.tar.gz &>/dev/null
+        rm go1.17.8.linux-amd64.tar.gz
+
+        if isCommandExist "go"; then
+            print_succeed "Golang installed successfully"
+        else
+            print_fail "Golang install Failed"
+        fi
     else
-        print_succeed "Golang installed"
+        print_indicate "Golang Already installed"
     fi
 }
 

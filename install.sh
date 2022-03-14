@@ -55,7 +55,9 @@ SetupGoIfDoesNotExist() {
         if isCommandExist "go"; then
             print_succeed "Golang installed successfully"
         else
-            print_fail "Golang install Failed"
+            print_fail "Golang install Failed !!"
+            print_indicate "Please try to install golang manual and reinstall again"
+            exit 1
         fi
     else
         print_indicate "Golang Already installed"

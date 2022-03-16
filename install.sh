@@ -45,7 +45,7 @@ isCommandExist() {
 }
 
 isMac() {
-    [[ "$OSTYPE" == "linux"* ]]
+    [[ "$OSTYPE" == "darwin"* ]]
 }
 
 isDebian() {
@@ -77,6 +77,7 @@ InstallUsingPacman() {
 InstallUsingBrew() {
     if brew --version &>/dev/null; then
 	    print_indicate "Brew is already installed"
+        
     else
         print_status "Try to install brew "
 	    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -100,9 +101,25 @@ SetupEssentialPackages() {
 
     elif isMac; then
         InstallUsingBrew
-
     fi
 }
+
+InstallGolang() {
+    rm -rf /usr/local/go
+
+    if isMac; then
+        wget https://go.dev/dl/go1.17.8.darwin-amd64.tar.gz -O golang.tar.gz &>/dev/null
+
+    else
+        wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz -O golang.tar.gz &>/dev/null    
+    fi
+
+
+    tar -C /usr/local -xzf golang.tar.gz &>/dev/null
+    rm golang.tar.gz
+    ln -sf /usr/local/go/bin/go /usr/local/bin/
+
+} 
 
 AddGoToProfile() {
     user=$(who am i | awk '{print $1}')
@@ -111,12 +128,12 @@ AddGoToProfile() {
     export GOPATH=$home/go
     export PATH=$GOPATH/bin:$GOROOT/bin:$home/.local/bin:$PATH
 
-cat << EOF >> $home/.profile
-# Golang vars
-export GOROOT=/usr/local/go
-export GOPATH=\$HOME/go
-export PATH=\$GOPATH/bin:\$GOROOT/bin:\$HOME/.local/bin:\$PATH
-EOF
+    cat <<- EOF >> $home/.profile
+		# Golang vars
+		export GOROOT=/usr/local/go
+		export GOPATH=\$HOME/go
+		export PATH=\$GOPATH/bin:\$GOROOT/bin:\$HOME/.local/bin:\$PATH
+	EOF
 
 }
 
@@ -124,14 +141,13 @@ SetupGoIfDoesNotExist() {
     if ! isCommandExist "go"; then
         print_fail "Golang does not exist !!"
         print_status "Install Golang"
-        wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz &>/dev/null
-        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.8.linux-amd64.tar.gz &>/dev/null
-        rm go1.17.8.linux-amd64.tar.gz
-        ln -sf /usr/local/go/bin/go /usr/local/bin/
-        AddGoToProfile
-
+        InstallGolang
+        
         if isCommandExist "go"; then
             print_succeed "Golang installed successfully"
+            AddGoToProfile
+            print_succeed "Golang added to bash profile"
+
         else
             print_fail "Golang install Failed !!"
             print_indicate "Please try to install golang manual and reinstall again"
@@ -186,14 +202,13 @@ SetupCrawlerLib() {
 
     if ! isDirExist "$CrawlerPath/build"; then
         cd $CrawlerPath
-
         python3 setup.py build &>/dev/null
         python3 setup.py install &>/dev/null
-
         cd "$CurrPath"
 
         if isDirExist "$CrawlerPath/build"; then
             print_succeed "Crawler lib built successfully"
+
         else
             print_fail "an error occured"
             print_indicate "Please reinstall or run 'cd $CrawlerPath; python3 setup.py build; python3 setup.py install'"
@@ -219,12 +234,12 @@ BuildSubFinder() {
 
     if ! IsSubFinderExtInstalled; then
         cd "$SubFinderPath"
-
         go build -buildmode=c-archive subfinder.go &>/dev/null
         cd "$CurrPath"
 
         if IsSubFinderExtInstalled; then
             print_succeed "SubFinder built successfully"
+
         else
             print_fail "SubFinder Build Failed"
             exit 1
@@ -246,6 +261,7 @@ SetupSubFinderLib() {
 
         if isDirExist "$SubFinderPath/build"; then
             print_succeed "SubFinderPath lib built successfully"
+
         else
             print_fail "an error occured"
             print_indicate "Please reinstall or run 'cd $SubFinderPath && python3 setup.py build && python3 setup.py install' and show the error"

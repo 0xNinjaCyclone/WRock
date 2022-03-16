@@ -44,6 +44,82 @@ isCommandExist() {
     [ ! -z $(command -v $1) ]
 }
 
+isMac() {
+    [[ "$OSTYPE" == "linux"* ]]
+}
+
+isDebian() {
+    isFileExist "/etc/debian_version"
+}
+
+isRedhat() {
+    isFileExist "/etc/redhat-release"
+}
+
+isArch() {
+    isFileExist "/etc/arch-release"
+}
+
+InstallUsingAPT() {
+    apt update -y &>/dev/null
+    apt install python3 python3-dev python3-pip build-essential gcc -y &>/dev/null
+}
+
+InstallUsingYum() {
+    yum groupinstall "Development Tools" -y &>/dev/null
+    yum install python3 python3-pip python3-devel gcc -y &>/dev/null
+}
+
+InstallUsingPacman() {
+    pacman -Sy install python python-pip base-devel gcc -y &>/dev/null
+}
+
+InstallUsingBrew() {
+    if brew --version &>/dev/null; then
+	    print_indicate "Brew is already installed"
+    else
+        print_status "Try to install brew "
+	    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+
+    brew update &>/dev/null
+    brew install bash coreutils python python3-dev gcc &>/dev/null
+}
+
+SetupEssentialPackages() {
+    print_status "Setup essential packages"
+
+    if isDebian; then
+        InstallUsingAPT
+
+    elif isRedhat; then
+        InstallUsingYum
+
+    elif isArch; then
+        InstallUsingPacman
+
+    elif isMac; then
+        InstallUsingBrew
+
+    fi
+}
+
+AddGoToProfile() {
+    user=$(who am i | awk '{print $1}')
+    home=$(eval echo ~$user)
+    export GOROOT=/usr/local/go
+    export GOPATH=$home/go
+    export PATH=$GOPATH/bin:$GOROOT/bin:$home/.local/bin:$PATH
+
+cat << EOF >> $home/.profile
+# Golang vars
+export GOROOT=/usr/local/go
+export GOPATH=\$HOME/go
+export PATH=\$GOPATH/bin:\$GOROOT/bin:\$HOME/.local/bin:\$PATH
+EOF
+
+}
+
 SetupGoIfDoesNotExist() {
     if ! isCommandExist "go"; then
         print_fail "Golang does not exist !!"
@@ -51,6 +127,8 @@ SetupGoIfDoesNotExist() {
         wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz &>/dev/null
         rm -rf /usr/local/go && tar -C /usr/local -xzf go1.17.8.linux-amd64.tar.gz &>/dev/null
         rm go1.17.8.linux-amd64.tar.gz
+        ln -sf /usr/local/go/bin/go /usr/local/bin/
+        AddGoToProfile
 
         if isCommandExist "go"; then
             print_succeed "Golang installed successfully"
@@ -59,6 +137,7 @@ SetupGoIfDoesNotExist() {
             print_indicate "Please try to install golang manual and reinstall again"
             exit 1
         fi
+
     else
         print_indicate "Golang Already installed"
     fi
@@ -87,9 +166,7 @@ SetupRockRawler() {
 
     if ! IsRockRawlerExtInstalled; then
         cd "$CrawlerPath/RockRawler"
-
         go build -o ../ -buildmode=c-archive RockRawler.go &>/dev/null
-
         cd "$CurrPath"
 
         if IsRockRawlerExtInstalled; then
@@ -195,6 +272,8 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+
+SetupEssentialPackages
 
 SetupGoIfDoesNotExist
 

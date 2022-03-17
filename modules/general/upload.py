@@ -14,14 +14,19 @@ class Upload(GeneralScanner):
 
     def run(self):
         res = self.request.Send()
-        forms = BeautifulSoup(res.text, 'html.parser').find("form")
 
-        if forms:        
-            for tag in forms.findAll("input"):
-                itype = tag.get("type") # input type
+        try:
+            forms = BeautifulSoup(res.text, 'html.parser').find("form")
+ 
+            if forms:        
+                for tag in forms.findAll("input"):
+                    itype = tag.get("type") # input type
 
-                if itype:
-                    if itype == "file":
-                        self.vulnInfo.status = Status.Maybe
+                    if itype:
+                        if itype == "file":
+                            self.vulnInfo.status = Status.Maybe
+
+        except:
+            pass
 
         return self.GetVulnInfo()

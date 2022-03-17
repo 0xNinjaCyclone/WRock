@@ -77,10 +77,10 @@ InstallUsingPacman() {
 InstallUsingBrew() {
     if brew --version &>/dev/null; then
 	    print_indicate "Brew is already installed"
-        
+
     else
         print_status "Try to install brew "
-	    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
     brew update &>/dev/null

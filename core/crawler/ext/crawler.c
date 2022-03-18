@@ -287,6 +287,16 @@ static PyObject *Crawler_GetRawHeaders(Crawler *self, void *closure)
     return self->rawHeaders;
 }
 
+void freeAllocatedMemory(char **ptr) {
+    for (char **temp = ptr; *temp; temp++)
+    {
+        /* Free each item of the array */
+        PyMem_Free(*temp);
+    }
+
+    PyMem_Free(ptr);
+}
+
 PyObject *StoreResults(char **results) 
 {
     /* declare a python list */
@@ -332,8 +342,8 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     /* Store data in a python list */
     pyresult = StoreResults(results);
     
-    /* free allocation of results */
-    PyMem_Free(results);
+    /* Free memory */
+    freeAllocatedMemory(results);
 
     return pyresult; 
 }

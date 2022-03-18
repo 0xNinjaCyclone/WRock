@@ -219,6 +219,16 @@ static PyObject *SubFinder_GetMaxEnumerationTime(SubFinder *self, void *closure)
     return self->maxEnumerationTime;
 }
 
+void freeAllocatedMemory(char **ptr) {
+    for (char **temp = ptr; *temp; temp++)
+    {
+        /* Free each item of the array */
+        PyMem_Free(*temp);
+    }
+
+    PyMem_Free(ptr);
+}
+
 PyObject *StoreResults(char **results) 
 {
     /* declare a python list */
@@ -312,17 +322,11 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
     /* Set Property using SubFinder API */
     SubFinderSetProperty(BuildGoStr(propname), property, (GoInt) nSize);
 
-    /* Free memory allocation */
-    for (size_t i = 0; i < nSize; i++)
-    {
-        PyMem_Free(property[i]);
-    }
-    
-    PyMem_Free(property);
+    /* Free memory */
+    freeAllocatedMemory(property);
 
     Py_RETURN_NONE;
 }
-
 
 static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args) {
 
@@ -347,19 +351,26 @@ static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args) {
     /* Store all results in a python list */
     result = StoreResults(property);
 
-    /* Free allocation of property */
-    PyMem_Free(property);
+    /* Free memory */
+    freeAllocatedMemory(property);
 
     return result;
 }
 
 static PyObject *SubFinder_Version(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
-    PyObject *version;
+    char *version;
+    PyObject *py_version;
 
-    /* Get SubFinder Version Using API and convert to python object */
-    version = PyUnicode_FromString(SubFinderVersion());
+    /* Get SubFinder Version Using API */
+    version = SubFinderVersion();
 
-    return version;
+    /* Convert to a python object */
+    py_version = PyUnicode_FromString(version);
+
+    /* Free memory */
+    PyMem_Free(version);
+
+    return py_version;
 }
 
 static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
@@ -380,7 +391,7 @@ static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) 
     pyresult = StoreResults(results);
     
     /* free allocation of results */
-    PyMem_Free(results);
+    freeAllocatedMemory(results);
 
     return pyresult; 
 }

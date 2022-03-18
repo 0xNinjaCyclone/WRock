@@ -187,6 +187,7 @@ SetupRockRawler() {
 
         if IsRockRawlerExtInstalled; then
             print_succeed "RockRawler built successfully"
+            
         else
             print_fail "RockRawler Build Failed"
             exit 1

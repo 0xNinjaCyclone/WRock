@@ -2,6 +2,10 @@
 from core.scan.module import *
 from bs4 import BeautifulSoup
 
+# Disable bs4 warnings
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
+
 
 class Upload(GeneralScanner):
     # This module will get all upload functions, without upload any thing

@@ -124,11 +124,13 @@ InstallGolang() {
 AddGoToProfile() {
     user=$(who am i | awk '{print $1}')
     home=$(eval echo ~$user)
+    profile=".$(basename $(echo $SHELL))rc"
+
     export GOROOT=/usr/local/go
     export GOPATH=$home/go
     export PATH=$GOPATH/bin:$GOROOT/bin:$home/.local/bin:$PATH
 
-    cat <<- EOF >> $home/.profile
+    cat <<- EOF >> $home/$profile
 		# Golang vars
 		export GOROOT=/usr/local/go
 		export GOPATH=\$HOME/go

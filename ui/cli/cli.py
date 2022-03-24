@@ -1,5 +1,5 @@
 
-import sys
+import sys, os.path
 from core.recon.subenum.enumerate import runEnumeration
 from ui.cli import options, builder, view, show
 from core.config.base import Mode
@@ -98,7 +98,8 @@ def run(opts):
             reportName  = output.GetFileName()
 
             # Save subdomains 
-            output.SetFileName(f"subdomains-{reportName}")
+            output_path , fileName = os.path.split(reportName)
+            output.SetFileName(os.path.join(output_path, f"subdomains-{fileName}"))
             writeReport(output, subdomains, writeEnumReport)
 
             # Return fileName again after changing when wrote subdomains report

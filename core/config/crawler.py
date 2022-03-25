@@ -4,9 +4,10 @@ from core.config.base import Config
 
 class CrawlerConfig(Config):
     def __init__(self) -> None:
-        self.__depth = 5
-        self.__subsInScope = False
-        self.__insecure = False
+        self.__depth            = 5
+        self.__subsInScope      = False
+        self.__insecure         = False
+        self.__nocrawl          = False
         Config.__init__(self)
 
     def SetDepth(self, depth):
@@ -26,4 +27,10 @@ class CrawlerConfig(Config):
 
     def isInsecureEnabled(self):
         return self.__insecure
+
+    def enable(self):
+        self.__nocrawl = True
+
+    def isEnabled(self):
+        return self.__nocrawl
     

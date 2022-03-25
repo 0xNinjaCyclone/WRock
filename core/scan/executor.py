@@ -76,15 +76,13 @@ class GeneralScanExecutor(ScanExecutor):
         if not self.reachable():
             raise Exception(f"This server is unreachable !!")
         
-        urls = rduplicate(crawl(self.config.GetCrawlerConfig()))
+        crawler_cfg = self.config.GetCrawlerConfig()
+        urls = rduplicate(crawl(crawler_cfg)) if crawler_cfg.isEnabled() else [crawler_cfg.GetTarget()]
 
         for MODULE in self.GetAllModules():
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 for url in urls:
                     executor.submit(self.run, url, MODULE)
-            
-            # for url in urls:
-            #     self.run(url, MODULE)
 
 
         return self.results

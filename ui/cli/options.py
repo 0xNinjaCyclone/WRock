@@ -26,6 +26,7 @@ def register_crawler_options(parser):
     crawler_options.add_option("--depth", dest="depth", help="Depth to crawl. (default = 5)", type=int, default=5)
     crawler_options.add_option("--subs",action="store_true",dest="subsInScope",help="Include subdomains in crawling")
     crawler_options.add_option("--insecure",action="store_true",dest="insecure",help="Disable TLS verification")
+    crawler_options.add_option("--no-crawl",action="store_true",dest="nocrawl",help="Don't use crawl to scan")
     parser.add_option_group(crawler_options)
 
 def register_advanced(parser):

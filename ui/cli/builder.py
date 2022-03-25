@@ -161,7 +161,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.insecure:
             crawler.enableInsecure()
 
-        if not self.data.nocrawl:
-            crawler.enable()
+        if self.data.nocrawl:
+            crawler.disable()
 
         return crawler

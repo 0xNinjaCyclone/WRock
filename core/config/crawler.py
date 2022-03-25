@@ -28,9 +28,9 @@ class CrawlerConfig(Config):
     def isInsecureEnabled(self):
         return self.__insecure
 
-    def enable(self):
+    def disable(self):
         self.__nocrawl = True
 
     def isEnabled(self):
-        return self.__nocrawl
+        return not self.__nocrawl
     

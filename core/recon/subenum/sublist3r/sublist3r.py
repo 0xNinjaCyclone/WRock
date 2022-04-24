@@ -559,8 +559,9 @@ class DNSdumpster(enumratorBase):
         
         # Recursive search
         if self.recursive:
-            with ThreadPoolExecutor(max_workers=self.threads) as e:
-                [e.submit(self.dnsdumpester_enum, subdomain) for subdomain in self.live_subdomains]
+            for subdomain in self.live_subdomains:
+                self.dnsdumpester_enum(subdomain)
+    
 
         return self.live_subdomains
 
@@ -638,8 +639,8 @@ class ThreatCrowd(enumratorBase):
 
         if self.recursive:
             # enumerate recursivly
-            with ThreadPoolExecutor(max_workers=self.threads) as e:
-                [e.submit(self.threatcrowd_enum, subdomain) for subdomain in self.subdomains]
+            for subdomain in self.subdomains:
+                self.threatcrowd_enum(subdomain)
                     
 
         return self.subdomains
@@ -686,10 +687,9 @@ class CrtSearch(enumratorBase):
 
         if self.recursive:
             # enumerate recursivly
-            with ThreadPoolExecutor(max_workers=self.threads) as e:
-                for wildcardsubdomain in self.wildcardsubdomains:
-                    wildcardsubdomain = wildcardsubdomain.replace('*.', '')
-                    e.submit(self.crtsh_enum, wildcardsubdomain)
+            for wildcardsubdomain in self.wildcardsubdomains:
+                wildcardsubdomain = wildcardsubdomain.replace('*.', '')
+                self.crtsh_enum(wildcardsubdomain)
 
         return self.subdomains
 
@@ -738,8 +738,8 @@ class PassiveDNS(enumratorBase):
 
         if self.recursive:
             # enumerate recursivly
-            with ThreadPoolExecutor(max_workers=self.threads) as e:
-                [e.submit(self.passivedns_enum, subdomain) for subdomain in self.subdomains]      
+            for subdomain in self.subdomains:
+                self.passivedns_enum(subdomain)    
 
 
         return self.subdomains

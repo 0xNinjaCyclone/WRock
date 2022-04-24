@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+*.a
+
+# C extensions header files
+core/crawler/ext/RockRawler.h
+core/recon/subenum/subfinder/ext/subfinder.h
+
+# Distribution / packaging
+build/
+
+# Visual studio code files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+

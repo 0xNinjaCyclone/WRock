@@ -106,14 +106,15 @@ Options:
     --depth=DEPTH       Depth to crawl. (default = 5)
     --subs              Include subdomains in crawling
     --insecure          Disable TLS verification
+    --no-crawl          Don't use crawl to scan
 
   Subdomain collector options:
     --sources=SOURCES   Enumerations Sources separated by comm (Note add minus
                         before source to exclude)
     --timeout=TIMEOUT   Time out (default = 30)
     --subfinder-apis=SUBFINDER_APIS
-                        Subfinder APIs (format =
-                        'Source1:API1-API2,Source2:API1')
+                        yamlfile or submit in this format ->
+                        'Source1:API1+API2,Source2:API1'
     --maxEnumerationTime=MAXENUMERATIONTIME
                         Minutes to wait for enumeration results (default = 10)
     --recursive         Collect recursivly

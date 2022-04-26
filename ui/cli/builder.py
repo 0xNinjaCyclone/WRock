@@ -1,8 +1,14 @@
 
+import yaml, os.path
 from core.config.builder import ConfigBuilder
 from core.request import Headers
 from core.config.module import *
 from core.config.rock import *
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
 
 class OptionsBuilder(ConfigBuilder):
 
@@ -53,18 +59,28 @@ class OptionsBuilder(ConfigBuilder):
         if apisfmt:
             apis    = {}
 
-            if ',' in apisfmt:
-                for fmt in apis.split(','):
+            if os.path.isfile(apisfmt):
+                try:
+                    with open(apisfmt, 'r') as stream:
+                        data = yaml.load(stream, Loader=Loader)
+
+                    for key in data.keys():
+                        apis[key.capitalize()] = data[key]
+                except:
+                    raise ValueError("Invalid yaml")
+
+            elif ',' in apisfmt:
+                for fmt in apisfmt.split(','):
                     if ':' in fmt:
                         key, value = fmt.split(':')
-                        apis[key.capitalize()]  = value.split('-') if '-' in value else [value]
+                        apis[key.capitalize()]  = value.split('+') if '+' in value else [value]
                     else:
                         raise ValueError("Invalid subfinder APIs format")
 
             else:
                 if ':' in apisfmt:
                     key, value = apisfmt.split(':')
-                    apis[key.capitalize()]  = value.split('-') if '-' in value else [value]
+                    apis[key.capitalize()]  = value.split('+') if '+' in value else [value]
                 else:
                     raise ValueError("Invalid subfinder APIs format")
 

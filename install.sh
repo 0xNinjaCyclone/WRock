@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-CrawlerPath="core/crawler/ext"
-SubFinderPath="core/recon/subenum/subfinder/ext"
+GoRockPath="gorock"
 CurrPath=$(pwd)
+
 
 # Colors used in printing
 Green="\033[0;32m"
@@ -176,15 +176,15 @@ SetupPyDependencies() {
 }
 
 IsRockRawlerExtInstalled() {
-    isFileExist "$CrawlerPath/RockRawler.a" || isFileExist "$CrawlerPath/RockRawler.h"
+    isFileExist "$GoRockPath/ext/RockRawler.a" || isFileExist "$GoRockPath/ext/RockRawler.h"
 }
 
-SetupRockRawler() {
-    print_status "Build RockRawler extension"
+BuildRockRawler() {
+    print_status "Build RockRawler"
 
     if ! IsRockRawlerExtInstalled; then
-        cd "$CrawlerPath/RockRawler"
-        go build -o ../ -buildmode=c-archive RockRawler.go &>/dev/null
+        cd "$GoRockPath/src/RockRawler"
+        go build -o ../../ext -buildmode=c-archive RockRawler.go &>/dev/null
         cd "$CurrPath"
 
         if IsRockRawlerExtInstalled; then
@@ -196,48 +196,20 @@ SetupRockRawler() {
         fi
 
     else
-        print_indicate "RockRawler extension has already been built before"
+        print_indicate "RockRawler has already been built before"
     fi
-}
-
-SetupCrawlerLib() {
-    print_status "Setup Crawler Library"
-
-    if ! isDirExist "$CrawlerPath/build"; then
-        cd $CrawlerPath
-        python3 setup.py build &>/dev/null
-        python3 setup.py install &>/dev/null
-        cd "$CurrPath"
-
-        if isDirExist "$CrawlerPath/build"; then
-            print_succeed "Crawler lib built successfully"
-
-        else
-            print_fail "an error occured"
-            print_indicate "Please reinstall or run 'cd $CrawlerPath; python3 setup.py build; python3 setup.py install'"
-            exit 1
-        fi
-   
-    else
-        print_indicate "CrawlerLib Already installed"
-    fi
-}
-
-SetupCrawler() {
-    SetupRockRawler
-    SetupCrawlerLib
 }
 
 IsSubFinderExtInstalled() {
-    isFileExist "$SubFinderPath/subfinder.a" || isFileExist "$SubFinderPath/subfinder.h"
+    isFileExist "$GoRockPath/ext/subfinder.a" || isFileExist "$GoRockPath/ext/subfinder.h"
 }
 
 BuildSubFinder() {
-    print_status "Build SubFinder extension"
+    print_status "Build SubFinder"
 
     if ! IsSubFinderExtInstalled; then
-        cd "$SubFinderPath"
-        go build -buildmode=c-archive subfinder.go &>/dev/null
+        cd "$GoRockPath/src/subfinder"
+        go build -o ../../ext -buildmode=c-archive subfinder.go &>/dev/null
         cd "$CurrPath"
 
         if IsSubFinderExtInstalled; then
@@ -249,42 +221,39 @@ BuildSubFinder() {
         fi
 
     else
-        print_indicate "SubFinder extension has already been built before"
+        print_indicate "SubFinder has already been built before"
     fi
 }
 
-SetupSubFinderLib() {
-    print_status "Setup SubFinder Library"
+SetupGoRockExtensions() {
+    print_status "Setup GoRock Framework Extensions"
 
-    if ! isDirExist "$SubFinderPath/build"; then
-        cd "$SubFinderPath"
-        python3 setup.py build &>/dev/null
+    if ! isDirExist "$GoRockPath/build"; then
+        cd $GoRockPath
         python3 setup.py install &>/dev/null
         cd "$CurrPath"
 
-        if isDirExist "$SubFinderPath/build"; then
-            print_succeed "SubFinderPath lib built successfully"
+        if isDirExist "$GoRockPath/build"; then
+            print_succeed "GoRock Framework built successfully"
 
         else
             print_fail "an error occured"
-            print_indicate "Please reinstall or run 'cd $SubFinderPath && python3 setup.py build && python3 setup.py install' and show the error"
+            print_indicate "Please reinstall or run 'cd $GoRockPath; python3 setup.py install'"
             exit 1
         fi
-
+   
     else
-        print_indicate "SubFinderLib Already installed"
+        print_indicate "GoRock Extensions Already installed"
     fi
 }
 
-SetupSubFinder() {
+BuildGoRockFramework() {
+    print_status "Build GoRock Framework"
+    BuildRockRawler
     BuildSubFinder
-    SetupSubFinderLib
+    SetupGoRockExtensions
 }
 
-SetupSubDomainTools() {
-    SetupSublist3r
-    SetupSubFinder
-}
 
 if [ "$EUID" -ne 0 ]; then 
     print_fail "Please run as root"
@@ -298,8 +267,8 @@ SetupGoIfDoesNotExist
 
 SetupPyDependencies
 
-SetupCrawler
+BuildGoRockFramework
 
-SetupSubDomainTools
+SetupSublist3r
 
 print_succeed "WebRock setup completed successfully"

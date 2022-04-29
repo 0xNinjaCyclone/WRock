@@ -30,9 +30,9 @@ static PyObject *SubFinder_new(PyTypeObject *type, PyObject *args, PyObject *kwd
         /* initialize our attributes */
         if(!(
             (self->domain = PyUnicode_FromString("")) && 
-            (self->threads = PyLong_FromLong(0)) &&
-            (self->timeout = PyLong_FromLong(0)) &&
-            (self->maxEnumerationTime = PyLong_FromLong(0))
+            (self->threads = PyLong_FromLong(5)) &&
+            (self->timeout = PyLong_FromLong(30)) &&
+            (self->maxEnumerationTime = PyLong_FromLong(10))
         ))
         {
             /* initialization failed */
@@ -48,9 +48,9 @@ static PyObject *SubFinder_new(PyTypeObject *type, PyObject *args, PyObject *kwd
 
 static int SubFinder_init(SubFinder *self, PyObject *args, PyObject* kwds)
 {
-    static char *kwlist[] = { "url", "threads", "timeout", "maxEnumerationTime", NULL };
+    static char *kwlist[] = { "url", "threads", "timeout", "maxEnumerationTime", "recursive", "all", NULL };
     PyObject *domain, *threads, *timeout, *maxEnumerationTime, *tmp;
-    int nThreads,nTimeout, nMaxEnumerationTime;
+    int nThreads, nTimeout, nMaxEnumerationTime, nRecursive, nAll;
 
     /* Initiate attrs */
     domain = NULL;
@@ -60,8 +60,8 @@ static int SubFinder_init(SubFinder *self, PyObject *args, PyObject* kwds)
     SubFinderInit();
 
     /* Get attrs from python */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Uiii", 
-                                    kwlist, &domain, &nThreads, &nTimeout, &nMaxEnumerationTime))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Uiiiii", 
+                                    kwlist, &domain, &nThreads, &nTimeout, &nMaxEnumerationTime, &nRecursive, &nAll))
     {
         return -1;
     }
@@ -97,6 +97,16 @@ static int SubFinder_init(SubFinder *self, PyObject *args, PyObject* kwds)
         Py_DECREF(tmp);
     }
 
+    if (nRecursive) {
+        if (PyBool_FromLong(nRecursive) == Py_True)
+            SubFinderUseRecursive();
+    }
+
+    if (nAll) {
+        if (PyBool_FromLong(nAll) == Py_True)
+            SubFinderUseAll();
+    }
+
     return 0;
 }
 
@@ -105,14 +115,6 @@ static void SubFinder_dealloc(SubFinder *self)
     PyObject_GC_UnTrack(self);
     SubFinder_clear(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
-}
-
-GoString BuildGoStr(PyObject *str)
-{
-    GoString GoStr;
-    GoStr.p = PyUnicode_AsUTF8(str);
-    GoStr.n = PyUnicode_GET_LENGTH(str);
-    return GoStr;
 }
 
 static int SubFinder_SetDomain(SubFinder *self, PyObject *value, void *closure) 
@@ -219,38 +221,14 @@ static PyObject *SubFinder_GetMaxEnumerationTime(SubFinder *self, void *closure)
     return self->maxEnumerationTime;
 }
 
-void freeAllocatedMemory(char **ptr) {
-    for (char **temp = ptr; *temp; temp++)
-    {
-        /* Free each item of the array */
-        PyMem_Free(*temp);
-    }
-
-    PyMem_Free(ptr);
+static PyObject *SubFinder_UseAll(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
+    SubFinderUseAll();
+    Py_RETURN_NONE;
 }
 
-PyObject *StoreResults(char **results) 
-{
-    /* declare a python list */
-    PyObject *pyresult; 
-
-    /* initialize the list and except error if init failed */
-    if (!(pyresult = PyList_New(0))) {
-        PyErr_SetString(PyExc_Exception, "an error occured when initializing the list");
-        return NULL;
-    } 
-
-    /* put all results in python list */
-    for (; *results; results++)
-    {
-        if(PyList_Append(pyresult, PyUnicode_FromString(*results)) != 0)
-        {
-            PyErr_SetString(PyExc_Exception, "an error occured when append results to the list");
-            return NULL;
-        }
-    }
-
-    return pyresult;
+static PyObject *SubFinder_UseRecursive(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
+    SubFinderUseRecursive();
+    Py_RETURN_NONE;
 }
 
 static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
@@ -272,7 +250,7 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
         return NULL;
     }
 
-    /* Check if the object passed is List */
+    /* Check if the object passed is a List */
     if(!PyList_Check(propval)) {
         PyErr_SetString(PyExc_TypeError,
                         "The properity must be a list");
@@ -323,7 +301,7 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
     SubFinderSetProperty(BuildGoStr(propname), property, (GoInt) nSize);
 
     /* Free memory */
-    freeAllocatedMemory(property);
+    FreeMemory(property);
 
     Py_RETURN_NONE;
 }
@@ -352,7 +330,7 @@ static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args) {
     result = StoreResults(property);
 
     /* Free memory */
-    freeAllocatedMemory(property);
+    FreeMemory(property);
 
     return result;
 }
@@ -375,7 +353,7 @@ static PyObject *SubFinder_Version(SubFinder *self, PyObject *Py_UNUSED(ignored)
 
 static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
 
-    /* RockRawler results */
+    /* subdomains container */
     char **results;
 
     /* declare a python list */
@@ -391,7 +369,7 @@ static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) 
     pyresult = StoreResults(results);
     
     /* free allocation of results */
-    freeAllocatedMemory(results);
+    FreeMemory(results);
 
     return pyresult; 
 }

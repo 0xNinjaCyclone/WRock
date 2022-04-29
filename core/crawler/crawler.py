@@ -1,7 +1,7 @@
 
 from core.config.scanner import CrawlerConfig
 from core.request import Headers
-from rockrawler import Crawler
+from gorock.rockrawler import Crawler
      
 
 class WebCrawler(Crawler):

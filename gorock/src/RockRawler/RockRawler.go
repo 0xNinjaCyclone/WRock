@@ -8,14 +8,11 @@ package main
 
 import (
 	"C"
-	"bufio"
 	"crypto/tls"
 	"errors"
-	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 	"unsafe"
@@ -210,28 +207,4 @@ func CStartCrawler(url string, threads int, depth int, subsInScope bool, insecur
 	return (**C.char)(cArray)
 }
 
-func main() {
-	threads := flag.Int("t", 5, "Number of threads to utilise.")
-	depth := flag.Int("d", 2, "Depth to crawl.")
-	insecure := flag.Bool("insecure", false, "Disable TLS verification.")
-	subsInScope := flag.Bool("subs", false, "Include subdomains for crawling.")
-	rawHeaders := flag.String(("h"), "", "Custom headers separated by two semi-colons. E.g. -h \"Cookie: foo=bar;;Referer: http://example.com/\" ")
-
-	flag.Parse()
-
-	// Check for stdin input
-	stat, _ := os.Stdin.Stat()
-	if (stat.Mode() & os.ModeCharDevice) != 0 {
-		fmt.Fprintln(os.Stderr, "No urls detected. Hint: cat urls.txt | RockRawler")
-		os.Exit(1)
-	}
-
-	// get each line of stdin, push it to the work channel
-	s := bufio.NewScanner(os.Stdin)
-
-	for s.Scan() {
-		url := s.Text()
-		results := StartCrawler(url, *threads, *depth, *subsInScope, *insecure, *rawHeaders)
-		printResults(results)
-	}
-}
+func main() {}

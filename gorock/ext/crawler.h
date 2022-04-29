@@ -1,9 +1,7 @@
 #ifndef _ROCK_CRAWLER
 #define _ROCK_CRAWLER
 
-#include "Python.h"
-#include "RockRawler.h"
-
+#include "gorock.h"
 
 typedef struct 
 {
@@ -25,8 +23,6 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds);
 static void Crawler_dealloc(Crawler *self);
 
-/* Convert Python String to Go String */
-GoString BuildGoStr(PyObject *str);
 
 /* Setters && Getters */
 static int Crawler_SetUrl(Crawler *self, PyObject *value, void *closure);

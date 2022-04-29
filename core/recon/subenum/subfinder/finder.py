@@ -1,6 +1,6 @@
 
 
-from subfinder import SubFinder
+from gorock.subfinder import SubFinder
 from core.config.enumerator import FinderConfig
 from core.recon.subenum.enumerator import IDomainEnumerator
 
@@ -62,17 +62,15 @@ class Finder(SubFinder, IDomainEnumerator):
             config.GetTarget(), 
             config.GetThreads(), 
             config.GetTimeout(), 
-            config.GetMaxEnumerationTime()
+            config.GetMaxEnumerationTime(),
+            config.isRecursiveEnabled(),
+            False # Do not use all subfinder sources, We can enable via 'self.UseAll()' API
         )
 
         IDomainEnumerator.__init__(self, config)
 
-        # Set supplied APIs
-        apis = config.GetAPIs()
+        self.__load_apis__(config.GetAPIs())
 
-        if apis:
-            for source, api in apis.items():
-                self.SetAPI(source, api)
                 
     def isEnumerator(self, obj):
         pass
@@ -122,3 +120,8 @@ class Finder(SubFinder, IDomainEnumerator):
 
     def GetExcludedSources(self):
         return self.GetProperty(Finder.Property.ExcludeSources)
+
+    def __load_apis__(self, apis):
+        if apis:
+            for source, api in apis.items():
+                self.SetAPI(source, api)

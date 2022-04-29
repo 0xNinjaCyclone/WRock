@@ -1,9 +1,7 @@
 #ifndef _ROCK_SUBFINDER
 #define _ROCK_SUBFINDER
 
-#include "Python.h"
-#include "subfinder.h"
-
+#include "gorock.h"
 
 typedef struct 
 {
@@ -23,8 +21,6 @@ static PyObject *SubFinder_new(PyTypeObject *type, PyObject *args, PyObject *kwd
 static int SubFinder_init(SubFinder *self, PyObject *args, PyObject* kwds);
 static void SubFinder_dealloc(SubFinder *self);
 
-/* Convert Python String to Go String */
-GoString BuildGoStr(PyObject *str);
 
 /* Setters && Getters */
 static int SubFinder_SetDomain(SubFinder *self, PyObject *value, void *closure);
@@ -40,6 +36,8 @@ static int SubFinder_SetMaxEnumerationTime(SubFinder *self, PyObject *value, voi
 static PyObject *SubFinder_GetMaxEnumerationTime(SubFinder *self, void *closure);
 
 /* Methods */
+static PyObject *SubFinder_UseAll(SubFinder *self, PyObject *Py_UNUSED(ignored));
+static PyObject *SubFinder_UseRecursive(SubFinder *self, PyObject *Py_UNUSED(ignored));
 static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args);
 static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args);
 static PyObject *SubFinder_Version(SubFinder *self, PyObject *Py_UNUSED(ignored));
@@ -67,6 +65,10 @@ static PyMethodDef SubFinder_methods[] = {
         "Return results in a list"},
     {"Version", (PyCFunction) SubFinder_Version, METH_NOARGS,
         "Return subfinder version"},
+    {"UseAll", (PyCFunction) SubFinder_UseAll, METH_NOARGS,
+        "Use all sources"},
+    {"UseRecursive", (PyCFunction) SubFinder_UseRecursive, METH_NOARGS,
+        "Enumerate Recursively"},
     {"SetProperty", (PyCFunction) SubFinder_SetProperty, METH_VARARGS,
         "Set subfinder configurations"},
     {"GetProperty", (PyCFunction) SubFinder_GetProperty, METH_VARARGS,

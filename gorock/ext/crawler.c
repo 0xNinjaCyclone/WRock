@@ -34,8 +34,8 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         /* initialize our attributes */
         if(!(
             (self->url = PyUnicode_FromString("")) && 
-            (self->threads = PyLong_FromLong(0)) &&
-            (self->depth = PyLong_FromLong(0)) &&
+            (self->threads = PyLong_FromLong(5)) &&
+            (self->depth = PyLong_FromLong(2)) &&
             (self->subsInScope = Py_False) &&
             (self->insecure = Py_False) &&
             (self->rawHeaders = PyUnicode_FromString(""))
@@ -121,14 +121,6 @@ static void Crawler_dealloc(Crawler *self)
     PyObject_GC_UnTrack(self);
     Crawler_clear(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
-}
-
-GoString BuildGoStr(PyObject *str)
-{
-    GoString GoStr;
-    GoStr.p = PyUnicode_AsUTF8(str);
-    GoStr.n = PyUnicode_GET_LENGTH(str);
-    return GoStr;
 }
 
 static int Crawler_SetUrl(Crawler *self, PyObject *value, void *closure) 
@@ -287,40 +279,6 @@ static PyObject *Crawler_GetRawHeaders(Crawler *self, void *closure)
     return self->rawHeaders;
 }
 
-void freeAllocatedMemory(char **ptr) {
-    for (char **temp = ptr; *temp; temp++)
-    {
-        /* Free each item of the array */
-        PyMem_Free(*temp);
-    }
-
-    PyMem_Free(ptr);
-}
-
-PyObject *StoreResults(char **results) 
-{
-    /* declare a python list */
-    PyObject *pyresult; 
-
-    /* initialize the list and except error if init failed */
-    if (!(pyresult = PyList_New(0))) {
-        PyErr_SetString(PyExc_Exception, "an error occured when initializing the list");
-        return NULL;
-    } 
-
-    /* put all results in python list */
-    for (; *results; results++)
-    {
-        if(PyList_Append(pyresult, PyUnicode_FromString(*results)) != 0)
-        {
-            PyErr_SetString(PyExc_Exception, "Error occured when append results to the list");
-            return NULL;
-        }
-    }
-
-    return pyresult;
-}
-
 static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
 
     /* RockRawler results */
@@ -343,7 +301,7 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     pyresult = StoreResults(results);
     
     /* Free memory */
-    freeAllocatedMemory(results);
+    FreeMemory(results);
 
     return pyresult; 
 }

@@ -31,7 +31,7 @@ type SubFinder struct {
 type Property map[string][]string
 
 // config data structure
-var subfinder = SubFinder{}
+var subfinder SubFinder
 
 //export SubFinderInit
 func SubFinderInit() {
@@ -39,11 +39,11 @@ func SubFinderInit() {
 	gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
 
 	// initiate configurations
-	subfinder.All = false
-	subfinder.Recursive = false
-
-	// Initiate property
-	subfinder.Property = make(Property)
+	subfinder = SubFinder{
+		All:       false,
+		Recursive: false,
+		Property:  make(Property),
+	}
 
 	// Default Resolvers
 	subfinder.Property["Resolvers"] = resolve.DefaultResolvers

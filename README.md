@@ -115,6 +115,7 @@ Options:
     --subfinder-apis=SUBFINDER_APIS
                         yamlfile or submit in this format ->
                         'Source1:API1+API2,Source2:API1'
+    --subfinder-all     Use all sources
     --maxEnumerationTime=MAXENUMERATIONTIME
                         Minutes to wait for enumeration results (default = 10)
     --recursive         Collect recursivly

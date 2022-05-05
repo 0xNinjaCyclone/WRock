@@ -15,6 +15,7 @@ def register_subdomain_options(parser):
     subdomain_options.add_option("--sources",dest="sources",help="Enumerations Sources separated by comm (Note add minus before source to exclude)")
     subdomain_options.add_option("--timeout",dest="timeout",help="Time out (default = 30)",type=int,default=30)
     subdomain_options.add_option("--subfinder-apis", dest="subfinder_apis",help="yamlfile or submit in this format -> 'Source1:API1+API2,Source2:API1'")
+    subdomain_options.add_option("--subfinder-all",action="store_true",dest="subfinder_all",help="Use all sources")
     subdomain_options.add_option("--maxEnumerationTime",dest="maxEnumerationTime",help="Minutes to wait for enumeration results (default = 10)",type=int,default=10)
     subdomain_options.add_option("--recursive",action="store_true",dest="recursive",help="Collect recursivly")
     subdomain_options.add_option("--sublist3r",action="store_true",dest="sublist3r",help="Use sublist3r")

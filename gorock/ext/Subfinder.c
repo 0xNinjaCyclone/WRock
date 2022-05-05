@@ -137,7 +137,7 @@ static int SubFinder_SetDomain(SubFinder *self, PyObject *value, void *closure)
 }
 
 
-static PyObject *SubFinder_GetDomin(SubFinder *self, void *closure) 
+static PyObject *SubFinder_GetDomain(SubFinder *self, void *closure) 
 {
     Py_INCREF(self->domain);
     return self->domain;

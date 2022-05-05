@@ -56,6 +56,9 @@ class OptionsBuilder(ConfigBuilder):
         self.buildSharedEnumerationData(finder)
         finder.SetMaxEnumerationTime(self.data.maxEnumerationTime)
 
+        if self.data.subfinder_all:
+            finder.UseAll()
+
         if apisfmt:
             apis    = {}
 

@@ -47,6 +47,7 @@ class FinderConfig(EnumeratationConfig):
     def __init__(self) -> None:
         self.__apis                 = None
         self.__maxEnumerationTime   = 10
+        self.__allSources           = False
         EnumeratationConfig.__init__(self)
 
     def SetAPIs(self, apis: dict):
@@ -60,6 +61,12 @@ class FinderConfig(EnumeratationConfig):
 
     def GetMaxEnumerationTime(self):
         return self.__maxEnumerationTime
+
+    def UseAll(self):
+        self.__allSources = True
+
+    def isUsingAllEnabled(self):
+        return self.__allSources
 
 
 class ReverseIPConfig(EnumeratationConfig):

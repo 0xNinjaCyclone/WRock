@@ -64,7 +64,7 @@ class Finder(SubFinder, IDomainEnumerator):
             config.GetTimeout(), 
             config.GetMaxEnumerationTime(),
             config.isRecursiveEnabled(),
-            False # Do not use all subfinder sources, We can enable via 'self.UseAll()' API
+            config.isUsingAllEnabled()
         )
 
         IDomainEnumerator.__init__(self, config)
@@ -110,7 +110,12 @@ class Finder(SubFinder, IDomainEnumerator):
         return self.GetProperty(Finder.Property.Sources)
 
     def GetAllSources(self):
-        return self.GetProperty(Finder.Property.AllSources)
+        # This function called by IDomainEnumerator.handleSources to get all sources to use in the process
+        # if the user does not use any include-exclude options
+        # but we need control this point and use specified sources (Faster)
+        # and make using all sources not default, only if user want (optional) 
+
+        return self.GetProperty(Finder.Property.AllSources) if self.config.isUsingAllEnabled() else self.GetSources()
 
     def SetAPI(self, source, APIs: list):
         self.SetProperty(source, APIs)

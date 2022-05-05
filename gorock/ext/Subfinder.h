@@ -24,7 +24,7 @@ static void SubFinder_dealloc(SubFinder *self);
 
 /* Setters && Getters */
 static int SubFinder_SetDomain(SubFinder *self, PyObject *value, void *closure);
-static PyObject *SubFinder_GetDomin(SubFinder *self, void *closure);
+static PyObject *SubFinder_GetDomain(SubFinder *self, void *closure);
 
 static int SubFinder_SetThreads(SubFinder *self, PyObject *value, void *closure);
 static PyObject *SubFinder_GetThreads(SubFinder *self, void *closure);
@@ -48,7 +48,7 @@ PyMODINIT_FUNC PyInit_subfinder(void);
 
 
 static PyGetSetDef SubFinder_getsetters[] = {
-    {"domain", (getter) SubFinder_GetDomin, (setter) SubFinder_SetDomain,
+    {"domain", (getter) SubFinder_GetDomain, (setter) SubFinder_SetDomain,
         "Domain to find subdomains for.", NULL},
     {"threads", (getter) SubFinder_GetThreads, (setter) SubFinder_SetThreads,
         "Number of threads.", NULL},

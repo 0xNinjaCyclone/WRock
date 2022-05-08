@@ -21,11 +21,11 @@ class ScanResults:
     def __init__(self) -> None:
         self.results = {}
 
-    def Add(self, vulnName, vulnInfo: VulnerabilityInfo):
-        if vulnName not in self.results:
-            self.results[vulnName] = list()
+    def Add(self, vulnInfo: VulnerabilityInfo):
+        if vulnInfo.vulnName not in self.results:
+            self.results[vulnInfo.vulnName] = list()
 
-        self.results[vulnName].append(vulnInfo)
+        self.results[vulnInfo.vulnName].append(vulnInfo)
 
     def GetResultByVuln(self, vulnName):
         if vulnName in self.results:

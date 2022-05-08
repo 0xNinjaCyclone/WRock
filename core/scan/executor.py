@@ -1,11 +1,10 @@
 
-import sys, os, inspect
+import sys, os, inspect, requests
 from concurrent.futures import ThreadPoolExecutor
 from core.config.scanner import ScannerConfig
 from core.scan.module import GeneralScanner
 from core.scan.result import ScanResults
 from core.utils import rduplicate
-from core.request import Request
 from core.crawler.crawl import crawl
 from core.data import rockPATH
 
@@ -38,7 +37,6 @@ class ScanExecutor:
     def LoadAllModules(self):
         # path where modules load from
         path = os.path.join(self.rock_path, 'modules', self.scantype.MODPATH)
-        self.excludedM.excludeA('__init__.py')
 
         for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
             mod = __import__('.'.join(['modules', self.scantype.MODPATH, py]), fromlist=[py])
@@ -53,18 +51,27 @@ class ScanExecutor:
         obj = MODULE(config)
 
         if obj.check():
-            vulnName = obj.__class__.__name__
-            self.results.Add(vulnName, obj.run())
+            self.results.Add(obj.run())
             
 
     def reachable(self):
         try:
-            Request(self.url).get(timeout=30)
+            requests.get(self.url, timeout=30)
             return True
         except:
             return False
             
 
+    def Start(self) -> ScanResults:
+        if not self.reachable():
+            raise Exception(f"This server is unreachable !!")
+
+        return self.start()
+
+        
+    def start(self) -> ScanResults:
+        """ chlid class should override this function """
+        pass
 
 class GeneralScanExecutor(ScanExecutor):
 
@@ -72,10 +79,7 @@ class GeneralScanExecutor(ScanExecutor):
         ScanExecutor.__init__(self, config, GeneralScanner)
 
 
-    def Start(self):
-        if not self.reachable():
-            raise Exception(f"This server is unreachable !!")
-        
+    def start(self):
         crawler_cfg = self.config.GetCrawlerConfig()
         urls = rduplicate(crawl(crawler_cfg)) if crawler_cfg.isEnabled() else [crawler_cfg.GetTarget()]
 

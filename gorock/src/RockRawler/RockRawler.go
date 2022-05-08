@@ -10,7 +10,6 @@ import (
 	"C"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -104,12 +103,6 @@ func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure
 	c.Wait()
 
 	return results
-}
-
-func printResults(results []string) {
-	for _, res := range results {
-		fmt.Printf("%s\n", res)
-	}
 }
 
 // parseHeaders does validation of headers input and saves it to a formatted map.

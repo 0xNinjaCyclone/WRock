@@ -1,5 +1,5 @@
-#ifndef _ROCK_CRAWLER
-#define _ROCK_CRAWLER
+#ifndef _GOROCK_CRAWLER
+#define _GOROCK_CRAWLER
 
 #include "gorock.h"
 

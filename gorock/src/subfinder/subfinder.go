@@ -9,7 +9,6 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
-	"log"
 	"unsafe"
 
 	"github.com/projectdiscovery/gologger"
@@ -177,12 +176,12 @@ func SubFinderStart(domain string, threads int, timeout int, maxEnumerationTime 
 	buf := bytes.Buffer{}
 	err := runnerInstance.EnumerateSingleDomain(context.Background(), domain, []io.Writer{&buf})
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 
 	data, err := ioutil.ReadAll(&buf)
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 
 	// Split bytes to array by newline delimiter

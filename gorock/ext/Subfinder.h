@@ -1,5 +1,5 @@
-#ifndef _ROCK_SUBFINDER
-#define _ROCK_SUBFINDER
+#ifndef _GOROCK_SUBFINDER
+#define _GOROCK_SUBFINDER
 
 #include "gorock.h"
 

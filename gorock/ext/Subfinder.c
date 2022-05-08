@@ -360,10 +360,14 @@ static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) 
     PyObject *pyresult = NULL; 
 
     /* Start Enumeration */
-    results = SubFinderStart(
+    if(!(results = SubFinderStart(
         BuildGoStr(self->domain), (GoInt) PyLong_AsLong(self->threads),
         (GoInt) PyLong_AsLong(self->timeout), (GoInt) PyLong_AsLong(self->maxEnumerationTime)
-    );
+    ))) {
+        PyErr_SetString(PyExc_Exception, "Subfinder failed");
+        return NULL;
+    }
+
 
     /* Store data in a python list */
     pyresult = StoreResults(results);

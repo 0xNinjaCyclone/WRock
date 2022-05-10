@@ -4,10 +4,7 @@
 
 GoString BuildGoStr(PyObject *str)
 {
-    GoString GoStr;
-    GoStr.p = PyUnicode_AsUTF8(str);
-    GoStr.n = PyUnicode_GET_LENGTH(str);
-    return GoStr;
+    return (GoString) { .p = PyUnicode_AsUTF8(str), .n = PyUnicode_GET_LENGTH(str) };
 }
 
 PyObject *StoreResults(char **results) 

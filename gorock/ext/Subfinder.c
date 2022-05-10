@@ -54,7 +54,7 @@ static int SubFinder_init(SubFinder *self, PyObject *args, PyObject* kwds)
 
     /* Initiate attrs */
     domain = NULL;
-    nThreads = nTimeout = nMaxEnumerationTime = 0;
+    nThreads = nTimeout = nMaxEnumerationTime = nRecursive = nAll = 0;
 
     /* Initialize subfinder */
     SubFinderInit();
@@ -234,9 +234,9 @@ static PyObject *SubFinder_UseRecursive(SubFinder *self, PyObject *Py_UNUSED(ign
 static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
 
     /* Property name and its value */
-    PyObject *propname = NULL, *propval = NULL, *listItemVal = NULL;
+    PyObject *propname = NULL, *propval = NULL, *pListItem;
     char **property;
-    size_t nSize, nStrSize;
+    Py_ssize_t nSize, nItemSize;
 
     /* Parse arguments */
     if(!PyArg_ParseTuple(args, "|UO", &propname, &propval)) {
@@ -266,32 +266,32 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
         return NULL;
     }
 
-    for (size_t i = 0; i < nSize; i++)
+    for (Py_ssize_t idx = 0; idx < nSize; idx++)
     {
         /* Get list item by index */
-        listItemVal = PyList_GetItem(propval, i);
+        pListItem = PyList_GetItem(propval, idx);
 
         /* Check if the list item not a string */
-        if (!PyUnicode_Check(listItemVal)) {
+        if (!PyUnicode_Check(pListItem)) {
             PyErr_SetString(PyExc_TypeError,
                         "The properity value must be a string");
             return NULL;
         }
 
         /* Property name size */
-        nStrSize = PyUnicode_GET_LENGTH(listItemVal);
+        nItemSize = PyUnicode_GET_LENGTH(pListItem);
 
         /* Allocate memory space for the array item */
-        if (!(property[i] = (char *) PyMem_Malloc(nStrSize + 1))) { /* add one for nul */
+        if (!(property[idx] = (char *) PyMem_Malloc(nItemSize + 1))) { /* add one for nul */
             PyErr_SetString(PyExc_Exception, "Out Of Memory");
             return NULL;
         }
 
         /* Copy N bytes from memory to allocated space */
-        memcpy(property[i], PyUnicode_AsUTF8(listItemVal), nStrSize);
+        memcpy(property[idx], PyUnicode_AsUTF8(pListItem), nItemSize);
 
         /* Nul-terminator */
-        property[i][nStrSize] = 0;
+        property[idx][nItemSize] = 0x00;
     }
 
     /* Terminator */

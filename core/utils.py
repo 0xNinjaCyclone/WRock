@@ -1,6 +1,7 @@
 
 import socket
 from urllib.parse import *
+from core.request import Headers
 
 
 def GetAddrsFromHosts(hosts):
@@ -61,3 +62,14 @@ def get_urls_from_file(fileName):
     return remove_duplicated_urls([url.strip() for url in open(fileName,'r').readlines()])
 
 
+def parse_headers_from_file(fileName):
+    rawHeaders = str()
+
+    with open(fileName, 'r') as f:
+        for line in f.readlines():
+            if ':' in line: # is a header ?
+                # Convert to raw headers format
+                rawHeaders += line.replace('\n', ';;')
+
+
+    return Headers(Headers.Parser.toDict(rawHeaders[:-2]))

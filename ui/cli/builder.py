@@ -1,5 +1,6 @@
 
 import yaml, os.path
+from core.utils import *
 from core.config.builder import ConfigBuilder
 from core.request import Headers
 from core.config.module import *
@@ -100,7 +101,7 @@ class OptionsBuilder(ConfigBuilder):
             return revip
     
     def buildHeaders(self):
-        return Headers(Headers.Parser.toDict(self.data.headers) if self.data.headers else dict())
+        return parse_headers_from_file(self.data.headers) if self.data.headers and os.path.isfile(self.data.headers) else Headers(Headers.Parser.toDict(self.data.headers) if self.data.headers else dict())
 
     def buildMode(self):
         mode = self.data.mode.lower()

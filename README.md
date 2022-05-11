@@ -81,7 +81,8 @@ Options:
                         Set Number Of Threads (default = 5)
   -H HEADERS, --headers=HEADERS
                         Custom headers separated by two semi-colons. E.g. -h
-                        "Cookie: foo=bar;;Referer: http://example.com/"
+                        "Cookie: foo=bar;;Referer: http://example.com/" Or
+                        File
   -i INCLUDED_MODULES, --include=INCLUDED_MODULES
                         Include specified vulnerabilities for scanning EX
                         'sqli,ssrf' (Note add minus before source to exclude

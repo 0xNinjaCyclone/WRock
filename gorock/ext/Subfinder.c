@@ -262,8 +262,7 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
 
     /* Allocate memory for property values that will pass to SubFinder API */
     if (!(property = (char **) PyMem_Malloc(sizeof(*property) * (nSize + 1)))) { /* add one for terminator */
-        PyErr_SetString(PyExc_Exception, "Out Of Memory");
-        return NULL;
+        goto OOM;
     }
 
     for (Py_ssize_t idx = 0; idx < nSize; idx++)
@@ -283,8 +282,15 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
 
         /* Allocate memory space for the array item */
         if (!(property[idx] = (char *) PyMem_Malloc(nItemSize + 1))) { /* add one for nul */
-            PyErr_SetString(PyExc_Exception, "Out Of Memory");
-            return NULL;
+            /* OOM CASE */
+
+            /* Null Terminator at the end of the allocated items to free them easily */
+            property[idx] = NULL;
+
+            /* Free Allocated Memory */
+            FreeMemory(property);
+            
+            goto OOM;
         }
 
         /* Copy N bytes from memory to allocated space */
@@ -304,6 +310,10 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args) {
     FreeMemory(property);
 
     Py_RETURN_NONE;
+
+    OOM:
+        PyErr_SetString(PyExc_Exception, "Out Of Memory");
+        return NULL;
 }
 
 static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args) {

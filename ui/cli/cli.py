@@ -1,6 +1,7 @@
 
 import sys, os.path
 from core.recon.subenum.enumerate import runEnumeration
+from core.scan.result import ScanResults
 from ui.cli import options, builder, view, show
 from core.config.base import Mode
 from core.data import rockVERSION
@@ -77,21 +78,20 @@ def run(opts):
         view.Print.status(f"Total results = {len(subdomains)}")
 
         view.Print.status("Start Scanning :", startl="\n", endl="\n\n")
-        results = list()
+        results = ScanResults()
         scanner_config = config.GetScannerConfig()
 
         for domain in subdomains:
             scanner_config.SetTarget(domain)
 
             try:
-                results.append(scan(scanner_config))
+                results += scan(scanner_config)
             except:
                 continue
 
 
         # Display results
-        for result in results:
-            show.printScanResults(result, scanner_config.isVerboseEnabled())
+        show.printScanResults(results, scanner_config.isVerboseEnabled())
 
         if output:
             view.Print.highlight("Write reports :", startl="\n")

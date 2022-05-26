@@ -33,3 +33,15 @@ class ScanResults:
 
     def GetAllVulnNames(self):
         return self.results.keys()
+
+    def merge(self, o):
+        for vulnName in o.GetAllVulnNames():
+            if vulnName in self.results:
+                self.results[vulnName] += o.GetResultByVuln(vulnName)
+
+            else:
+                self.results[vulnName] = o.GetResultByVuln(vulnName)
+
+    def __add__(self, o):
+        self.merge(o)
+        return self

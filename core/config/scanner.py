@@ -17,6 +17,9 @@ class ScannerConfig(Config):
         if not target.startswith('http'):
             target = 'http://' + target
 
+        if not target.endswith('/'):
+            target += '/'
+
         Config.SetTarget(self, target)
     
     def SetExcludedModules(self, excluded: ExcludedModules):

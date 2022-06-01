@@ -2,7 +2,7 @@
 import sys, os, inspect, requests
 from concurrent.futures import ThreadPoolExecutor
 from core.config.scanner import ScannerConfig
-from core.scan.module import GeneralScanner
+from core.scan.module import *
 from core.scan.result import ScanResults
 from core.utils import rduplicate
 from core.crawler.crawl import crawl
@@ -28,21 +28,27 @@ class ScanExecutor:
         callers_module = sys._getframe(1).f_globals['__name__']
         classes = inspect.getmembers(sys.modules[callers_module], inspect.isclass)
         for _ , obj in classes: # return (className , class_object)
-            if (obj is not self.scantype) and (self.scantype in inspect.getmro(obj)):
+            if (obj not in (self.scantype, CommonScanner)) and (self.scantype in inspect.getmro(obj) or CommonScanner in inspect.getmro(obj)):
                 subclasses.append(obj)
-
+            
         return subclasses
         
 
     def LoadAllModules(self):
-        # path where modules load from
-        path = os.path.join(self.rock_path, 'modules', self.scantype.MODPATH)
+        # paths where modules load from
+        paths = [
+            os.path.join(self.rock_path, 'modules', self.scantype.MODPATH),
+            
+            # Common modules
+            os.path.join(self.rock_path, 'modules', CommonScanner.MODPATH)
+        ]
 
-        for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
-            mod = __import__('.'.join(['modules', self.scantype.MODPATH, py]), fromlist=[py])
-            classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
-            for cls in classes:
-                setattr(sys.modules[__name__], cls.__name__, cls)
+        for path in paths:
+            for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
+                mod = __import__('.'.join(['modules', path.split('/')[-1], py]), fromlist=[py])
+                classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
+                for cls in classes:
+                    setattr(sys.modules[__name__], cls.__name__, cls)
     
     
     def run(self, url, MODULE):
@@ -73,6 +79,7 @@ class ScanExecutor:
         """ chlid class should override this function """
         pass
 
+
 class GeneralScanExecutor(ScanExecutor):
 
     def __init__(self, config: ScannerConfig) -> None:
@@ -81,7 +88,7 @@ class GeneralScanExecutor(ScanExecutor):
 
     def start(self):
         crawler_cfg = self.config.GetCrawlerConfig()
-        urls = rduplicate(crawl(crawler_cfg)) if crawler_cfg.isEnabled() else [crawler_cfg.GetTarget()]
+        urls = rduplicate(crawl(crawler_cfg)) if crawler_cfg.isEnabled() else [self.config.GetTarget()]
 
         for MODULE in self.GetAllModules():
             with ThreadPoolExecutor(max_workers=self.threads) as executor:

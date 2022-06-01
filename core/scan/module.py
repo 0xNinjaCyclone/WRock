@@ -2,6 +2,7 @@
 from core.config.module import *
 from core.request import *
 from core.scan.result import *
+from core.data import *
 
 
 class BaseScanner:
@@ -75,6 +76,15 @@ class BaseScanner:
             
             
         return self.GetVulnInfo()
+
+
+class CommonScanner(BaseScanner):
+
+    # Modules folder that will use this
+    MODPATH = "common"
+
+    def __init__(self, config: ModuleConfig) -> None:
+        BaseScanner.__init__(self, config)
 
 
 class GeneralScanner(BaseScanner):

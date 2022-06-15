@@ -28,28 +28,18 @@ class ScanExecutor:
         callers_module = sys._getframe(1).f_globals['__name__']
         classes = inspect.getmembers(sys.modules[callers_module], inspect.isclass)
         for _ , obj in classes: # return (className , class_object)
-            if (obj not in (self.scantype, CommonScanner)) and (self.scantype in inspect.getmro(obj) or CommonScanner in inspect.getmro(obj)):
+            if not self.__isabstractscanner__(obj) and issubclass(obj, BaseScanner):
                 subclasses.append(obj)
             
         return subclasses
         
 
     def LoadAllModules(self):
-        # paths where modules load from
-        paths = [
-            os.path.join(self.rock_path, 'modules', self.scantype.MODPATH),
+        self.__loadmodules__(os.path.join(self.rock_path, 'modules', self.scantype.MODPATH))
             
-            # Common modules
-            os.path.join(self.rock_path, 'modules', CommonScanner.MODPATH)
-        ]
+        # Common modules
+        self.__loadmodules__(os.path.join(self.rock_path, 'modules', CommonScanner.MODPATH))
 
-        for path in paths:
-            for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
-                mod = __import__('.'.join(['modules', path.split('/')[-1], py]), fromlist=[py])
-                classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
-                for cls in classes:
-                    setattr(sys.modules[__name__], cls.__name__, cls)
-    
     
     def run(self, url, MODULE):
         config = self.config.GetModuleConfig()
@@ -79,6 +69,15 @@ class ScanExecutor:
         """ chlid class should override this function """
         pass
 
+    def __loadmodules__(self, path):
+        for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
+            mod = __import__('.'.join(['modules', path.split('/')[-1], py]), fromlist=[py])
+            classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
+            for cls in classes:
+                setattr(sys.modules[__name__], cls.__name__, cls)
+
+    def __isabstractscanner__(self, cls):
+        return 'core/scan' in inspect.getfile(cls)
 
 class GeneralScanExecutor(ScanExecutor):
 

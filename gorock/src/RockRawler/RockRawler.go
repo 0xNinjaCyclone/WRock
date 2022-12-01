@@ -6,8 +6,28 @@
 
 package main
 
+/*
+typedef struct {
+	char *name;
+	char *value;
+	char *p_type; // parameter type
+} Parameter;
+
+typedef struct {
+	char      *url;
+	char	  *m_type;
+	Parameter **params;
+} EndPoint;
+
+typedef struct {
+	EndPoint **endpoints;
+	char     **jsFiles;
+	char     **emails;
+} RockRawlerResult;
+*/
+import "C"
+
 import (
-	"C"
 	"crypto/tls"
 	"errors"
 	"net/http"
@@ -19,13 +39,55 @@ import (
 	"github.com/gocolly/colly"
 )
 
-func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure bool, rawHeaders string) []string {
+type RockRawlerConfig struct {
+	url         string
+	threads     int
+	depth       int
+	insecure    bool
+	subsInScope bool
+	rawHeaders  string
+}
+
+type Parameter struct {
+	name   string
+	value  string
+	p_type string // parameter type
+}
+
+type EndPoint struct {
+	url    string
+	m_type string // method type -> Get or Post ?
+	params []Parameter
+}
+
+type RockRawlerResult struct {
+	endpoints []EndPoint
+	jsFiles   []string
+	emails    []string
+}
+
+func initRockRawlerResult() RockRawlerResult {
+	return RockRawlerResult{
+		endpoints: make([]EndPoint, 0),
+		jsFiles:   make([]string, 0),
+		emails:    make([]string, 0),
+	}
+}
+
+func FindEmails(text string) []string {
+	var EMAILS_REGEX = regexp.MustCompile(`(?i)([A-Za-z0-9!#$%&'*+\/=?^_{|.}~-]+@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)`)
+	return EMAILS_REGEX.FindAllString(text, -1)
+}
+
+func StartCrawler(config RockRawlerConfig) RockRawlerResult {
+	// Target url
+	url := config.url
 
 	// Convert the headers input to a usable map (or die trying)
-	headers, _ := parseHeaders(rawHeaders)
+	headers, _ := parseHeaders(config.rawHeaders)
 
 	// A container where the results are stored
-	results := make([]string, 0)
+	result := initRockRawlerResult()
 
 	// if a url does not start with scheme (It fix hakrawler bug)
 	if !strings.HasPrefix(url, "http") {
@@ -36,8 +98,8 @@ func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure
 	hostname, err := extractHostname(url)
 
 	if err != nil {
-		// return empty slice
-		return results
+		// return empty
+		return result
 	}
 
 	// Instantiate default collector
@@ -50,36 +112,40 @@ func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure
 		colly.AllowedDomains(hostname),
 
 		// set MaxDepth to the specified depth
-		colly.MaxDepth(depth),
+		colly.MaxDepth(config.depth),
 
 		// specify Async for threading
 		colly.Async(true),
 	)
 
 	// if -subs is present, use regex to filter out subdomains in scope.
-	if subsInScope {
+	if config.subsInScope {
 		c.AllowedDomains = nil
 		c.URLFilters = []*regexp.Regexp{regexp.MustCompile(".*(\\.|\\/\\/)" + strings.ReplaceAll(hostname, ".", "\\.") + "((#|\\/|\\?).*)?")}
 	}
 
 	// Set parallelism
-	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: threads})
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: config.threads})
+
+	// Search about emails in html content
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		appendEmails(&result.emails, e)
+	})
 
 	// append every href found, and visit it
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		appendResult(link, &results, e)
-		e.Request.Visit(link)
+		appendEndPoint(e.Attr("href"), &result, e)
+		e.Request.Visit(e.Attr("href"))
 	})
 
 	// find all JavaScript files
 	c.OnHTML("script[src]", func(e *colly.HTMLElement) {
-		appendResult(e.Attr("src"), &results, e)
+		appendResult(e.Attr("src"), &result.jsFiles, e)
 	})
 
 	// find all the form action URLs
 	c.OnHTML("form[action]", func(e *colly.HTMLElement) {
-		appendResult(e.Attr("action"), &results, e)
+		appendEndPoint(e.Attr("action"), &result, e)
 	})
 
 	// add the custom headers
@@ -93,7 +159,7 @@ func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure
 
 	// Skip TLS verification if -insecure flag is present
 	c.WithTransport(&http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.insecure},
 	})
 
 	// Start scraping
@@ -102,7 +168,7 @@ func StartCrawler(url string, threads int, depth int, subsInScope bool, insecure
 	// Wait until threads are finished
 	c.Wait()
 
-	return results
+	return result
 }
 
 // parseHeaders does validation of headers input and saves it to a formatted map.
@@ -163,10 +229,53 @@ func appendResult(link string, results *[]string, e *colly.HTMLElement) {
 	}
 }
 
-// returns whether the supplied url is unique or not
-func isUnique(data *[]string, url string) bool {
+func appendEmails(result *[]string, e *colly.HTMLElement) {
+	for _, email := range FindEmails(string(e.Response.Body)) {
+		if isUnique(result, email) {
+			*result = append(*result, email)
+		}
+	}
+}
+
+// append endpoints
+func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement) {
+	endpoint := EndPoint{
+		url: e.Request.AbsoluteURL(func() string {
+			if link == "#" {
+				return ""
+			} else {
+				return link
+			}
+		}()),
+		m_type: func() string {
+			if e.Attr("method") != "" {
+				return e.Attr("method")
+			} else {
+				return "get"
+			}
+		}(),
+		params: make([]Parameter, 0),
+	}
+
+	e.ForEach("input", func(_ int, i *colly.HTMLElement) {
+		param := Parameter{
+			name:   i.Attr("name"),
+			value:  i.Attr("value"),
+			p_type: i.Attr("type"),
+		}
+
+		endpoint.params = append(endpoint.params, param)
+	})
+
+	if isUniqueEndPoint(result.endpoints, endpoint) {
+		result.endpoints = append(result.endpoints, endpoint)
+	}
+}
+
+// returns whether the supplied element is unique or not
+func isUnique(data *[]string, element string) bool {
 	for _, item := range *data {
-		if item == url {
+		if item == element {
 			return false
 		}
 	}
@@ -174,14 +283,33 @@ func isUnique(data *[]string, url string) bool {
 	return true
 }
 
-//export CStartCrawler
-func CStartCrawler(url string, threads int, depth int, subsInScope bool, insecure bool, rawHeaders string) **C.char {
+func isUniqueParameter(p1 []Parameter, p2 []Parameter) bool {
+	unique := false
 
-	// Pass the supplied parameters from C to the crawler
-	results := StartCrawler(url, threads, depth, subsInScope, insecure, rawHeaders)
+	for _, item := range p1 {
+		for _, item2 := range p2 {
+			if item.name != item2.name {
+				unique = true
+			}
+		}
+	}
 
+	return unique
+}
+
+func isUniqueEndPoint(endpoints []EndPoint, endpoint EndPoint) bool {
+	for _, item := range endpoints {
+		if item.url == endpoint.url && item.m_type == endpoint.m_type && !isUniqueParameter(item.params, endpoint.params) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func GoStringsToC(gostrings []string) **C.char {
 	// Get size of results to allocate memory for c results
-	size := len(results) + 1 // add one to put a nul terminator at the end of C strings array
+	size := len(gostrings) + 1 // add one to put a nul terminator at the end of C strings array
 
 	// Allocate memory space for C array
 	cArray := C.malloc(C.size_t(size) * C.size_t(unsafe.Sizeof(uintptr(0))))
@@ -189,15 +317,97 @@ func CStartCrawler(url string, threads int, depth int, subsInScope bool, insecur
 	// convert the C array to a Go Array so we can index it
 	a := (*[1 << 28]*C.char)(unsafe.Pointer(cArray))[:size:size]
 
-	for idx, link := range results {
+	for idx, link := range gostrings {
 		a[idx] = C.CString(link)
 	}
 
 	// put a nul-terminator in the end of array
 	a[size-1] = nil
 
-	// return **char type to C
 	return (**C.char)(cArray)
+}
+
+func GoParameterToC(params []Parameter) **C.Parameter {
+	// Get size of params to allocate memory for c results
+	size := len(params) + 1
+
+	// Allocate memory space for C array
+	cArray := C.malloc(C.size_t(size) * C.size_t(unsafe.Sizeof(uintptr(0))))
+
+	// Convert the C array to a Go Array so we can index it
+	a := (*[1 << 28]*C.Parameter)(unsafe.Pointer(cArray))[:size:size]
+
+	for idx, p := range params {
+		pParam := (*C.Parameter)(C.malloc(C.size_t(unsafe.Sizeof(C.Parameter{}))))
+		pParam.name = C.CString(p.name)
+		pParam.value = C.CString(p.value)
+		pParam.p_type = C.CString(p.p_type)
+		a[idx] = pParam
+	}
+
+	// Put a nul-terminator in the end of array
+	a[size-1] = nil
+
+	return (**C.Parameter)(cArray)
+}
+
+func GoEndpointsToC(endpoint []EndPoint) **C.EndPoint {
+	// Get size of data to allocate memory for c results
+	size := len(endpoint) + 1
+
+	// Allocate memory space for C array
+	cArray := C.malloc(C.size_t(size) * C.size_t(unsafe.Sizeof(uintptr(0))))
+
+	// Convert the C array to a Go Array so we can index it
+	a := (*[1 << 28]*C.EndPoint)(unsafe.Pointer(cArray))[:size:size]
+
+	for idx, data := range endpoint {
+		pData := (*C.EndPoint)(C.malloc(C.size_t(unsafe.Sizeof(C.EndPoint{}))))
+		pData.url = C.CString(data.url)
+		pData.m_type = C.CString(data.m_type)
+		pData.params = GoParameterToC(data.params)
+		a[idx] = pData
+	}
+
+	// Put a nul-terminator in the end of array
+	a[size-1] = nil
+
+	return (**C.EndPoint)(cArray)
+}
+
+func GoResultToC(result RockRawlerResult) *C.RockRawlerResult {
+	pResult := (*C.RockRawlerResult)(C.malloc(C.size_t(unsafe.Sizeof(C.RockRawlerResult{}))))
+	pResult.endpoints = GoEndpointsToC(result.endpoints)
+	pResult.jsFiles = GoStringsToC(result.jsFiles)
+	pResult.emails = GoStringsToC(result.emails)
+	return pResult
+}
+
+//export CStartCrawler
+func CStartCrawler(
+	url string,
+	threads int,
+	depth int,
+	subsInScope bool,
+	insecure bool,
+	rawHeaders string,
+) *C.RockRawlerResult {
+
+	// Config
+	config := RockRawlerConfig{
+		url:         url,
+		threads:     threads,
+		depth:       depth,
+		subsInScope: subsInScope,
+		insecure:    insecure,
+		rawHeaders:  rawHeaders,
+	}
+
+	// Pass the supplied parameters from C to the crawler
+	result := StartCrawler(config)
+
+	// Return *C.RockRawlerResult
+	return GoResultToC(result)
 }
 
 func main() {}

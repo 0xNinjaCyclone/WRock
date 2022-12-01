@@ -46,9 +46,9 @@ def startEnumeration(enum_cfg):
     return subdomains
 
 def startCrawling(crawl_cfg):
-    urls = crawl(crawl_cfg)
-    show.printCrawledUrls(urls)
-    return urls
+    crawler_result = crawl(crawl_cfg)
+    show.printCrawlerResult(crawler_result, crawl_cfg.isVerboseEnabled())
+    return crawler_result
 
 def writeReport(output, results, reportWriter):
     if output:
@@ -112,8 +112,8 @@ def run(opts):
         rock_t.finish("recon and scan")
 
     elif mode == Mode.Crawl:
-        urls = startCrawling(config.GetCrawlerConfig())
-        writeReport(output, urls, writeCrawlReport)
+        crawler_result = startCrawling(config.GetCrawlerConfig())
+        writeReport(output, crawler_result, writeCrawlReport)
         rock_t.finish("crawl")
 
     else:

@@ -3,11 +3,11 @@ from core.config.base import Format
 from core.output import *
 
 
-def writeCrawlReport(config: OutputConfig, urls: list):
+def writeCrawlReport(config: OutputConfig, crawler_result):
     if config.isEnable():
         with CrawlerReport(config) as report:
-            for url in urls:
-                report.write(url)
+            for endpoint in crawler_result.GetEndPoints():
+                report.write(endpoint['url'])
 
 
 class CrawlerReportInText(TxtOutput):

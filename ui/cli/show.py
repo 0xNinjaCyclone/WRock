@@ -2,6 +2,17 @@
 from core.scan.result import *
 from core.crawler.crawler import CrawlerResult
 from ui.cli.view import Color, Print
+from core.data import rockVERSION
+
+def displayAppVersion():
+    Print.highlight(f"WRock Version is '{rockVERSION()}'", startl="\n")
+
+def displayUsage(usage):
+    Print.normal(usage)
+
+def displayError(err):
+    Print.fail(f"Error type => {err.__class__.__name__}", startl="\n")
+    Print.fail(f"Error msg  => {err}")
 
 def printScanResults(results: ScanResults, verbose = False):
     Print.highlight("Results :")

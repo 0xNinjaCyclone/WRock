@@ -15,6 +15,7 @@ typedef struct {
 
 typedef struct {
 	char      *url;
+	int		  nStatusCode;
 	char	  *m_type;
 	Parameter **params;
 } EndPoint;
@@ -56,6 +57,7 @@ type Parameter struct {
 
 type EndPoint struct {
 	url    string
+	status int    // status code
 	m_type string // method type -> Get or Post ?
 	params []Parameter
 }
@@ -255,7 +257,16 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement)
 			}
 		}(),
 		params: make([]Parameter, 0),
+		status: 200,
 	}
+
+	/* TODO : Get status code of endpoints only if user want
+	r, err := http.Get(endpoint.url)
+
+	if err == nil {
+		endpoint.status = r.StatusCode
+	}
+	*/
 
 	e.ForEach("input", func(_ int, i *colly.HTMLElement) {
 		param := Parameter{
@@ -270,6 +281,7 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement)
 	if isUniqueEndPoint(result.endpoints, endpoint) {
 		result.endpoints = append(result.endpoints, endpoint)
 	}
+
 }
 
 // returns whether the supplied element is unique or not
@@ -364,6 +376,7 @@ func GoEndpointsToC(endpoint []EndPoint) **C.EndPoint {
 	for idx, data := range endpoint {
 		pData := (*C.EndPoint)(C.malloc(C.size_t(unsafe.Sizeof(C.EndPoint{}))))
 		pData.url = C.CString(data.url)
+		pData.nStatusCode = C.int(data.status)
 		pData.m_type = C.CString(data.m_type)
 		pData.params = GoParameterToC(data.params)
 		a[idx] = pData

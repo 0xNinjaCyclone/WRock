@@ -26,6 +26,7 @@ class WebCrawler(Crawler):
                             [
                                 {
                                     "url": "http://target/path/to/endpoint",
+                                    "status_code": 200 # (Under dev, need more improvements)
                                     "m_type": "METHOD" # Get or Post ?
                                     "params": {
                                         "name": "param name",

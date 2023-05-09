@@ -488,6 +488,9 @@ static PyObject *StoreEndPointsResult(EndPoint **endpoints)
         /* Insert url to the endpoint dict */
         PyDict_SetItemString(pData, "url", PyUnicode_FromString((*endpoints)->url));
 
+        /* Insert status code to the endpoint dict */
+        PyDict_SetItemString(pData, "status_code", PyLong_FromLong((*endpoints)->nStatusCode));
+
         /* Insert method type to the endpoint dict */
         PyDict_SetItemString(pData, "m_type", PyUnicode_FromString((*endpoints)->m_type));
 

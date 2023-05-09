@@ -296,13 +296,24 @@ func isUnique(data *[]string, element string) bool {
 }
 
 func isUniqueParameter(p1 []Parameter, p2 []Parameter) bool {
-	unique := false
+	if len(p1) != len(p2) {
+		return true
+	}
+
+	var unique bool
 
 	for _, item := range p1 {
+		unique = true
+
 		for _, item2 := range p2 {
-			if item.name != item2.name {
-				unique = true
+			if item.name == item2.name {
+				unique = false
+				break
 			}
+		}
+
+		if unique {
+			break
 		}
 	}
 

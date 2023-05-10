@@ -20,7 +20,7 @@ class Headers:
         def toDict(cls, rawHeaders):
             if isinstance(rawHeaders, str):
                 headers = {}
-                unparsed = rawHeaders.split(";;") if ';;' in rawHeaders else [rawHeaders]
+                unparsed = rawHeaders.splitlines() if '\n' in rawHeaders else rawHeaders.split(";;") if ';;' in rawHeaders else [rawHeaders]
                 
                 for header in unparsed:
                     if ':' not in header:
@@ -43,9 +43,21 @@ class Headers:
                 for key , value in headers.items():
                     rawHeaders += key + ': ' + value + ';;'
 
-                return rawHeaders
+                return rawHeaders[:-2] if rawHeaders else rawHeaders
 
             raise HeadersTypeError(f"{type(headers)} not expected, pass a dict")
+
+        @classmethod
+        def toHttpRaw(cls, headers):
+            if isinstance(headers, dict):
+                rawHttpHeadersList = [
+                    f"{hname}: {hvalue}" for hname, hvalue in headers.items()
+                ]
+
+            elif isinstance(headers, str):
+                rawHttpHeadersList = headers.split(';;')
+
+            return '\n'.join(rawHttpHeadersList)
 
 
     def __init__(self, headers = {}) -> None:
@@ -85,65 +97,40 @@ class Headers:
 
 class Request:
 
-    def __init__(self, url, params = {}, headers: Headers = Headers()) -> None:
+    def __init__(self, url, params = {}, data = {}, headers: Headers = Headers()) -> None:
         self.url                = url
-        self.uri                = urlparse(self.url)
-        self.params             = params                    # Body parameters
-        self.urlparams          = parse_qs(self.uri.query)  # Url parameters
-        self.hostname           = self.uri.hostname
+        self.params             = params # Url parameters
+        self.data               = data   # Body parameters
         self.headers            = headers
         self.session            = self.GetReqSession()
 
     def GetReqSession(self) -> requests.Session:
         return requests.Session()
 
-    def Send(self, timeout = 10) -> requests.Response or None:
+    def Send(self, **args) -> requests.Response or None:
         pass
 
-    def GetUrl(self):
-        return f"{self.uri.scheme}://{self.uri.netloc}{self.uri.path}" + (f"?{urlencode(self.urlparams)}" if self.urlparams else str())
+    def get(self, **args):
+        return self.SendReq(self.session.get, **args)
 
-    def SetParams(self, params: dict):
-        # Set Body parameters
-        self.params = params
+    def post(self, **args):
+        return self.SendReq(self.session.post, **args)
 
-    def GetParams(self):
-        return self.params
-
-    def SetUrlParams(self, urlparams):
-        self.urlparams = urlparams
-
-    def GetUrlParams(self):
-        return self.urlparams
-
-    def get(self, timeout = 10):
-        return self.SendReq(self.session.get, timeout)
-
-    def post(self, timeout = 10):
-        return self.SendReq(self.session.post, timeout)
-
-    def SendReq(self, reqMethod, timeout = 10):
-        return reqMethod(self.GetUrl(), data=self.params, headers=self.headers.GetAll(), timeout=timeout)
+    def SendReq(self, reqMethod, **args):
+        return reqMethod(self.url, params=self.params, data=self.data, headers=self.headers.GetAll(), **args)
 
 
 class Get(Request):
-    def __init__(self, url, params = {}, headers: Headers = Headers()) -> None:
-        Request.__init__(self, url, params, headers)
+    def __init__(self, url, params={}, data={}, headers: Headers = Headers()) -> None:
+        Request.__init__(self, url, params, data, headers)
 
-    def Send(self, timeout = 10) -> requests.Response or None:
-        return Request.get(self, timeout)
-
-    def SetParams(self, urlparams: dict):
-        # In Get request paramters is urlparams attr not params
-        self.SetUrlParams(urlparams)
-    
-    def GetParams(self) -> dict:
-        return self.GetUrlParams()
+    def Send(self, **args) -> requests.Response or None:
+        return Request.get(self, **args)
 
 
 class Post(Request):
-    def __init__(self, url, params = {}, headers: Headers = Headers()) -> None:
-        Request.__init__(self, url, params, headers)
+    def __init__(self, url, params={}, data={}, headers: Headers = Headers()) -> None:
+        Request.__init__(self, url, params, data, headers)
 
-    def Send(self, timeout = 10) -> requests.Response or None:
-        return Request.post(self, timeout)
+    def Send(self, **args) -> requests.Response or None:
+        return Request.post(self, **args)

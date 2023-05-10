@@ -1,5 +1,4 @@
 
-import types
 from core.scan.module import GeneralScanner
 
 class LFI(GeneralScanner):
@@ -8,22 +7,22 @@ class LFI(GeneralScanner):
         GeneralScanner.__init__(self, config)
 
     def check(self):
-        params = self.request.GetParams()
+        endpoint = self.GetEndPoint()
+        params = endpoint.GetAllParams()
 
-        for param , values in params.items():
-            value = values.__getitem__(0)
+        for param , value in params.items():
             
-            if value.startswith("http"):
+            if value.startswith("http") or endpoint.GetParmTypeByName(param) in ('submit', 'file', 'url'):
                 continue
             
-            self.vulnerable_params.append(param)
+            self.may_vulnerable_params.append(param)
 
-        return bool(self.vulnerable_params)
+        return bool(self.may_vulnerable_params)
 
     def GetPayloads(self) -> list:
         return [
             "data://text/plain;base64,TEZJQjAwTQ==",
-            "/etc/passwd","file://etc/passwd","/etc/passwd%00",
+            "/etc/passwd","file://etc/passwd","/etc/passwd\x00",
             "C:\\boot.ini"
         ]
               
@@ -38,22 +37,4 @@ class LFI(GeneralScanner):
                 return True
 
         return False
-
-    def GetUrl(self, requestInstance):
-        # override Request.GetUrl for doesn't encode paramas 
-        # encode null byte %00 breaks the attack
         
-        urlparams = str()
-
-        for param, value in requestInstance.urlparams.items():
-            urlparams += param + '=' + value
-            if param != list(requestInstance.urlparams.keys())[-1]:
-                urlparams += '&'
-                
-        return f"{requestInstance.uri.scheme}://{requestInstance.uri.netloc}{requestInstance.uri.path}?{urlparams}"
-
-    def run(self):
-        # override GetUrl function to our implementation (Strategy Pattern)
-        self.request.GetUrl = types.MethodType(self.GetUrl, self.request)
-
-        return GeneralScanner.run(self)

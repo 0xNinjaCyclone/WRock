@@ -44,6 +44,32 @@ class OptionsBuilder(ConfigBuilder):
             else:
                 return [self.data.sources]
 
+    def buildModule(self):
+        module              = ConfigBuilder.buildModule(self)
+        endpoint            = dict()
+        url                 = module.GetTarget() # buildSharedData() had set url as a target here
+        endpoint['url']     = url
+        endpoint['params']  = list()
+
+        if self.data.post:
+            endpoint['m_type'] = "POST"
+
+            for i in self.data.post.split('&'):
+                param           = dict()
+                pname, temp     = i.split('=')
+                pvalue, p_type  = temp.split('|') if '|' in temp else [temp, '']
+                param['name']   = pname
+                param['value']  = pvalue
+                param['p_type'] = p_type
+                endpoint['params'].append(param)
+
+        else:
+            endpoint['m_type'] = "GET"
+
+        module.SetTarget(endpoint)
+                
+        return module
+
     def buildList3rConfig(self):
         if self.data.sublist3r:
             list3r = List3rConfig()

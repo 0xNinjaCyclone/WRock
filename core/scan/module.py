@@ -8,16 +8,14 @@ from core.data import *
 class BaseScanner:
 
     def __init__(self, config: ModuleConfig) -> None:
-        self.config             = config
-        self.url                = config.GetTarget()
-        self.options            = self.config.GetModulesOptions()
-        scannerName             = self.__class__.__name__
+        self.config                 = config
+        self.endpoint               = config.GetTarget()
+        self.options                = self.config.GetModulesOptions()
+        scannerName                 = self.__class__.__name__
+        self.may_vulnerable_params  = []
+        self.request_args           = {}
+        self.vulnInfo               = VulnerabilityInfo(self.endpoint.GetFullUrl(), scannerName)
         self.options.setKey(scannerName.lower())
-        self.request            = Get(self.url, headers = self.config.GetHeaders())
-        self.vulnerable_params  = []
-        self.vulnInfo           = VulnerabilityInfo()
-        self.vulnInfo.vulnName  = scannerName
-        self.vulnInfo.url       = self.url
 
         
     def GetPayloads(self) -> list:
@@ -32,47 +30,52 @@ class BaseScanner:
         # should override
         pass
 
+    def GetEndPoint(self):
+        return self.endpoint
+
+    def GetRequester(self):
+        return self.endpoint.GetRequester(self.config.GetHeaders())
+
     def GetVulnInfo(self):
         return self.vulnInfo
 
-    def PutPayloadInParams(self, payload):
-        params = self.request.GetParams()
+    def SetRequestArgs(self, **args):
+        self.request_args = args
 
-        for param in params:
-            if param in self.vulnerable_params:
-                params[param] = payload
-                continue
-            
-            # Set the normal parameter value if this param is not vulnerable 
-            params[param] = params.get(param).__getitem__(0)
-
-        return params
-
-    def SetPayloadInParams(self, payload) -> dict:
-        # Put payload in vulnerable params
-        params = self.PutPayloadInParams(payload)
-
-        # Pass injected params to request handler
-        self.request.SetParams(params)
+    def InsertAllParamsToScan(self) -> dict:
+        
+        for pname in self.endpoint.GetAllParamNames():
+            if self.endpoint.GetParmTypeByName(pname) != 'submit':
+                self.may_vulnerable_params.append(pname)
 
     def run(self):
         for payload in self.GetPayloads():
-            self.SetPayloadInParams(payload)
+            for pname, pvalue in self.endpoint.GetAllParams().items():
+                if pname not in self.may_vulnerable_params: continue
 
-            try:
-                res = self.request.Send()
-            except KeyboardInterrupt:
-                # Stop activities because user want that
-                raise KeyboardInterrupt("Stop !!!")
+                # Set payload in param
+                self.endpoint.SetParam(pname, payload)
 
-            except:
-                # Because http requests for scanning activities often get weird
-                # in this case we should continue in our scanning activities 
-                continue
-            
+                try:
+                    request = self.GetRequester()
+                    res = request.Send(**self.request_args)
+                except KeyboardInterrupt:
+                    # Stop activities because user want that
+                    raise KeyboardInterrupt("Stop !!!")
 
-            if self.is_vulnerable(res):
-                self.vulnInfo.status = Status.Vulnerable
+                except:
+                    # Because http requests for scanning activities often get weird
+                    # in this case we should continue in our scanning activities 
+                    continue
+                
+                # Reset param to its value after scan
+                self.endpoint.SetParam(pname, pvalue)
+
+                if self.is_vulnerable(res):
+                    self.vulnInfo.register_vuln(pname, payload)
+
+                    # remove param from may_vulnerable_params
+                    self.may_vulnerable_params.remove(pname)
             
             
         return self.GetVulnInfo()

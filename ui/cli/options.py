@@ -42,6 +42,7 @@ def register():
     parser.add_option('-T','--threads',dest="threads",help="Set Number Of Threads (default = 5)", type=int, default=5)
     parser.add_option('-H','--headers',dest="headers",help="Custom headers separated by two semi-colons. E.g. -h \"Cookie: foo=bar;;Referer: http://example.com/\" Or File")
     parser.add_option('-i','--include',dest="included_modules",help="Include specified vulnerabilities for scanning EX 'sqli,ssrf' (Note add minus before source to exclude EX '-xss')")
+    parser.add_option('-p','--post-params',dest="post",help="Post params ('p1=v1&p2=v2|param_type')")
     parser.add_option('-f','--format',dest="format",help="Output format ('text' by default)",default="text")
     parser.add_option('-o','--output',dest="output",help="Enter FileName for save output in it")
     parser.add_option('-v','--verbose',action="store_true",dest="verbose",help="Increase verbosity",default=False)

@@ -4,9 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from core.config.scanner import ScannerConfig
 from core.scan.module import *
 from core.scan.result import ScanResults
-from core.utils import rduplicate
+from core.scan.endpoint import EndPoint
 from core.crawler.crawl import crawl
 from core.data import rockPATH
+from core.utils import rduplicate
 
 
 class ScanExecutor:
@@ -41,14 +42,13 @@ class ScanExecutor:
         self.__loadmodules__(os.path.join(self.rock_path, 'modules', CommonScanner.MODPATH))
 
     
-    def run(self, url, MODULE):
+    def run(self, endpoint, Module):
         config = self.config.GetModuleConfig()
-        config.SetTarget(url)
-        obj = MODULE(config)
+        config.SetTarget(endpoint)
+        obj = Module(config)
 
         if obj.check():
-            self.results.Add(obj.run())
-            
+            self.results.Add(obj.run()) 
 
     def reachable(self):
         try:
@@ -87,13 +87,18 @@ class GeneralScanExecutor(ScanExecutor):
 
     def start(self):
         crawler_cfg = self.config.GetCrawlerConfig()
-        urls = rduplicate(crawl(crawler_cfg)) if crawler_cfg.isEnabled() else [self.config.GetTarget()]
+        if crawler_cfg.isEnabled():
+            crawler_result = crawl(crawler_cfg)
+            endpoints = rduplicate(crawler_result.GetEndPoints())
+        else:
+            endpoints = [self.config.GetModuleConfig().GetTarget()]
 
         for MODULE in self.GetAllModules():
+            # for endpoint in endpoints:
+            #     self.run(EndPoint(endpoint), MODULE)
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
-                for url in urls:
-                    executor.submit(self.run, url, MODULE)
-
+                for endpoint in endpoints:
+                    executor.submit(self.run, EndPoint(endpoint), MODULE)
 
         return self.results
 

@@ -11,14 +11,16 @@ class XSS(GeneralScanner):
         self.collaborator = self.options.get('collaborator')
 
     def check(self):
-        params = self.request.GetParams()
+        endpoint = self.GetEndPoint()
+        params = endpoint.GetAllParams()
+        temp = params
 
         # If xsshunter or collaborator were used, we have to attack all params
         # To detect blind cases 
 
         if self.xsshunter or self.collaborator:
             # Include all parameters even those that are not reflected in the same page
-            self.vulnerable_params.extend(params)
+            self.InsertAllParamsToScan()
 
             # We have to not resume
             return True
@@ -29,8 +31,14 @@ class XSS(GeneralScanner):
             params[p] = f"Hello{str(counter)}"
             counter += 1
 
-        self.request.SetParams(params)
-        res = self.request.Send()
+        endpoint.SetParams(params)
+
+        try:
+            req = self.GetRequester()
+            res = req.Send()
+        except:
+            return False
+
         ret = False
 
         for i in range(len(params)):
@@ -38,8 +46,11 @@ class XSS(GeneralScanner):
             if value in res.text:
                 # Get key by value 
                 vulnerable_param = list(params.keys())[list(params.values()).index(value)]
-                self.vulnerable_params.append(vulnerable_param)
+                self.may_vulnerable_params.append(vulnerable_param)
                 ret = True
+
+        # reset default values again
+        endpoint.SetParams(temp)
 
         return ret
         

@@ -10,10 +10,27 @@ class Status(Enum):
 
 class VulnerabilityInfo:
 
-    def __init__(self) -> None:
-        self.url        = None
-        self.vulnName   = None
-        self.status     = Status.NotVulnerable
+    def __init__(self, url, vulnName) -> None:
+        self.url                = url
+        self.vulnName           = vulnName
+        self.status             = Status.NotVulnerable
+        self.vulnerable_params  = []
+
+    def register_vuln(self, paramName, payload):
+        self.status = Status.Vulnerable
+        self.__add_vuln__(paramName, payload)
+
+    def register_maybe(self, paramName, payload = ''):
+        self.status = Status.Maybe
+        self.__add_vuln__(paramName, payload)
+
+    def __add_vuln__(self, paramName, payload):
+        if isinstance(paramName, list):
+            for pname in paramName:
+                self.vulnerable_params.append({"param": pname, "payload": payload})
+        
+        else:
+            self.vulnerable_params.append({"param": paramName, "payload": payload})
 
 
 class ScanResults:

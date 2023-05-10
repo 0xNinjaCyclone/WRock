@@ -12,8 +12,8 @@ class XPath(GeneralScanner):
         # we cannot scan XPath without parameters
         # put all prameters to vulnerable_params for scan it with payloads
         
-        self.vulnerable_params = self.request.GetParams()
-        return bool(self.vulnerable_params)
+        self.InsertAllParamsToScan()
+        return bool(self.may_vulnerable_params)
 
     def GetPayloads(self):
         return [

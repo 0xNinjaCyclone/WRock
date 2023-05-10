@@ -24,7 +24,7 @@ def remove_duplicated_urls(urls):
     return list(dict.fromkeys(urls))
 
 
-def rduplicate(urls):
+def rduplicate(endpoints):
     # Remove duplicate urls with differents in params values 
     # like (https://example.com/?q=value1 && https://example.com/?q=value2)
 
@@ -34,7 +34,8 @@ def rduplicate(urls):
     # Here we store unduplicated urls
     results = list()
 
-    for url in urls:
+    for endpoint in endpoints:
+        url = endpoint['url']
         uri = urlparse(url)
         query = parse_qs(uri.query)
 
@@ -48,11 +49,11 @@ def rduplicate(urls):
                 # Append to temp to check another urls based on
                 temp.append(tempurl)
 
-                # Append url to results container because it special url
-                results.append(url)
+                # Append endpoing to results container because it has a uniqe url
+                results.append(endpoint)
 
         else: # No params to check
-            results.append(url)
+            results.append(endpoint)
 
 
     return results

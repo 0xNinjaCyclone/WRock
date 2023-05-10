@@ -1,10 +1,5 @@
 
 from core.scan.module import *
-from bs4 import BeautifulSoup
-
-# Disable bs4 warnings
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
 
 class Upload(GeneralScanner):
@@ -14,23 +9,13 @@ class Upload(GeneralScanner):
         GeneralScanner.__init__(self, config)
 
     def check(self) -> bool:
-        return True
+        endpoint = self.GetEndPoint()
+
+        for pname in endpoint.GetAllParamNames():
+            if endpoint.GetParmTypeByName(pname) == 'file':
+                self.may_vulnerable_params.append(pname)
+                self.GetVulnInfo().register_maybe(self.may_vulnerable_params)
+                return True
 
     def run(self):
-        res = self.request.Send()
-
-        try:
-            forms = BeautifulSoup(res.text, 'html.parser').find("form")
- 
-            if forms:        
-                for tag in forms.findAll("input"):
-                    itype = tag.get("type") # input type
-
-                    if itype:
-                        if itype == "file":
-                            self.vulnInfo.status = Status.Maybe
-
-        except:
-            pass
-
         return self.GetVulnInfo()

@@ -15,13 +15,14 @@ class SSRF(GeneralScanner):
 
 
     def check(self):
-        params = self.request.GetParams()
+        endpoint = self.GetEndPoint()
+        params = endpoint.GetAllParams()
 
         if bool(params):
             for param , values in params.items():
                 value = values.__getitem__(0)
-                if value.startswith("http://") or value.startswith("https://"):
-                    self.vulnerable_params.append(param)
+                if value.startswith("http://") or value.startswith("https://") or endpoint.GetParmTypeByName(param) == "url":
+                    self.may_vulnerable_params.append(param)
                     return True
 
         
@@ -46,7 +47,7 @@ class SSRF(GeneralScanner):
         if self.ssrf_receiver_server:
             GeneralScanner.run(self)
             
-        self.vulnInfo.status = Status.Maybe
+        self.vulnInfo.register_maybe(self.may_vulnerable_params)
 
         return self.GetVulnInfo()
 

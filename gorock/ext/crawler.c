@@ -571,7 +571,7 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoUint8) PyLong_AsLong(self->sc)
     );
 
-    /* Store data in a python list */
+    /* returns CrawlerResult object */
     pResult = StoreCrawlerResult(result);
     
     /* Free memory */

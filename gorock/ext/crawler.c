@@ -9,6 +9,7 @@ static int Crawler_traverse(Crawler *self, visitproc visit, void *arg)
     Py_VISIT(self->subsInScope);
     Py_VISIT(self->insecure);
     Py_VISIT(self->rawHeaders);
+    Py_VISIT(self->sc);
     return 0;
 }
 
@@ -20,6 +21,7 @@ static int Crawler_clear(Crawler *self)
     Py_CLEAR(self->subsInScope);
     Py_CLEAR(self->insecure);
     Py_CLEAR(self->rawHeaders);
+    Py_CLEAR(self->sc);
     return 0;
 }
 
@@ -38,7 +40,8 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             (self->depth = PyLong_FromLong(2)) &&
             (self->subsInScope = PyBool_FromLong(0)) &&
             (self->insecure = PyBool_FromLong(0)) &&
-            (self->rawHeaders = PyUnicode_FromString(""))
+            (self->rawHeaders = PyUnicode_FromString("")) &&
+            (self->sc = PyBool_FromLong(0))
         ))
         {
             /* initialization failed */
@@ -54,15 +57,15 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
 {
-    static char *kwlist[] = { "url", "threads", "depth", "subsInScope", "insecure", "rawHeaders", NULL };
-    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *tmp;
-    int nThreads,nDepth, nSubsInScope, nInsecure;
+    static char *kwlist[] = { "url", "threads", "depth", "subsInScope", "insecure", "rawHeaders", "sc", NULL };
+    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *tmp;
+    int nThreads,nDepth, nSubsInScope, nInsecure, nSc;
 
     url = rawHeaders = NULL;
-    nThreads = nDepth = nSubsInScope = nInsecure = 0;
+    nThreads = nDepth = nSubsInScope = nInsecure = nSc = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UiiiiU", 
-                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UiiiiUi", 
+                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc))
     {
         return -1;
     }
@@ -110,6 +113,14 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         tmp = self->rawHeaders;
         Py_INCREF(rawHeaders);
         self->rawHeaders = rawHeaders;
+        Py_DECREF(tmp);
+    }
+
+    if (nSc) {
+        sc = PyBool_FromLong(nSc);
+        tmp = self->sc;
+        Py_INCREF(sc);
+        self->sc = sc;
         Py_DECREF(tmp);
     }
 
@@ -556,7 +567,8 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoInt) PyLong_AsLong(self->depth), 
             (GoUint8) PyLong_AsLong(self->subsInScope), 
             (GoUint8) PyLong_AsLong(self->insecure), 
-            BuildGoStr(self->rawHeaders)
+            BuildGoStr(self->rawHeaders),
+            (GoUint8) PyLong_AsLong(self->sc)
     );
 
     /* Store data in a python list */

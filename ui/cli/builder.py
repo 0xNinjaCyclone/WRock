@@ -210,4 +210,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.nocrawl:
             crawler.disable()
 
+        if self.data.sc:
+            crawler.enableGetStatusCode()
+
         return crawler

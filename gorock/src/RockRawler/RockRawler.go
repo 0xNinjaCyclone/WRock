@@ -47,6 +47,7 @@ type RockRawlerConfig struct {
 	insecure    bool
 	subsInScope bool
 	rawHeaders  string
+	sc          bool // Get urls status code flag
 }
 
 type Parameter struct {
@@ -136,7 +137,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// append every href found, and visit it
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		appendEndPoint(e.Attr("href"), &result, e)
+		appendEndPoint(e.Attr("href"), &result, e, config.sc)
 		e.Request.Visit(e.Attr("href"))
 	})
 
@@ -147,7 +148,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// find all the form action URLs
 	c.OnHTML("form[action]", func(e *colly.HTMLElement) {
-		appendEndPoint(e.Attr("action"), &result, e)
+		appendEndPoint(e.Attr("action"), &result, e, config.sc)
 	})
 
 	// add the custom headers
@@ -239,8 +240,31 @@ func appendEmails(result *[]string, e *colly.HTMLElement) {
 	}
 }
 
+func GetStatusCode(site_url string, params []Parameter, reqtype string) int {
+	var res *http.Response
+	var err error
+
+	if reqtype == "post" {
+		data := make(url.Values)
+
+		for _, p := range params {
+			data[p.name] = []string{p.value}
+		}
+
+		res, err = http.PostForm(site_url, data)
+	} else {
+		res, err = http.Get(site_url)
+	}
+
+	if err != nil {
+		return 0
+	}
+
+	return res.StatusCode
+}
+
 // append endpoints
-func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement) {
+func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement, sc bool) {
 	endpoint := EndPoint{
 		url: e.Request.AbsoluteURL(func() string {
 			if link == "#" {
@@ -257,16 +281,12 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement)
 			}
 		}(),
 		params: make([]Parameter, 0),
-		status: 200,
+		status: 0,
 	}
 
-	/* TODO : Get status code of endpoints only if user want
-	r, err := http.Get(endpoint.url)
-
-	if err == nil {
-		endpoint.status = r.StatusCode
+	if sc {
+		endpoint.status = GetStatusCode(endpoint.url, endpoint.params, endpoint.m_type)
 	}
-	*/
 
 	e.ForEach("input", func(_ int, i *colly.HTMLElement) {
 		param := Parameter{
@@ -415,6 +435,7 @@ func CStartCrawler(
 	subsInScope bool,
 	insecure bool,
 	rawHeaders string,
+	sc bool,
 ) *C.RockRawlerResult {
 
 	// Config
@@ -425,6 +446,7 @@ func CStartCrawler(
 		subsInScope: subsInScope,
 		insecure:    insecure,
 		rawHeaders:  rawHeaders,
+		sc:          sc,
 	}
 
 	// Pass the supplied parameters from C to the crawler

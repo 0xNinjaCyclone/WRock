@@ -28,6 +28,7 @@ def register_crawler_options(parser):
     crawler_options.add_option("--subs",action="store_true",dest="subsInScope",help="Include subdomains in crawling")
     crawler_options.add_option("--insecure",action="store_true",dest="insecure",help="Disable TLS verification")
     crawler_options.add_option("--no-crawl",action="store_true",dest="nocrawl",help="Don't use crawl to scan")
+    crawler_options.add_option("--get-sc",action="store_true",dest="sc",help="Get status code of crawled urls")
     parser.add_option_group(crawler_options)
 
 def register_advanced(parser):

@@ -46,7 +46,8 @@ def printCrawledEndpoints(endpoints, verbose = False):
         url = endpoint['url']
         
         if url.startswith("http"):
-            Print.success(f"{Color.Bold}[{endpoint['m_type'].upper()}][{str(endpoint['status_code'])}]{Color.NC}" + " " * (4 % (len(endpoint['m_type'])) + 1) + url)
+            displaySC = lambda: f"[{str(endpoint['status_code'])}]" if endpoint['status_code'] != 0 else str()
+            Print.success(f"{Color.Bold}[{endpoint['m_type'].upper()}]{displaySC()}{Color.NC}" + " " * (4 % (len(endpoint['m_type'])) + 1) + url)
         
         else:
             Print.warn(url)

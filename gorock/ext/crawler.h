@@ -13,6 +13,7 @@ typedef struct
     PyObject *subsInScope;
     PyObject *insecure;
     PyObject *rawHeaders;
+    PyObject *sc; // status_code -> PyBool
 
 } Crawler;
 

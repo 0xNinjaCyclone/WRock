@@ -14,7 +14,8 @@ class WebCrawler(Crawler):
             config.GetDepth(),
             config.isSubsInScopeEnabled(),
             config.isInsecureEnabled(),
-            Headers.Parser.toRaw(config.GetHeaders().GetAll())
+            Headers.Parser.toRaw(config.GetHeaders().GetAll()),
+            config.isGetStatusCodeEnabled()
         )
 
     def Start(self) -> CrawlerResult:
@@ -26,7 +27,7 @@ class WebCrawler(Crawler):
                             [
                                 {
                                     "url": "http://target/path/to/endpoint",
-                                    "status_code": 200 # (Under dev, need more improvements)
+                                    "status_code": 200 
                                     "m_type": "METHOD" # Get or Post ?
                                     "params": {
                                         "name": "param name",

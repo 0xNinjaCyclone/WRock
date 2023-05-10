@@ -523,22 +523,22 @@ static void FreeCrawlerResult(RockRawlerResult *result)
     FreeMemory(result->emails);
 
     for (EndPoint **e = result->endpoints; *e; e++)
-	{
-		for (Parameter **p = (*e)->params; *p; p++)
-		{
-			PyMem_Free((*p)->name);
-			PyMem_Free((*p)->value);
-			PyMem_Free((*p)->p_type);
-		}
-		
-		PyMem_Free((*e)->url);
+    {
+        for (Parameter **p = (*e)->params; *p; p++)
+        {
+            PyMem_Free((*p)->name);
+            PyMem_Free((*p)->value);
+            PyMem_Free((*p)->p_type);
+        }
+
+        PyMem_Free((*e)->url);
         PyMem_Free((*e)->m_type);
-		PyMem_Free((*e)->params);
-		PyMem_Free(*e);
-	}
-	
-	PyMem_Free(result->endpoints);
-	PyMem_Free(result);
+        PyMem_Free((*e)->params);
+        PyMem_Free(*e);
+    }
+
+    PyMem_Free(result->endpoints);
+    PyMem_Free(result);
 }
 
 static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {

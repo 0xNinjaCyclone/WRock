@@ -1,5 +1,5 @@
 
-from core.config.scanner import CrawlerConfig
+from core.config.crawler import CrawlerConfig
 from core.request import Headers
 from gorock.rockrawler import Crawler, CrawlerResult
      
@@ -15,7 +15,8 @@ class WebCrawler(Crawler):
             config.isSubsInScopeEnabled(),
             config.isInsecureEnabled(),
             Headers.Parser.toRaw(config.GetHeaders().GetAll()),
-            config.isGetStatusCodeEnabled()
+            config.isGetStatusCodeEnabled(),
+            config.isNoOutOfScopeEnabled()
         )
 
     def Start(self) -> CrawlerResult:

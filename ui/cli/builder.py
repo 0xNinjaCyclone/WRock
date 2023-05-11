@@ -213,4 +213,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.sc:
             crawler.enableGetStatusCode()
 
+        if self.data.noOutOfScope:
+            crawler.enableNoOutOfScope()
+
         return crawler

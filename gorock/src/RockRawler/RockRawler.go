@@ -41,13 +41,14 @@ import (
 )
 
 type RockRawlerConfig struct {
-	url         string
-	threads     int
-	depth       int
-	insecure    bool
-	subsInScope bool
-	rawHeaders  string
-	sc          bool // Get urls status code flag
+	url          string
+	threads      int
+	depth        int
+	insecure     bool
+	subsInScope  bool
+	rawHeaders   string
+	sc           bool // Get urls status code flag
+	noOutOfScope bool
 }
 
 type Parameter struct {
@@ -137,7 +138,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// append every href found, and visit it
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		appendEndPoint(e.Attr("href"), &result, e, config.sc)
+		appendEndPoint(e.Attr("href"), &result, e, config)
 		e.Request.Visit(e.Attr("href"))
 	})
 
@@ -148,7 +149,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// find all the form action URLs
 	c.OnHTML("form[action]", func(e *colly.HTMLElement) {
-		appendEndPoint(e.Attr("action"), &result, e, config.sc)
+		appendEndPoint(e.Attr("action"), &result, e, config)
 	})
 
 	// add the custom headers
@@ -263,16 +264,34 @@ func GetStatusCode(site_url string, params []Parameter, reqtype string) int {
 	return res.StatusCode
 }
 
+func IsInScope(targetUrl string, urlString string) bool {
+	targetHost, _ := extractHostname(targetUrl)
+	hostName, err := extractHostname(urlString)
+
+	if err != nil {
+		return false
+	}
+
+	return targetHost == hostName
+}
+
 // append endpoints
-func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement, sc bool) {
+func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement, config RockRawlerConfig) {
+	fullUrl := e.Request.AbsoluteURL(func() string {
+		if link == "#" {
+			return ""
+		} else {
+			return link
+		}
+	}())
+
+	// Skip out of scope pages
+	if config.noOutOfScope && !IsInScope(config.url, fullUrl) {
+		return
+	}
+
 	endpoint := EndPoint{
-		url: e.Request.AbsoluteURL(func() string {
-			if link == "#" {
-				return ""
-			} else {
-				return link
-			}
-		}()),
+		url: fullUrl,
 		m_type: func() string {
 			if e.Attr("method") != "" {
 				return e.Attr("method")
@@ -284,7 +303,7 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement,
 		status: 0,
 	}
 
-	if sc {
+	if config.sc {
 		endpoint.status = GetStatusCode(endpoint.url, endpoint.params, endpoint.m_type)
 	}
 
@@ -436,17 +455,19 @@ func CStartCrawler(
 	insecure bool,
 	rawHeaders string,
 	sc bool,
+	noOutOfScope bool,
 ) *C.RockRawlerResult {
 
 	// Config
 	config := RockRawlerConfig{
-		url:         url,
-		threads:     threads,
-		depth:       depth,
-		subsInScope: subsInScope,
-		insecure:    insecure,
-		rawHeaders:  rawHeaders,
-		sc:          sc,
+		url:          url,
+		threads:      threads,
+		depth:        depth,
+		subsInScope:  subsInScope,
+		insecure:     insecure,
+		rawHeaders:   rawHeaders,
+		sc:           sc,
+		noOutOfScope: noOutOfScope,
 	}
 
 	// Pass the supplied parameters from C to the crawler

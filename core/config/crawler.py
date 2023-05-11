@@ -9,6 +9,7 @@ class CrawlerConfig(Config):
         self.__insecure         = False
         self.__nocrawl          = False
         self.__getstatuscode    = False
+        self.__noOutOfScope     = False
         Config.__init__(self)
 
     def SetDepth(self, depth):
@@ -40,4 +41,10 @@ class CrawlerConfig(Config):
 
     def enableGetStatusCode(self):
         self.__getstatuscode = True
+
+    def isNoOutOfScopeEnabled(self):
+        return self.__noOutOfScope
+
+    def enableNoOutOfScope(self):
+        self.__noOutOfScope = True
     

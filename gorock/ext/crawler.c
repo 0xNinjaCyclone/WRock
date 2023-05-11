@@ -10,6 +10,7 @@ static int Crawler_traverse(Crawler *self, visitproc visit, void *arg)
     Py_VISIT(self->insecure);
     Py_VISIT(self->rawHeaders);
     Py_VISIT(self->sc);
+    Py_VISIT(self->noOutOfScope);
     return 0;
 }
 
@@ -22,6 +23,7 @@ static int Crawler_clear(Crawler *self)
     Py_CLEAR(self->insecure);
     Py_CLEAR(self->rawHeaders);
     Py_CLEAR(self->sc);
+    Py_CLEAR(self->noOutOfScope);
     return 0;
 }
 
@@ -41,7 +43,8 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             (self->subsInScope = PyBool_FromLong(0)) &&
             (self->insecure = PyBool_FromLong(0)) &&
             (self->rawHeaders = PyUnicode_FromString("")) &&
-            (self->sc = PyBool_FromLong(0))
+            (self->sc = PyBool_FromLong(0)) &&
+            (self->noOutOfScope = PyBool_FromLong(0))
         ))
         {
             /* initialization failed */
@@ -57,15 +60,15 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
 {
-    static char *kwlist[] = { "url", "threads", "depth", "subsInScope", "insecure", "rawHeaders", "sc", NULL };
-    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *tmp;
-    int nThreads,nDepth, nSubsInScope, nInsecure, nSc;
+    static char *kwlist[] = { "url", "threads", "depth", "subsInScope", "insecure", "rawHeaders", "sc", "noOutOfScope", NULL };
+    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *tmp;
+    int nThreads,nDepth, nSubsInScope, nInsecure, nSc, nNoOutOfScope;
 
     url = rawHeaders = NULL;
-    nThreads = nDepth = nSubsInScope = nInsecure = nSc = 0;
+    nThreads = nDepth = nSubsInScope = nInsecure = nSc = nNoOutOfScope = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UiiiiUi", 
-                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UiiiiUii", 
+                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope))
     {
         return -1;
     }
@@ -121,6 +124,14 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         tmp = self->sc;
         Py_INCREF(sc);
         self->sc = sc;
+        Py_DECREF(tmp);
+    }
+
+    if (nNoOutOfScope) {
+        noOutOfScope = PyBool_FromLong(nNoOutOfScope);
+        tmp = self->noOutOfScope;
+        Py_INCREF(noOutOfScope);
+        self->noOutOfScope = noOutOfScope;
         Py_DECREF(tmp);
     }
 
@@ -568,7 +579,8 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoUint8) PyLong_AsLong(self->subsInScope), 
             (GoUint8) PyLong_AsLong(self->insecure), 
             BuildGoStr(self->rawHeaders),
-            (GoUint8) PyLong_AsLong(self->sc)
+            (GoUint8) PyLong_AsLong(self->sc),
+            (GoUint8) PyLong_AsLong(self->noOutOfScope)
     );
 
     /* returns CrawlerResult object */

@@ -15,8 +15,9 @@ typedef struct {
 
 typedef struct {
 	char      *url;
-	int		  nStatusCode;
-	char	  *m_type;
+	int       nStatusCode;
+	char      bInScope; // boolean value
+	char      *m_type;
 	Parameter **params;
 } EndPoint;
 
@@ -58,10 +59,11 @@ type Parameter struct {
 }
 
 type EndPoint struct {
-	url    string
-	status int    // status code
-	m_type string // method type -> Get or Post ?
-	params []Parameter
+	url      string
+	status   int // status code
+	in_scope bool
+	m_type   string // method type -> Get or Post ?
+	params   []Parameter
 }
 
 type RockRawlerResult struct {
@@ -285,8 +287,11 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement,
 		}
 	}())
 
-	// Skip out of scope pages
-	if config.noOutOfScope && !IsInScope(config.url, fullUrl) {
+	// Check if the obtained url is in scope
+	in_scope := IsInScope(config.url, fullUrl)
+
+	// Skip out of scope pages if the user want
+	if config.noOutOfScope && !in_scope {
 		return
 	}
 
@@ -299,8 +304,9 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement,
 				return "get"
 			}
 		}(),
-		params: make([]Parameter, 0),
-		status: 0,
+		params:   make([]Parameter, 0),
+		status:   0,
+		in_scope: in_scope,
 	}
 
 	if config.sc {
@@ -427,6 +433,15 @@ func GoEndpointsToC(endpoint []EndPoint) **C.EndPoint {
 		pData := (*C.EndPoint)(C.malloc(C.size_t(unsafe.Sizeof(C.EndPoint{}))))
 		pData.url = C.CString(data.url)
 		pData.nStatusCode = C.int(data.status)
+		pData.bInScope = C.char(
+			func() int8 {
+				if data.in_scope {
+					return 1
+				} else {
+					return 0
+				}
+			}(),
+		)
 		pData.m_type = C.CString(data.m_type)
 		pData.params = GoParameterToC(data.params)
 		a[idx] = pData

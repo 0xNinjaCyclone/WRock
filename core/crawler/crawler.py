@@ -29,6 +29,7 @@ class WebCrawler(Crawler):
                                 {
                                     "url": "http://target/path/to/endpoint",
                                     "status_code": 200 
+                                    "in_scope: True # indicates if the url in scope or not
                                     "m_type": "METHOD" # Get or Post ?
                                     "params": {
                                         "name": "param name",

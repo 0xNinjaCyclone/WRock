@@ -45,7 +45,7 @@ class BaseScanner:
     def InsertAllParamsToScan(self) -> dict:
         
         for pname in self.endpoint.GetAllParamNames():
-            if self.endpoint.GetParmTypeByName(pname) != 'submit':
+            if self.endpoint.GetParamTypeByName(pname) != 'submit':
                 self.may_vulnerable_params.append(pname)
 
     def run(self):

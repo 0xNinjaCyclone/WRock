@@ -12,7 +12,7 @@ class Upload(GeneralScanner):
         endpoint = self.GetEndPoint()
 
         for pname in endpoint.GetAllParamNames():
-            if endpoint.GetParmTypeByName(pname) == 'file':
+            if endpoint.GetParamTypeByName(pname) == 'file':
                 self.may_vulnerable_params.append(pname)
                 self.GetVulnInfo().register_maybe(self.may_vulnerable_params)
                 return True

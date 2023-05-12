@@ -21,7 +21,7 @@ class SSRF(GeneralScanner):
         if bool(params):
             for param , values in params.items():
                 value = values.__getitem__(0)
-                if value.startswith("http://") or value.startswith("https://") or endpoint.GetParmTypeByName(param) == "url":
+                if value.startswith("http://") or value.startswith("https://") or endpoint.GetParamTypeByName(param) == "url":
                     self.may_vulnerable_params.append(param)
                     return True
 

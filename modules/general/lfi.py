@@ -12,7 +12,7 @@ class LFI(GeneralScanner):
 
         for param , value in params.items():
             
-            if value.startswith("http") or endpoint.GetParmTypeByName(param) in ('submit', 'file', 'url'):
+            if value.startswith("http") or endpoint.GetParamTypeByName(param) in ('submit', 'file', 'url'):
                 continue
             
             self.may_vulnerable_params.append(param)

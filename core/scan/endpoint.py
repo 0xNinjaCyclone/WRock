@@ -57,7 +57,7 @@ class EndPoint:
     def GetAllParamNames(self):
         return list(self.__params.keys()) + list(self.__data.keys())
 
-    def GetParmTypeByName(self, pname):
+    def GetParamTypeByName(self, pname):
         for p in self.__rawparams:
             if p['name'] == pname:
                 return p['p_type']

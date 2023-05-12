@@ -146,7 +146,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// find all JavaScript files
 	c.OnHTML("script[src]", func(e *colly.HTMLElement) {
-		appendResult(e.Attr("src"), &result.jsFiles, e)
+		appendResult(e.Attr("src"), &result.jsFiles, e, config)
 	})
 
 	// find all the form action URLs
@@ -224,10 +224,15 @@ func extractHostname(urlString string) (string, error) {
 }
 
 // append valid unique result to results
-func appendResult(link string, results *[]string, e *colly.HTMLElement) {
+func appendResult(link string, results *[]string, e *colly.HTMLElement, config RockRawlerConfig) {
 	result := e.Request.AbsoluteURL(link)
 
 	if result != "" {
+		// Exclude Out Of Scope urls if the user want
+		if config.noOutOfScope && !IsInScope(config.url, result) {
+			return
+		}
+
 		// Append only unique links
 		if isUnique(results, result) {
 			*results = append(*results, result)

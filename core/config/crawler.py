@@ -12,6 +12,16 @@ class CrawlerConfig(Config):
         self.__noOutOfScope     = False
         Config.__init__(self)
 
+
+    def SetTarget(self, target):
+        if not target.startswith('http'):
+            target = 'http://' + target
+
+        if not target.endswith('/'):
+            target += '/'
+
+        Config.SetTarget(self, target)
+
     def SetDepth(self, depth):
         self.__depth = depth
 

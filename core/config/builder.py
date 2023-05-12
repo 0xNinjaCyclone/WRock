@@ -10,7 +10,7 @@ class ConfigBuilder:
     def buildSharedData(self, cfghandler: Config):
         pass
 
-    def buildSharedEnumerationData(self, cfghandler: EnumeratationConfig):
+    def buildSharedEnumerationData(self, cfghandler: EnumerationConfig):
         pass
 
     def buildMode(self):

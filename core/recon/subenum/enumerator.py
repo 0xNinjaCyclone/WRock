@@ -1,12 +1,12 @@
 
 
 import sys, inspect
-from core.config.enumerator import EnumeratationConfig
+from core.config.enumerator import EnumerationConfig
 from core.recon.subenum.reverser.revip import *
 from core.recon.subenum.sublist3r.sublist3r import *
 
 class IDomainEnumerator:
-    def __init__(self, config: EnumeratationConfig) -> None:
+    def __init__(self, config: EnumerationConfig) -> None:
         self.config = config
         self.domain = self.config.GetTarget()
         self.__enumerators = self.GetAllEnumerators()

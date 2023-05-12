@@ -24,7 +24,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.verbose:
             cfghandler.enableVerbose()
 
-    def buildSharedEnumerationData(self, cfg: EnumeratationConfig):
+    def buildSharedEnumerationData(self, cfg: EnumerationConfig):
         self.buildSharedData(cfg)
         cfg.SetTimeout(self.data.timeout)
         cfg.SetSources(self.buildSources())

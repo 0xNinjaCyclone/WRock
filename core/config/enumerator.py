@@ -2,7 +2,7 @@
 from urllib.parse import urlparse
 from core.config.base import Config
 
-class EnumeratationConfig(Config):
+class EnumerationConfig(Config):
 
     def __init__(self) -> None:
         self.__recursive          = False
@@ -36,19 +36,19 @@ class EnumeratationConfig(Config):
         return self.__sources
 
 
-class List3rConfig(EnumeratationConfig):
+class List3rConfig(EnumerationConfig):
 
     def __init__(self) -> None:
-        EnumeratationConfig.__init__(self)
+        EnumerationConfig.__init__(self)
 
 
-class FinderConfig(EnumeratationConfig):
+class FinderConfig(EnumerationConfig):
 
     def __init__(self) -> None:
         self.__apis                 = None
         self.__maxEnumerationTime   = 10
         self.__allSources           = False
-        EnumeratationConfig.__init__(self)
+        EnumerationConfig.__init__(self)
 
     def SetAPIs(self, apis: dict):
         self.__apis = apis
@@ -69,19 +69,19 @@ class FinderConfig(EnumeratationConfig):
         return self.__allSources
 
 
-class ReverseIPConfig(EnumeratationConfig):
+class ReverseIPConfig(EnumerationConfig):
     
     def __init__(self) -> None:
-        EnumeratationConfig.__init__(self)
+        EnumerationConfig.__init__(self)
 
 
-class EnumeratorConfig(EnumeratationConfig):
+class EnumeratorConfig(EnumerationConfig):
 
     def __init__(self) -> None:
         self.__list3r     = None
         self.__finder     = None
         self.__reverseIP  = None 
-        EnumeratationConfig.__init__(self)
+        EnumerationConfig.__init__(self)
 
     def SetList3rConfig(self, list3r: List3rConfig):
         self.__list3r = list3r

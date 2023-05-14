@@ -1,4 +1,5 @@
 # WRock
+
 WebRock is a multi web security purposes tool .
 
 ## Features
@@ -87,6 +88,8 @@ Options:
                         Include specified vulnerabilities for scanning EX
                         'sqli,ssrf' (Note add minus before source to exclude
                         EX '-xss')
+  -p POST, --post-params=POST
+                        Post params ('p1=v1&p2=v2|param_type')
   -f FORMAT, --format=FORMAT
                         Output format ('text' by default)
   -o OUTPUT, --output=OUTPUT
@@ -108,6 +111,8 @@ Options:
     --subs              Include subdomains in crawling
     --insecure          Disable TLS verification
     --no-crawl          Don't use crawl to scan
+    --get-sc            Get status code of crawled urls
+    --no-outofscope     Exclude out of scope pages
 
   Subdomain collector options:
     --sources=SOURCES   Enumerations Sources separated by comm (Note add minus
@@ -122,6 +127,7 @@ Options:
     --recursive         Collect recursivly
     --sublist3r         Use sublist3r
     --revip             Reverse IPs all collected subdomains
+
 
 
 ```

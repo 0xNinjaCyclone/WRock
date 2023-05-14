@@ -1,6 +1,6 @@
 # WRock
 
-WebRock is a multi web security purposes tool .
+![Image](imgs/logo.png)
 
 ## Features
 - Web scanning

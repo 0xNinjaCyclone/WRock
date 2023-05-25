@@ -468,13 +468,13 @@ static PyObject *StoreParameterResult(Parameter **params)
         }
 
         /* Insert parameter name to the dict */
-        PyDict_SetItemString(pParam, "name", PyUnicode_FromString((*params)->name));
+        PyDict_SetItemString(pParam, "name", PyUnicode_FromString( ( *params )->name ));
 
         /* Insert parameter value to the dict */
-        PyDict_SetItemString(pParam, "value", PyUnicode_FromString((*params)->value));
+        PyDict_SetItemString(pParam, "value", PyUnicode_FromString( ( *params )->value ));
 
         /* Insert parameter type to the dict */
-        PyDict_SetItemString(pParam, "p_type", PyUnicode_FromString((*params)->p_type));
+        PyDict_SetItemString(pParam, "p_type", PyUnicode_FromString( ( *params )->p_type ));
 
         /* Insert the parameter dict to the parameter list */
         PyList_Append(pParamList, pParam);
@@ -508,19 +508,19 @@ static PyObject *StoreEndPointsResult(EndPoint **endpoints)
         }
 
         /* Insert url to the endpoint dict */
-        PyDict_SetItemString(pData, "url", PyUnicode_FromString((*endpoints)->url));
+        PyDict_SetItemString(pData, "url", PyUnicode_FromString( ( *endpoints )->url ));
 
         /* Insert status code to the endpoint dict */
-        PyDict_SetItemString(pData, "status_code", PyLong_FromLong((*endpoints)->nStatusCode));
+        PyDict_SetItemString(pData, "status_code", PyLong_FromLong( ( *endpoints )->nStatusCode ));
 
         /* Insert inScope flag to the endpoint dict */
-        PyDict_SetItemString(pData, "in_scope", PyBool_FromLong((*endpoints)->bInScope));
+        PyDict_SetItemString(pData, "in_scope", PyBool_FromLong( ( *endpoints )->bInScope ));
 
         /* Insert method type to the endpoint dict */
-        PyDict_SetItemString(pData, "m_type", PyUnicode_FromString((*endpoints)->m_type));
+        PyDict_SetItemString(pData, "m_type", PyUnicode_FromString( ( *endpoints )->m_type ));
 
         /* Insert the parameter list to the dict */
-        PyDict_SetItemString(pData, "params", StoreParameterResult((*endpoints)->params));
+        PyDict_SetItemString(pData, "params", StoreParameterResult( ( *endpoints )->params ));
 
         /* Insert the endpoint dict to the endpoints list */
         PyList_Append(pDataList, pData);
@@ -549,17 +549,18 @@ static void FreeCrawlerResult(RockRawlerResult *result)
 
     for (EndPoint **e = result->endpoints; *e; e++)
     {
-        for (Parameter **p = (*e)->params; *p; p++)
+        for (Parameter **p = ( *e )->params; *p; p++)
         {
-            PyMem_Free((*p)->name);
-            PyMem_Free((*p)->value);
-            PyMem_Free((*p)->p_type);
+            PyMem_Free( ( *p )->name );
+            PyMem_Free( ( *p )->value );
+            PyMem_Free( ( *p )->p_type );
+            PyMem_Free( *p );
         }
 
-        PyMem_Free((*e)->url);
-        PyMem_Free((*e)->m_type);
-        PyMem_Free((*e)->params);
-        PyMem_Free(*e);
+        PyMem_Free( ( *e )->url );
+        PyMem_Free( ( *e )->m_type );
+        PyMem_Free( ( *e )->params );
+        PyMem_Free( *e );
     }
 
     PyMem_Free(result->endpoints);

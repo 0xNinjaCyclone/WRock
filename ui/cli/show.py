@@ -30,6 +30,22 @@ def printScanResults(results: ScanResults, verbose = False):
             else:
                 Print.fail(vulnInfo.url, verbose = verbose)
 
+def printJsAnalyzerResults(results, verbose = False):
+    Print.highlight("Js sensitive data :", endl="\n\n", startl="\n")
+    noSensitive = True
+
+    for result in [ r for r in results if len(r.GetItems()) != 0 ]:
+        noSensitive = False
+        Print.success(f"Js Link -> {result.GetJsLink()}")
+
+        for item in result.GetItems():
+            extractor = item.GetExtractor()
+            data = ', '.join( item.GetData() )
+
+            Print.success(f"Data => {data} - Platform => {extractor.GetPlatform()} - Key type => {extractor.GetKeyType()} - Regex => {extractor.GetExpression()}")
+
+    if noSensitive:
+        Print.fail("No sensitive data found !!!")
 
 def printSubdomains(subdomains):
     Print.highlight("Subdomains :", endl="\n\n")
@@ -90,4 +106,3 @@ def printCrawlerResult(crawler_result: CrawlerResult, verbose = False):
     printCrawledEndpoints(crawler_result.GetEndPoints(), verbose)
     printCrawledJsFiles(crawler_result.GetJsFiles())
     printCrawledEmails(crawler_result.GetEmails())
-    printCrawledTotals(crawler_result)

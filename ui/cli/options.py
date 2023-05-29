@@ -30,6 +30,7 @@ def register_crawler_options(parser):
     crawler_options.add_option("--no-crawl",action="store_true",dest="nocrawl",help="Don't use crawl to scan")
     crawler_options.add_option("--get-sc",action="store_true",dest="sc",help="Get status code of crawled urls")
     crawler_options.add_option("--no-outofscope",action="store_true",dest="noOutOfScope",help="Exclude out of scope pages")
+    crawler_options.add_option("--jsanalyze",action="store_true",dest="jsanalyzer",help="Extract sensitive data from js files like APIs,Tokens,SecretKeys (Works in crawl mode only)")
     parser.add_option_group(crawler_options)
 
 def register_advanced(parser):

@@ -216,4 +216,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.noOutOfScope:
             crawler.enableNoOutOfScope()
 
+        if self.data.jsanalyzer:
+            crawler.enableJsAnalyzer()
+
         return crawler

@@ -6,6 +6,7 @@ from core.scan.result import ScanResults
 from core.config.base import Mode
 from core.scan.scanner import scan
 from core.crawler.crawl import crawl
+from core.jsanalyzer.analyzer import do_analysis
 from core.crawler.report import writeCrawlReport
 from core.scan.report import writeScanReport, writeListScansReport
 from core.recon.subenum.report import writeEnumReport
@@ -25,6 +26,11 @@ def startCrawling(crawl_cfg):
     crawler_result = crawl(crawl_cfg)
     show.printCrawlerResult(crawler_result, crawl_cfg.isVerboseEnabled())
     return crawler_result
+
+def startJsAnalysis(jsLinks, threads):
+    results = do_analysis(jsLinks, threads)
+    show.printJsAnalyzerResults(results)
+    return results
 
 def writeReport(output, results, reportWriter):
     if output:
@@ -88,7 +94,13 @@ def run(opts):
         rock_t.finish("recon and scan")
 
     elif mode == Mode.Crawl:
-        crawler_result = startCrawling(config.GetCrawlerConfig())
+        cralwer_config = config.GetCrawlerConfig()
+        crawler_result = startCrawling(cralwer_config)
+
+        if cralwer_config.isJsAnalyzerEnabled():
+            startJsAnalysis(crawler_result.GetJsFiles(), cralwer_config.GetThreads())
+
+        show.printCrawledTotals(crawler_result)
         writeReport(output, crawler_result, writeCrawlReport)
         rock_t.finish("crawl")
 

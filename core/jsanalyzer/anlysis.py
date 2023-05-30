@@ -33,21 +33,21 @@ class Extractor:
 class ExtractorsLoader:
     
     def __init__(self) -> None:
-        self.__extracotrs = list()
+        self.__extractors = list()
 
     def Load(self):
         with open(EXTRACTORS, 'r') as f:
             reader = csv.reader(f)
-            self.__extracotrs = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader ]
+            self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader ]
 
     def GetAll(self):
-        return self.__extracotrs
+        return self.__extractors
 
     def GetByKeyType(self, keyType):
-        return [ extractor for extractor in self.__extracotrs if extractor.GetKeyType() == keyType ]
+        return [ extractor for extractor in self.__extractors if extractor.GetKeyType() == keyType ]
 
     def GetByPlatform(self, platform):
-        return [ extractor for extractor in self.__extracotrs if extractor.GetPlatform() == platform ]
+        return [ extractor for extractor in self.__extractors if extractor.GetPlatform() == platform ]
 
 
 class SensitiveDataItem:
@@ -64,7 +64,7 @@ class SensitiveDataItem:
 
 
 class AnalysisResult:
-    def __init__(self, jslink, ) -> None:
+    def __init__(self, jslink) -> None:
         self.__jslink = jslink
         self.__items  = list()
 

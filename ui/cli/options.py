@@ -30,18 +30,24 @@ def register_crawler_options(parser):
     crawler_options.add_option("--no-crawl",action="store_true",dest="nocrawl",help="Don't use crawl to scan")
     crawler_options.add_option("--get-sc",action="store_true",dest="sc",help="Get status code of crawled urls")
     crawler_options.add_option("--no-outofscope",action="store_true",dest="noOutOfScope",help="Exclude out of scope pages")
-    crawler_options.add_option("--jsanalyze",action="store_true",dest="jsanalyzer",help="Extract sensitive data from js files like APIs,Tokens,SecretKeys (Works in crawl mode only)")
     parser.add_option_group(crawler_options)
+
+def register_jsanalyzer_options(parser):
+    jsanalyzer_options = OptionGroup(parser,"Js Analyzer options")
+    jsanalyzer_options.add_option("--by-platform", dest="by_platforms", help="Use specific extractors by comma-sperated platforms EX(Google,GitHub,General)")
+    jsanalyzer_options.add_option("--by-key", dest="by_keys", help="Use specific extractors by comma-sperated keys type EX(APIKey,OAuth,JWT)")
+    parser.add_option_group(jsanalyzer_options)
 
 def register_advanced(parser):
     register_modules_options(parser)
     register_crawler_options(parser)
     register_subdomain_options(parser)
+    register_jsanalyzer_options(parser)
 
 def register():
     parser = OptionParser(f"\n\t\t./{sys.argv[0].split('/')[-1]} [-h or --help] for more options \n")
     parser.add_option('-t','--target',dest="target",help="Enter The Target Url|Domain")
-    parser.add_option('-m','--mode',dest="mode",help="mode [r|recon - s|scan - c|crawl] (default mode = scan)",default="scan")
+    parser.add_option('-m','--mode',dest="mode",help="mode [r|recon - s|scan - c|crawl - a|jsanalyze] (default mode = scan)",default="scan")
     parser.add_option('-T','--threads',dest="threads",help="Set Number Of Threads (default = 5)", type=int, default=5)
     parser.add_option('-H','--headers',dest="headers",help="Custom headers separated by two semi-colons. E.g. -h \"Cookie: foo=bar;;Referer: http://example.com/\" Or File")
     parser.add_option('-i','--include',dest="included_modules",help="Include specified vulnerabilities for scanning EX 'sqli,ssrf' (Note add minus before source to exclude EX '-xss')")

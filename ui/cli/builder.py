@@ -1,5 +1,7 @@
 
 import yaml, os.path
+from core.config.jsanlyzer import JsAnalyzerConfig
+from core.jsanalyzer.anlysis import ExtractorsLoader
 from core.utils import *
 from core.config.builder import ConfigBuilder
 from core.request import Headers
@@ -145,6 +147,9 @@ class OptionsBuilder(ConfigBuilder):
         elif mode in ('c', 'crawl'):
             modecfg.SetModeToCrawl()
 
+        elif mode in ('a', 'jsanalyze'):
+            modecfg.SetModeToJsAnalyze()
+
         return modecfg
 
     def buildExcludedModules(self):
@@ -216,7 +221,26 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.noOutOfScope:
             crawler.enableNoOutOfScope()
 
-        if self.data.jsanalyzer:
-            crawler.enableJsAnalyzer()
-
         return crawler
+
+    def buildJsAnalyzer(self):
+        jsAnalyzer = JsAnalyzerConfig()
+        self.buildSharedData(jsAnalyzer)
+        jsAnalyzer.SetCrawlerConfig( self.buildCrawler() )
+
+        # Load extractors
+        extLoader = ExtractorsLoader()
+
+        if self.data.by_platforms:
+            extLoader.LoadByPlatforms( self.data.by_platforms.split(',') )
+
+        elif self.data.by_keys:
+            extLoader.LoadByKeys( self.data.by_keys.split(',') )
+
+        else:
+            extLoader.LoadAll()
+
+        # Pass the Extractors list to the config
+        jsAnalyzer.SetExtractors( extLoader.GetAll() )
+
+        return jsAnalyzer

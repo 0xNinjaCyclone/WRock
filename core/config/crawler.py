@@ -10,7 +10,6 @@ class CrawlerConfig(Config):
         self.__nocrawl          = False
         self.__getstatuscode    = False
         self.__noOutOfScope     = False
-        self.__jsanalyzer       = False       
         Config.__init__(self)
 
 
@@ -58,10 +57,15 @@ class CrawlerConfig(Config):
 
     def enableNoOutOfScope(self):
         self.__noOutOfScope = True
-
-    def isJsAnalyzerEnabled(self):
-        return self.__jsanalyzer
-
-    def enableJsAnalyzer(self):
-        self.__jsanalyzer = True
     
+
+class CrawlerProxy:
+
+    def __init__(self) -> None:
+        self.__crawler   = None
+
+    def SetCrawlerConfig(self, crawler: CrawlerConfig):
+        self.__crawler = crawler
+
+    def GetCrawlerConfig(self):
+        return self.__crawler

@@ -67,10 +67,11 @@ class OutputConfig:
 
 
 class Mode(Enum):
-    Both    = auto()
-    Scan    = auto()
-    Recon   = auto()
-    Crawl   = auto()
+    Both      = auto()
+    Scan      = auto()
+    Recon     = auto()
+    Crawl     = auto()
+    JsAnalyze = auto()
 
 class RockMode:
 
@@ -88,6 +89,9 @@ class RockMode:
 
     def SetModeToCrawl(self):
         self.__mode = Mode.Crawl
+
+    def SetModeToJsAnalyze(self):
+        self.__mode = Mode.JsAnalyze
 
     def GetMode(self):
         return self.__mode

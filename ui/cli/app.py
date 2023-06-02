@@ -10,6 +10,7 @@ from core.jsanalyzer.analyzer import do_analysis
 from core.crawler.report import writeCrawlReport
 from core.scan.report import writeScanReport, writeListScansReport
 from core.recon.subenum.report import writeEnumReport
+from core.jsanalyzer.report import writeJsAnalyzerReport
 
 
 def startScan(scanner_cfg):
@@ -27,8 +28,8 @@ def startCrawling(crawl_cfg):
     show.printCrawlerResult(crawler_result, crawl_cfg.isVerboseEnabled())
     return crawler_result
 
-def startJsAnalysis(jsLinks, threads):
-    results = do_analysis(jsLinks, threads)
+def startJsAnalysis(jsanalyzer_cfg):
+    results = do_analysis(jsanalyzer_cfg)
     show.printJsAnalyzerResults(results)
     return results
 
@@ -94,15 +95,14 @@ def run(opts):
         rock_t.finish("recon and scan")
 
     elif mode == Mode.Crawl:
-        cralwer_config = config.GetCrawlerConfig()
-        crawler_result = startCrawling(cralwer_config)
-
-        if cralwer_config.isJsAnalyzerEnabled():
-            startJsAnalysis(crawler_result.GetJsFiles(), cralwer_config.GetThreads())
-
-        show.printCrawledTotals(crawler_result)
+        crawler_result = startCrawling(config.GetCrawlerConfig())
         writeReport(output, crawler_result, writeCrawlReport)
         rock_t.finish("crawl")
+
+    elif mode == Mode.JsAnalyze:
+        results = startJsAnalysis(config.GetJsAnalyzerConfig())
+        writeReport(output, results, writeJsAnalyzerReport)
+        rock_t.finish("js analysis")
 
     else:
         view.Print.fail("This mode is not supported !!")

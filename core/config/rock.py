@@ -1,15 +1,14 @@
 
 from core.config.base import *
+from core.config.jsanlyzer import JsAnalyzerProxy
 from core.config.scanner import *
 from core.config.enumerator import *
 
-class RockConfig:
+class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy):
 
     def __init__(self) -> None:
         self.__mode       = None
         self.__output     = None
-        self.__scanner    = None
-        self.__crawler    = None
         self.__enumerator = None
 
     def SetMode(self, mode: RockMode):
@@ -23,18 +22,6 @@ class RockConfig:
 
     def GetOutputConfig(self):
         return self.__output
-
-    def SetScannerConfig(self, scanner: ScannerConfig):
-        self.__scanner = scanner
-
-    def GetScannerConfig(self):
-        return self.__scanner
-
-    def SetCrawlerConfig(self, crawler: CrawlerConfig):
-        self.__crawler = crawler
-
-    def GetCrawlerConfig(self):
-        return self.__crawler
 
     def SetEnumeratorConfig(self, enumerator: EnumeratorConfig):
         self.__enumerator = enumerator

@@ -1,8 +1,10 @@
 
-from concurrent.futures import ThreadPoolExecutor
 import csv, requests, re
 import os.path
 from core.data import rockPATH
+from core.crawler.crawl import crawl
+from core.config.jsanlyzer import *
+from concurrent.futures import ThreadPoolExecutor
 
 
 # src => https://github.com/odomojuli/RegExAPI/blob/master/regex.csv
@@ -35,10 +37,16 @@ class ExtractorsLoader:
     def __init__(self) -> None:
         self.__extractors = list()
 
-    def Load(self):
+    def LoadAll(self):
         with open(EXTRACTORS, 'r') as f:
             reader = csv.reader(f)
             self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader ]
+
+    def LoadByPlatforms(self, platforms: list):
+        self.__loadby__(platforms, 0)
+
+    def LoadByKeys(self, keys):
+        self.__loadby__(keys, 1)
 
     def GetAll(self):
         return self.__extractors
@@ -48,6 +56,11 @@ class ExtractorsLoader:
 
     def GetByPlatform(self, platform):
         return [ extractor for extractor in self.__extractors if extractor.GetPlatform() == platform ]
+
+    def __loadby__(self, data: list, i):
+        with open(EXTRACTORS, 'r') as f:
+            reader = csv.reader(f)
+            self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader if row[i] in data ]
 
 
 class SensitiveDataItem:
@@ -59,7 +72,7 @@ class SensitiveDataItem:
     def GetData(self) -> list:
         return self.__data
 
-    def GetExtractor(self) -> list:
+    def GetExtractor(self) -> Extractor:
         return self.__extractor
 
 
@@ -80,16 +93,14 @@ class AnalysisResult:
 
 class Analyzer:
 
-    def __init__(self, extractors, jsLinks: list, threads) -> None:
-        self.__extractors = extractors
-        self.__jsLinks    = jsLinks
-        self.__threads    = threads
+    def __init__(self, config: JsAnalyzerConfig) -> None:
+        self.__config     = config
 
     def Analyze(self, jsLink) -> AnalysisResult:
         result  = AnalysisResult(jsLink)
         content = self.__getjscontent__(jsLink)
 
-        for extractor in self.__extractors:
+        for extractor in self.__config.GetExtractors():
             prog = re.compile(extractor.GetExpression(), re.X | re.I)
             all_matches = list( dict.fromkeys( [ match.group(0) for match in re.finditer(prog, content) ] ) )
 
@@ -102,15 +113,15 @@ class Analyzer:
         return result
 
     def Start(self) -> list:
-        with ThreadPoolExecutor(max_workers=self.__threads) as executor:
-            features = [ executor.submit(self.Analyze, jsLink) for jsLink in self.__jsLinks ]
+        with ThreadPoolExecutor(max_workers=self.__config.GetThreads()) as executor:
+            features = [ executor.submit(self.Analyze, jsLink) for jsLink in crawl( self.__config.GetCrawlerConfig() ).GetJsFiles() ]
 
 
         return [ feature.result() for feature in features ]
 
     def __getjscontent__(self, jsLink):
         try:
-            response = requests.get(jsLink, timeout=30)
+            response = requests.get(jsLink, headers=self.__config.GetHeaders().GetAll(), timeout=30)
             retval   = response.text if response.ok else str()
         except:
             retval = str()

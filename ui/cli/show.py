@@ -106,3 +106,4 @@ def printCrawlerResult(crawler_result: CrawlerResult, verbose = False):
     printCrawledEndpoints(crawler_result.GetEndPoints(), verbose)
     printCrawledJsFiles(crawler_result.GetJsFiles())
     printCrawledEmails(crawler_result.GetEmails())
+    printCrawledTotals(crawler_result)

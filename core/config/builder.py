@@ -28,6 +28,9 @@ class ConfigBuilder:
     def buildCrawler(self):
         pass
 
+    def buildJsAnalyzer(self):
+        pass
+
     def buildScanner(self):
         scanner = ScannerConfig()
         self.buildSharedData(scanner)
@@ -79,6 +82,9 @@ class ConfigBuilder:
 
         elif mode == Mode.Crawl:
             rock.SetCrawlerConfig(self.buildCrawler())
+
+        elif mode == Mode.JsAnalyze:
+            rock.SetJsAnalyzerConfig(self.buildJsAnalyzer())
 
         elif mode == Mode.Both:
             rock.SetScannerConfig(self.buildScanner())

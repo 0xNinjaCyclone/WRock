@@ -5,12 +5,12 @@ from core.config.crawler import *
 from core.config.enumerator import *
 
 
-class ScannerConfig(Config):
+class ScannerConfig(Config, CrawlerProxy):
     def __init__(self) -> None:
         self.__excluded_modules   = None
         self.__module_config      = None
-        self.__crawler            = None
         Config.__init__(self)
+        CrawlerProxy.__init__(self)
 
     
     def SetTarget(self, target):
@@ -34,9 +34,14 @@ class ScannerConfig(Config):
     def GetModuleConfig(self):
         return self.__module_config
 
-    def SetCrawlerConfig(self, crawler: CrawlerConfig):
-        self.__crawler = crawler
+    
+class ScannerProxy:
 
-    def GetCrawlerConfig(self):
-        return self.__crawler
+    def __init__(self) -> None:
+        self.__scanner = None
 
+    def SetScannerConfig(self, scanner: ScannerConfig):
+        self.__scanner = scanner
+
+    def GetScannerConfig(self):
+        return self.__scanner

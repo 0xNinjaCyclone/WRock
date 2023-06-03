@@ -3,20 +3,14 @@ from core.config.base import Format
 from core.output import *
 
 
-def writeEnumReport(config: OutputConfig, subdomains: list):
-    if config.isEnable():
-        with EnumeratorReport(config) as report:
-            for domain in subdomains:
-                report.write(domain)
-
-
 class SubdomainEnumeratorReportInText(TxtOutput):
     
     def __init__(self, fileName):
         TxtOutput.__init__(self, fileName)
 
-    def write(self, domain):
-        TxtOutput.write(self, domain)
+    def write(self, subdomains):
+        for domain in subdomains:
+            TxtOutput.write(self, domain)
 
 
 class EnumeratorReport(Report):

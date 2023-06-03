@@ -3,20 +3,14 @@ from core.config.base import Format
 from core.output import *
 
 
-def writeCrawlReport(config: OutputConfig, crawler_result):
-    if config.isEnable():
-        with CrawlerReport(config) as report:
-            for endpoint in crawler_result.GetEndPoints():
-                report.write(endpoint['url'])
-
-
 class CrawlerReportInText(TxtOutput):
     
     def __init__(self, fileName):
         TxtOutput.__init__(self, fileName)
 
-    def write(self, domain):
-        TxtOutput.write(self, domain)
+    def write(self, crawler_result):
+        for endpoint in crawler_result.GetEndPoints():
+            TxtOutput.write(self, endpoint['url'])
 
 
 class CrawlerReport(Report):

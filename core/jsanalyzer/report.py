@@ -3,12 +3,6 @@ from core.config.base import Format
 from core.output import *
 
 
-def writeJsAnalyzerReport(config: OutputConfig, jsanalyzer_results):
-    if config.isEnable():
-        with JsAnalyzerReport(config) as report:
-            report.write(jsanalyzer_results)
-
-
 class JsAnalyzerReportInText(TxtOutput):
     
     def __init__(self, fileName):

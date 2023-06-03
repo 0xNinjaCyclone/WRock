@@ -1,4 +1,5 @@
 
+from typing import Type
 from core.config.base import OutputConfig
 
 
@@ -22,6 +23,21 @@ class Report:
 
     def __exit__(self, type, value, trace_back):
         self.save()
+
+
+class ReportWriter:
+
+    def __init__(self, config: OutputConfig) -> None:
+        self.__config = config
+
+    def write(self, Report: Type[Report], data) -> None:
+        if self.__config.isEnable():
+            self.__write__(Report, data)
+
+    def __write__(self, Report: Type[Report], data):
+        with Report(self.__config) as report:
+            report.write(data)
+
 
 class Output:
 

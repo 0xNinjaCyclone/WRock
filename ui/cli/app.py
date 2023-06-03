@@ -7,10 +7,11 @@ from core.config.base import Mode
 from core.scan.scanner import scan
 from core.crawler.crawl import crawl
 from core.jsanalyzer.analyzer import do_analysis
-from core.crawler.report import writeCrawlReport
-from core.scan.report import writeScanReport, writeListScansReport
-from core.recon.subenum.report import writeEnumReport
-from core.jsanalyzer.report import writeJsAnalyzerReport
+from core.crawler.report import CrawlerReport
+from core.scan.report import ScannerReport
+from core.recon.subenum.report import EnumeratorReport
+from core.jsanalyzer.report import JsAnalyzerReport
+from core.output import Report, ReportWriter, Type
 
 
 def startScan(scanner_cfg):
@@ -33,9 +34,9 @@ def startJsAnalysis(jsanalyzer_cfg):
     show.printJsAnalyzerResults(results)
     return results
 
-def writeReport(output, results, reportWriter):
+def writeReport(output, results, Report: Type[Report]):
     if output:
-        reportWriter(output, results)
+        ReportWriter( output ).write( Report, results )
         view.Print.status(f"Output has been saved at '{output.GetFileName()}'")
 
 def run(opts):
@@ -46,12 +47,12 @@ def run(opts):
 
     if mode == Mode.Scan:
         results = startScan(config.GetScannerConfig())
-        writeReport(output, results, writeScanReport)
+        writeReport(output, results, ScannerReport)
         rock_t.finish("scan")
 
     elif mode == Mode.Recon:
         subdomains = startEnumeration(config.GetEnumeratorConfig())
-        writeReport(output, subdomains, writeEnumReport)
+        writeReport(output, subdomains, EnumeratorReport)
         rock_t.finish("recon")
 
     elif mode == Mode.Both:
@@ -83,25 +84,25 @@ def run(opts):
             # Save subdomains 
             output_path , fileName = os.path.split(reportName)
             output.SetFileName(os.path.join(output_path, f"subdomains-{fileName}"))
-            writeReport(output, subdomains, writeEnumReport)
+            writeReport(output, subdomains, EnumeratorReport)
 
             # Return fileName again after changing when wrote subdomains report
             output.SetFileName(reportName)
 
             # Write all results in a report 
-            writeReport(output, results, writeListScansReport)
+            writeReport(output, results, ScannerReport)
 
 
         rock_t.finish("recon and scan")
 
     elif mode == Mode.Crawl:
         crawler_result = startCrawling(config.GetCrawlerConfig())
-        writeReport(output, crawler_result, writeCrawlReport)
+        writeReport(output, crawler_result, CrawlerReport)
         rock_t.finish("crawl")
 
     elif mode == Mode.JsAnalyze:
         results = startJsAnalysis(config.GetJsAnalyzerConfig())
-        writeReport(output, results, writeJsAnalyzerReport)
+        writeReport(output, results, JsAnalyzerReport)
         rock_t.finish("js analysis")
 
     else:

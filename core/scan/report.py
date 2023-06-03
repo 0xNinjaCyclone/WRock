@@ -4,31 +4,23 @@ from core.output import *
 from core.scan.result import *
 
 
-def writeResults(report, results: ScanResults):
-    for vulnName in results.GetAllVulnNames():
-        for vulnInfo in results.GetResultByVuln(vulnName):
-            if vulnInfo.status == Status.Vulnerable or vulnInfo.status == Status.Maybe:
-                report.write(vulnInfo)
-
-def writeScanReport(output: OutputConfig, results: ScanResults):
-    if output.isEnable():
-        with ScannerReport(output) as report:
-            writeResults(report, results)
-
-def writeListScansReport(output: OutputConfig, resultsList: list):
-    if output.isEnable():
-        with ScannerReport(output) as report:
-            for results in resultsList:
-                writeResults(report, results)
-
 class ScannerReportInText(TxtOutput):
 
     def __init__(self, fileName):
         TxtOutput.__init__(self, fileName)
 
-    def write(self, data: VulnerabilityInfo):
-        data = f"{data.vulnName} - {data.url}"
-        return TxtOutput.write(self, data)
+    def write(self, results: ScanResults | list[ScanResults]):
+        resultsList = [ results ] if isinstance(results, ScanResults) else results
+
+        for results in resultsList:
+            self.writeResult(results)
+            TxtOutput.write(self, '-' * 50)
+
+    def writeResult(self, results: ScanResults):
+        for vulnName in results.GetAllVulnNames():
+            for vulnInfo in results.GetResultByVuln(vulnName):
+                if vulnInfo.status == Status.Vulnerable or vulnInfo.status == Status.Maybe:
+                    TxtOutput.write(self, f"{vulnInfo.vulnName} - {vulnInfo.url}")
 
 
 class ScannerReport(Report):

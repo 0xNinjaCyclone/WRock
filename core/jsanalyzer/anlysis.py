@@ -1,6 +1,5 @@
 
-import csv, requests, re
-import os.path
+import csv, requests, re, os.path
 from core.data import rockPATH
 from core.crawler.crawl import crawl
 from core.config.jsanlyzer import *
@@ -33,34 +32,34 @@ class Extractor:
 
 
 class ExtractorsLoader:
+    PLATFORM = 0
+    KEYTYPE  = 1
     
     def __init__(self) -> None:
         self.__extractors = list()
 
     def LoadAll(self):
-        with open(EXTRACTORS, 'r') as f:
-            reader = csv.reader(f)
-            self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader ]
+        self.__loadby__(all=True)
 
     def LoadByPlatforms(self, platforms: list):
-        self.__loadby__(platforms, 0)
+        self.__loadby__(platforms, ExtractorsLoader.PLATFORM)
 
     def LoadByKeys(self, keys):
-        self.__loadby__(keys, 1)
+        self.__loadby__(keys, ExtractorsLoader.KEYTYPE)
 
-    def GetAll(self):
+    def GetAll(self) -> list[ Extractor ]:
         return self.__extractors
 
-    def GetByKeyType(self, keyType):
+    def GetByKeyType(self, keyType) -> list[ Extractor ]:
         return [ extractor for extractor in self.__extractors if extractor.GetKeyType() == keyType ]
 
-    def GetByPlatform(self, platform):
+    def GetByPlatform(self, platform) -> list[ Extractor ]:
         return [ extractor for extractor in self.__extractors if extractor.GetPlatform() == platform ]
 
-    def __loadby__(self, data: list, i):
+    def __loadby__(self, data: list = [], index = 0, all = False):
         with open(EXTRACTORS, 'r') as f:
             reader = csv.reader(f)
-            self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader if row[i] in data ]
+            self.__extractors = [ Extractor(row[0], row[1], row[2], row[3]) for row in reader if all or row[index] in data ]
 
 
 class SensitiveDataItem:
@@ -69,7 +68,7 @@ class SensitiveDataItem:
         self.__data      = data
         self.__extractor = extractor
 
-    def GetData(self) -> list:
+    def GetData(self) -> list[ str ]:
         return self.__data
 
     def GetExtractor(self) -> Extractor:
@@ -77,14 +76,14 @@ class SensitiveDataItem:
 
 
 class AnalysisResult:
-    def __init__(self, jslink) -> None:
+    def __init__(self, jslink: str) -> None:
         self.__jslink = jslink
         self.__items  = list()
 
-    def GetJsLink(self):
+    def GetJsLink(self) -> str:
         return self.__jslink
 
-    def GetItems(self):
+    def GetItems(self) -> list[ SensitiveDataItem ]:
         return self.__items
 
     def AppendItem(self, item: SensitiveDataItem):
@@ -95,8 +94,8 @@ class AnalysisResults( list ):
     def __init__(self, iterable):
         list.__init__(self, iterable)
 
-    def GetFilesHaveSensitives(self):
-        return [ sensitive for sensitive in self if bool( len(sensitive.GetItems()) ) ]
+    def GetFilesHaveSensitives(self) -> list[ AnalysisResult ]:
+        return [ sensitive for sensitive in self if bool( sensitive.GetItems() ) ]
 
     def GetNumberOfJsLinks(self) -> int:
         return len( self )
@@ -140,7 +139,7 @@ class Analyzer:
 
         return result
 
-    def Start(self) -> list:
+    def Start(self) -> AnalysisResults:
         crawler_cfg = self.__config.GetCrawlerConfig()
 
         with ThreadPoolExecutor(max_workers=self.__config.GetThreads()) as executor:
@@ -151,7 +150,7 @@ class Analyzer:
 
         return AnalysisResults( feature.result() for feature in features )
 
-    def __getjscontent__(self, jsLink):
+    def __getjscontent__(self, jsLink) -> str:
         try:
             response = requests.get(jsLink, headers=self.__config.GetHeaders().GetAll(), timeout=30)
             retval   = response.text if response.ok else str()

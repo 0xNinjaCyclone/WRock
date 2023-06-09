@@ -31,7 +31,7 @@ def startCrawling(crawl_cfg):
 
 def startJsAnalysis(jsanalyzer_cfg):
     results = do_analysis(jsanalyzer_cfg)
-    show.printJsAnalyzerResults(results)
+    show.printJsAnalyzerResults(results, jsanalyzer_cfg.isVerboseEnabled())
     return results
 
 def writeReport(output, results, Report: Type[Report]):

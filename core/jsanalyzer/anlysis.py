@@ -91,6 +91,34 @@ class AnalysisResult:
         self.__items.append(item)
 
 
+class AnalysisResults( list ):
+    def __init__(self, iterable):
+        list.__init__(self, iterable)
+
+    def GetFilesHaveSensitives(self):
+        return [ sensitive for sensitive in self if bool( len(sensitive.GetItems()) ) ]
+
+    def GetNumberOfJsLinks(self) -> int:
+        return len( self )
+
+    def GetNumberOfFilesHaveSensitives(self) -> int:
+        ctr = 0
+
+        for result in self:
+            ctr += bool( len(result.GetItems()) )
+
+        return ctr
+
+    def GetNumberOfSensitives(self) -> int:
+        sensitives = 0
+
+        for items in [ result.GetItems() for result in self ]:
+            for item in items:
+                sensitives += len( item.GetData() )
+
+        return sensitives
+
+
 class Analyzer:
 
     def __init__(self, config: JsAnalyzerConfig) -> None:
@@ -113,11 +141,15 @@ class Analyzer:
         return result
 
     def Start(self) -> list:
+        crawler_cfg = self.__config.GetCrawlerConfig()
+
         with ThreadPoolExecutor(max_workers=self.__config.GetThreads()) as executor:
-            features = [ executor.submit(self.Analyze, jsLink) for jsLink in crawl( self.__config.GetCrawlerConfig() ).GetJsFiles() ]
+            features = [ 
+                executor.submit(self.Analyze, jsLink) for jsLink in ( crawl( crawler_cfg ).GetJsFiles() if crawler_cfg.isEnabled() else [ self.__config.GetTarget() ] )
+            ]
 
 
-        return [ feature.result() for feature in features ]
+        return AnalysisResults( feature.result() for feature in features )
 
     def __getjscontent__(self, jsLink):
         try:

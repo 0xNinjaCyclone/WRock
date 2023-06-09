@@ -32,10 +32,8 @@ def printScanResults(results: ScanResults, verbose = False):
 
 def printJsAnalyzerResults(results, verbose = False):
     Print.highlight("Js sensitive data :", endl="\n\n", startl="\n")
-    noSensitive = True
 
-    for result in [ r for r in results if len(r.GetItems()) != 0 ]:
-        noSensitive = False
+    for result in results.GetFilesHaveSensitives():
         Print.success(f"Js Link -> {result.GetJsLink()}")
 
         for item in result.GetItems():
@@ -44,8 +42,17 @@ def printJsAnalyzerResults(results, verbose = False):
 
             Print.success(f"Data => {data} - Platform => {extractor.GetPlatform()} - Key type => {extractor.GetKeyType()} - Regex => {extractor.GetExpression()}")
 
-    if noSensitive:
+    else:
         Print.fail("No sensitive data found !!!")
+
+    Print.highlight("All JsFiles :", verbose=verbose, endl="\n\n", startl="\n")
+    
+    for result in results:
+        Print.success(result.GetJsLink(), verbose=verbose)
+
+    Print.status("Total processed js files = {}".format( results.GetNumberOfJsLinks() ), startl="\n")
+    Print.status("Number of files that have sensitives = {}".format( results.GetNumberOfFilesHaveSensitives() ))
+    Print.status("Number of sensitives = {}".format( results.GetNumberOfSensitives() ))
 
 def printSubdomains(subdomains):
     Print.highlight("Subdomains :", endl="\n\n")

@@ -12,7 +12,7 @@ class JsAnalyzerReportInText(TxtOutput):
         line = "*" * 50
 
 
-        for result in [ r for r in results if len(r.GetItems()) != 0 ]:
+        for result in results.GetFilesHaveSensitives():
             TxtOutput.write(self, line)
             TxtOutput.write(self, f"JsLink:  {result.GetJsLink()}")
 

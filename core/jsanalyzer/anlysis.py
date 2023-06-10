@@ -111,8 +111,8 @@ class AnalysisResults( list ):
     def GetNumberOfSensitives(self) -> int:
         sensitives = 0
 
-        for items in [ result.GetItems() for result in self ]:
-            for item in items:
+        for result in self:
+            for item in result.GetItems():
                 sensitives += len( item.GetData() )
 
         return sensitives

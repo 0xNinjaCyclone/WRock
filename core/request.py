@@ -12,7 +12,7 @@ class HeadersTypeError(TypeError):
         TypeError.__init__(self, *args)
 
 
-class Headers:
+class Headers( dict ):
 
     class Parser:
 
@@ -57,27 +57,31 @@ class Headers:
             elif isinstance(headers, str):
                 rawHttpHeadersList = headers.split(';;')
 
+            else:
+                raise HeadersTypeError(f"{type(headers)} not expected")
+
             return '\n'.join(rawHttpHeadersList)
 
 
-    def __init__(self, headers = {}) -> None:
-        self.headers = headers
+    def __init__(self, __map = None, **kwargs):
+        dict.__init__(self, __map if bool(__map) else {}, **kwargs)
+        self.__set_defaults()
 
     def add(self, headname, headval):
         if not self.ishead(headname):
-            self.headers[headname] = headval
+            self[headname] = headval
 
-    def update(self, headname, headval):
-        self.headers[headname] = headval
+    def update2(self, headname, headval):
+        self[headname] = headval
 
     def remove(self, headname):
         if self.ishead(headname):
-            del self.headers[headname]
+            del self[headname]
 
     def ishead(self, headname):
-        return headname in self.headers.keys()
+        return headname in self
 
-    def GetAll(self):
+    def __set_defaults(self):
 
         self.add('User-Agent', 
                         'Mozilla/5.0 (Windows NT 10.0; rv:54.0) Gecko/20100101 Firefox/54.0'
@@ -92,7 +96,6 @@ class Headers:
         self.add('Upgrade-Insecure-Requests', '1')
         self.add('Connection', 'keep-alive')
 
-        return self.headers
 
 
 class Request:
@@ -117,7 +120,7 @@ class Request:
         return self.SendReq(self.session.post, **args)
 
     def SendReq(self, reqMethod, **args):
-        return reqMethod(self.url, params=self.params, data=self.data, headers=self.headers.GetAll(), **args)
+        return reqMethod(self.url, params=self.params, data=self.data, headers=self.headers, **args)
 
 
 class Get(Request):

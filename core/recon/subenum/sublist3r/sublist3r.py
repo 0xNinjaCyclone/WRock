@@ -107,7 +107,7 @@ class SearchEngineEnumerator(enumratorBase):
         url = self.get_url(query, page_no)
 
         try:
-            resp = self.session.get(url, headers=self.headers.GetAll(), timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -432,7 +432,7 @@ class NetcraftEnum(enumratorBase):
     def req(self, url, cookies=None):
         cookies = cookies or {}
         try:
-            resp = self.session.get(url, headers=self.headers.GetAll(), timeout=self.timeout, cookies=cookies)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout, cookies=cookies)
         except:
             resp = None
 
@@ -523,7 +523,7 @@ class DNSdumpster(enumratorBase):
 
     def req(self, req_method, url, params=None):
         params = params or {}
-        headers = dict(self.headers.GetAll())
+        headers = dict(self.headers)
         headers['Referer'] = self.base_url 
         try:
             if req_method == 'GET':
@@ -621,7 +621,7 @@ class ThreatCrowd(enumratorBase):
 
     def req(self, url):
         try:
-            resp = self.session.get(url, headers=self.headers.GetAll(), timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -668,7 +668,7 @@ class CrtSearch(enumratorBase):
 
     def req(self, url):
         try:
-            resp = self.session.get(url, headers=self.headers.GetAll(), timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception:
             resp = None
 
@@ -719,7 +719,7 @@ class PassiveDNS(enumratorBase):
 
     def req(self, url):
         try:
-            resp = self.session.get(url, headers=self.headers.GetAll(), timeout=self.timeout)
+            resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except:
             resp = None
 

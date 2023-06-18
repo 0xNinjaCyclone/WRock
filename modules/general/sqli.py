@@ -56,7 +56,7 @@ class SQLi(GeneralScanner):
         if not isfile(fileName):
             with open(fileName,'w+') as f:
                 req = self.GetRequester()
-                headers = req.headers.GetAll()
+                headers = req.headers
                 endpoint = self.GetEndPoint()
                 uri = endpoint.GetUri()
                 query = endpoint.GetQuery()

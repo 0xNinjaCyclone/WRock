@@ -152,7 +152,7 @@ class Analyzer:
 
     def __getjscontent__(self, jsLink) -> str:
         try:
-            response = requests.get(jsLink, headers=self.__config.GetHeaders().GetAll(), timeout=30)
+            response = requests.get(jsLink, headers=self.__config.GetHeaders(), timeout=30)
             retval   = response.text if response.ok else str()
         except:
             retval = str()

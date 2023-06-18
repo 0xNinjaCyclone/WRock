@@ -14,7 +14,7 @@ class WebCrawler(Crawler):
             config.GetDepth(),
             config.isSubsInScopeEnabled(),
             config.isInsecureEnabled(),
-            Headers.Parser.toRaw(config.GetHeaders().GetAll()),
+            Headers.Parser.toRaw(config.GetHeaders()),
             config.isGetStatusCodeEnabled(),
             config.isNoOutOfScopeEnabled()
         )

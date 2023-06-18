@@ -34,7 +34,7 @@ class Sonar(ReverseIPBase):
         url = self.get_url()
 
         try:
-            res = requests.get(url, headers=self.headers.GetAll(), timeout=self.timeout)
+            res = requests.get(url, headers=self.headers, timeout=self.timeout)
             if 'application/json' in res.headers.get("Content-Type"):
                 data = json.loads(res.text)
                 

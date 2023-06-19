@@ -2,6 +2,7 @@
 import yaml, os.path
 from core.config.jsanlyzer import JsAnalyzerConfig
 from core.jsanalyzer.anlysis import ExtractorsLoader
+from core.logger import Level
 from core.utils import *
 from core.config.builder import ConfigBuilder
 from core.request import Headers
@@ -22,9 +23,7 @@ class OptionsBuilder(ConfigBuilder):
         cfghandler.SetTarget(self.data.target)
         cfghandler.SetThreads(self.data.threads)
         cfghandler.SetHeaders(self.buildHeaders())
-        
-        if self.data.verbose:
-            cfghandler.enableVerbose()
+        cfghandler.SetVerbosity(self.buildVerbosity())
 
     def buildSharedEnumerationData(self, cfg: EnumerationConfig):
         self.buildSharedData(cfg)
@@ -37,6 +36,25 @@ class OptionsBuilder(ConfigBuilder):
 
         if self.data.recursive:
             cfg.enableRecursive()
+
+    def buildVerbosity(self):
+        v = Verbosity()
+
+        if self.data.verbose:
+            v.Enable()
+
+        level = self.data.level
+
+        if level == 1:
+            v.SetLevel(Level.CRITICAL)
+        elif level == 2:
+            v.SetLevel(Level.INFO)
+        elif level == 3:
+            v.SetLevel(Level.DEBUG)
+        else:
+            raise ValueError("Invalid verbosity level")
+
+        return v
 
     def buildSources(self):
         if self.data.sources:

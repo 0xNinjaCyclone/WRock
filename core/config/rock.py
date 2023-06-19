@@ -10,6 +10,7 @@ class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy):
         self.__mode       = None
         self.__output     = None
         self.__enumerator = None
+        self.__verbose    = None
 
     def SetMode(self, mode: RockMode):
         self.__mode = mode
@@ -28,3 +29,9 @@ class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy):
 
     def GetEnumeratorConfig(self):
         return self.__enumerator
+
+    def SetVerbosity(self, v: Verbosity):
+        self.__verbose = v
+
+    def GetVerbosity(self):
+        return self.__verbose

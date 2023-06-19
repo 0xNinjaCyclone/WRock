@@ -1,4 +1,5 @@
 
+from core.logger import *
 from core.scan.result import *
 from core.crawler.crawler import CrawlerResult
 from ui.cli.view import Color, Print
@@ -114,3 +115,41 @@ def printCrawlerResult(crawler_result: CrawlerResult, verbose = False):
     printCrawledJsFiles(crawler_result.GetJsFiles())
     printCrawledEmails(crawler_result.GetEmails())
     printCrawledTotals(crawler_result)
+
+def handleLogger(verbosity):
+    # Under dev ( need more improvement )
+    
+    logger = Logger()
+    v_level = verbosity.GetLevel()
+
+    while True:
+        record = logger.get()
+        l_level = record.GetLevel()
+
+
+        if l_level == Level.CRITICAL:
+            printRecord( record )
+
+        elif l_level == Level.INFO and v_level in ( Level.INFO, Level.DEBUG ):
+            printRecord( record )
+
+        elif l_level == Level.DEBUG and v_level == Level.DEBUG:
+            printRecord( record )
+
+
+        logger.task_done()
+
+def printRecord(record: Record):
+    msgtype = record.GetType()
+
+    if msgtype == MessageType.SUCCESS:
+        Print.success( record.GetMessage() )
+
+    elif msgtype == MessageType.STATUS:
+        Print.status( record.GetMessage() )
+
+    elif msgtype == MessageType.WARN:
+        Print.warn( record.GetMessage() )
+
+    elif msgtype == MessageType.ERROR:
+        Print.fail( record.GetMessage() )

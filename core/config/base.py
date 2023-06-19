@@ -3,12 +3,32 @@ from enum import Enum, auto
 from core.request import Headers
 
 
+class Verbosity:
+
+    def __init__(self) -> None:
+        self.__verbose = False
+        self.__level   = None
+
+    def Enable(self):
+        self.__verbose = True
+
+    def IsEnabled(self):
+        return self.__verbose
+
+    def SetLevel(self, level):
+        self.__level = level
+
+    def GetLevel(self):
+        return self.__level
+
+
 class Config:
     def __init__(self) -> None:
         self.__target  = None
         self.__threads = 1
         self.__headers = None
-        self.__verbose = False
+        self.__verbose = None
+        
 
     def SetTarget(self, target):
         self.__target = target
@@ -28,11 +48,12 @@ class Config:
     def GetHeaders(self):
         return self.__headers
 
-    def enableVerbose(self):
-        self.__verbose = True
+    def SetVerbosity(self, v: Verbosity):
+        self.__verbose = v
 
-    def isVerboseEnabled(self):
+    def GetVerbosity(self):
         return self.__verbose
+
 
 class Format(Enum):
     Text    = auto()

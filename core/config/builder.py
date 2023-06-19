@@ -13,6 +13,9 @@ class ConfigBuilder:
     def buildSharedEnumerationData(self, cfghandler: EnumerationConfig):
         pass
 
+    def buildVerbosity(self):
+        pass
+
     def buildMode(self):
         pass
 
@@ -68,6 +71,7 @@ class ConfigBuilder:
     def buildRock(self):
         rock = RockConfig()
         rock.SetMode(self.buildMode())
+        rock.SetVerbosity(self.buildVerbosity())
         mode = rock.GetMode()
         output = self.buildOutput()
         

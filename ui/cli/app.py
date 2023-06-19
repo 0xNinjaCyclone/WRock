@@ -1,5 +1,6 @@
 
-import os.path
+import os.path, threading
+from core.logger import Logger
 from ui.cli import builder, view, show
 from core.recon.subenum.enumerate import runEnumeration
 from core.scan.result import ScanResults
@@ -16,7 +17,7 @@ from core.output import Report, ReportWriter, Type
 
 def startScan(scanner_cfg):
     results = scan(scanner_cfg)
-    show.printScanResults(results, scanner_cfg.isVerboseEnabled())
+    show.printScanResults(results, scanner_cfg.GetVerbosity().IsEnabled())
     return results
 
 def startEnumeration(enum_cfg):
@@ -26,12 +27,12 @@ def startEnumeration(enum_cfg):
 
 def startCrawling(crawl_cfg):
     crawler_result = crawl(crawl_cfg)
-    show.printCrawlerResult(crawler_result, crawl_cfg.isVerboseEnabled())
+    show.printCrawlerResult(crawler_result, crawl_cfg.GetVerbosity().IsEnabled())
     return crawler_result
 
 def startJsAnalysis(jsanalyzer_cfg):
     results = do_analysis(jsanalyzer_cfg)
-    show.printJsAnalyzerResults(results, jsanalyzer_cfg.isVerboseEnabled())
+    show.printJsAnalyzerResults(results, jsanalyzer_cfg.GetVerbosity().IsEnabled())
     return results
 
 def writeReport(output, results, Report: Type[Report]):
@@ -44,6 +45,9 @@ def run(opts):
     output = config.GetOutputConfig()
     mode   = config.GetMode()
     rock_t = view.RockTime()
+    logger = Logger()
+    threading.Thread(target=show.handleLogger, args=( config.GetVerbosity(), ), daemon=True).start()
+
 
     if mode == Mode.Scan:
         results = startScan(config.GetScannerConfig())
@@ -75,7 +79,7 @@ def run(opts):
 
 
         # Display results
-        show.printScanResults(results, scanner_config.isVerboseEnabled())
+        show.printScanResults(results, scanner_config.GetVerbosity().IsEnabled())
 
         if output:
             view.Print.highlight("Write reports :", startl="\n")
@@ -107,3 +111,5 @@ def run(opts):
 
     else:
         view.Print.fail("This mode is not supported !!")
+
+    logger.join()

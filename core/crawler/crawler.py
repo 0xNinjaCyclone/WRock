@@ -22,6 +22,7 @@ class WebCrawler(Crawler):
     def Start(self) -> CrawlerResult:
         '''
             CrawlerResult methods:
+                Transform()     -> Transform the result to a dictionary
                 GetJsFiles()    -> a list of js urls files
                 GetEmails()     -> a list of crawled emails
                 GetEndPoints()  -> a list of dict that contains all endpoints
@@ -31,11 +32,16 @@ class WebCrawler(Crawler):
                                     "status_code": 200 
                                     "in_scope: True # indicates if the url in scope or not
                                     "m_type": "METHOD" # Get or Post ?
-                                    "params": {
+                                    "params": [
+                                        {
                                         "name": "param name",
                                         "value": "param value",
                                         "p_type": "param type" file or text or submit or what ?
-                                    }
+                                        },
+                                        {
+                                            
+                                        }
+                                    ]
                                 },
                                 {
 

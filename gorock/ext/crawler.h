@@ -72,7 +72,9 @@ static PyObject *CrawlerResult_GetEmailsAttr(CrawlerResult *self, void *closure)
 static PyObject *CrawlerResult_GetEndPoints(CrawlerResult *self, PyObject *Py_UNUSED(ignored));
 static PyObject *CrawlerResult_GetJsFiles(CrawlerResult *self, PyObject *Py_UNUSED(ignored));
 static PyObject *CrawlerResult_GetEmails(CrawlerResult *self, PyObject *Py_UNUSED(ignored));
+static PyObject *CrawlerResult_Transform(CrawlerResult *self, PyObject *Py_UNUSED(ignored));
 
+static PyObject *StorePyDataInNewList(PyObject *pObj);
 static PyObject *StoreParameterResult(Parameter **params);
 static PyObject *StoreEndPointsResult(EndPoint **endpoints);
 static PyObject *StoreCrawlerResult(RockRawlerResult *result);
@@ -124,6 +126,8 @@ static PyMethodDef CrawlerResult_methods[] = {
         "Return a list of js files"},
     {"GetEmails", (PyCFunction) CrawlerResult_GetEmails, METH_NOARGS,
         "Return a list of emails"},
+    {"Transform", (PyCFunction) CrawlerResult_Transform, METH_NOARGS,
+        "Transform the result to a dictionary"},
 
     {NULL}  /* Sentinel */
 };

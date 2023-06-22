@@ -443,6 +443,64 @@ static PyObject *CrawlerResult_GetEmails(CrawlerResult *self, PyObject *Py_UNUSE
     return self->emails;
 }
 
+static PyObject *CrawlerResult_Transform(CrawlerResult *self, PyObject *Py_UNUSED(ignored))
+{
+    PyObject *pDict, *pList;
+
+    /* Initialize our dictionary that hold the data */
+    if ( !(pDict = PyDict_New()) )
+    {
+        PyErr_SetString(PyExc_Exception, "an error occured when initializing the dict");
+        return NULL;
+    }
+
+    if ( !(pList = StorePyDataInNewList(self->endpoints)) ) return NULL;
+    if ( PyDict_SetItemString(pDict, "endpoints", pList) != 0 ) goto FAILED_TO_INSERT;
+
+    if ( !(pList = StorePyDataInNewList(self->jsFiles)) ) return NULL;
+    if ( PyDict_SetItemString(pDict, "jsFiles", pList) != 0 ) goto FAILED_TO_INSERT;
+
+    if ( !(pList = StorePyDataInNewList(self->emails)) ) return NULL;
+    if ( PyDict_SetItemString(pDict, "emails", pList) != 0 ) goto FAILED_TO_INSERT;
+
+    return pDict;
+
+    FAILED_TO_INSERT:
+        PyErr_SetString(PyExc_Exception, "an error occurred when inserting results to the dict");
+        return NULL;
+}
+
+static PyObject *StorePyDataInNewList(PyObject *pObj)
+{
+    PyObject *pResult;
+
+    /* Check if the object is valid */
+    if ( !PyList_Check(pObj) )
+    {
+        PyErr_SetString(PyExc_TypeError, "[StorePyDataInNewList] The object must be a list");
+        return NULL;
+    }
+
+    /* Initialize a new list that hold the result */
+    if ( !(pResult = PyList_New(0)) )
+    {
+        PyErr_SetString(PyExc_Exception, "[StorePyDataInNewList] an error occured when initializing the result list");
+        return NULL;
+    }
+
+    for (Py_ssize_t lIdx = 0; lIdx < PyList_Size(pObj); lIdx++)
+    {
+        if ( PyList_Append(pResult, PyList_GetItem(pObj, lIdx)) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when appending the result to the list");
+            return NULL;
+        }
+    }
+
+    return pResult;
+    
+}
+
 static PyObject *StoreParameterResult(Parameter **params)
 {
     /* a list of params */
@@ -468,16 +526,32 @@ static PyObject *StoreParameterResult(Parameter **params)
         }
 
         /* Insert parameter name to the dict */
-        PyDict_SetItemString(pParam, "name", PyUnicode_FromString( ( *params )->name ));
+        if ( PyDict_SetItemString(pParam, "name", PyUnicode_FromString( ( *params )->name )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting parameter name to the dict");
+            return NULL;
+        }
 
         /* Insert parameter value to the dict */
-        PyDict_SetItemString(pParam, "value", PyUnicode_FromString( ( *params )->value ));
+        if ( PyDict_SetItemString(pParam, "value", PyUnicode_FromString( ( *params )->value )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting parameter value to the dict");
+            return NULL;
+        }
 
         /* Insert parameter type to the dict */
-        PyDict_SetItemString(pParam, "p_type", PyUnicode_FromString( ( *params )->p_type ));
+        if ( PyDict_SetItemString(pParam, "p_type", PyUnicode_FromString( ( *params )->p_type )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting parameter type to the dict");
+            return NULL;
+        }
 
         /* Insert the parameter dict to the parameter list */
-        PyList_Append(pParamList, pParam);
+        if ( PyList_Append(pParamList, pParam) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when appending the param dict to the params list");
+            return NULL;
+        }
     }
 
     return pParamList;
@@ -508,22 +582,46 @@ static PyObject *StoreEndPointsResult(EndPoint **endpoints)
         }
 
         /* Insert url to the endpoint dict */
-        PyDict_SetItemString(pData, "url", PyUnicode_FromString( ( *endpoints )->url ));
+        if ( PyDict_SetItemString(pData, "url", PyUnicode_FromString( ( *endpoints )->url )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting url to the dict");
+            return NULL;
+        }
 
         /* Insert status code to the endpoint dict */
-        PyDict_SetItemString(pData, "status_code", PyLong_FromLong( ( *endpoints )->nStatusCode ));
+        if ( PyDict_SetItemString(pData, "status_code", PyLong_FromLong( ( *endpoints )->nStatusCode )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting status code to the dict");
+            return NULL;
+        }
 
         /* Insert inScope flag to the endpoint dict */
-        PyDict_SetItemString(pData, "in_scope", PyBool_FromLong( ( *endpoints )->bInScope ));
+        if ( PyDict_SetItemString(pData, "in_scope", PyBool_FromLong( ( *endpoints )->bInScope )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting inscope flag to the dict");
+            return NULL;
+        }
 
         /* Insert method type to the endpoint dict */
-        PyDict_SetItemString(pData, "m_type", PyUnicode_FromString( ( *endpoints )->m_type ));
+        if ( PyDict_SetItemString(pData, "m_type", PyUnicode_FromString( ( *endpoints )->m_type )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting method type to the dict");
+            return NULL;
+        }
 
         /* Insert the parameter list to the dict */
-        PyDict_SetItemString(pData, "params", StoreParameterResult( ( *endpoints )->params ));
+        if ( PyDict_SetItemString(pData, "params", StoreParameterResult( ( *endpoints )->params )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting params to the dict");
+            return NULL;
+        }
 
         /* Insert the endpoint dict to the endpoints list */
-        PyList_Append(pDataList, pData);
+        if ( PyList_Append(pDataList, pData) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when appending endpoint dict to the list");
+            return NULL;
+        }
     }
 
     return pDataList;

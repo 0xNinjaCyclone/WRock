@@ -14,11 +14,11 @@ typedef struct {
 } Parameter;
 
 typedef struct {
-	char      *url;
-	int       nStatusCode;
-	char      bInScope; // boolean value
-	char      *m_type;
-	Parameter **params;
+	char          *url;
+	int           nStatusCode;
+	unsigned char bInScope; // boolean value
+	char          *m_type;
+	Parameter     **params;
 } EndPoint;
 
 typedef struct {
@@ -390,8 +390,8 @@ func GoStringsToC(gostrings []string) **C.char {
 	// convert the C array to a Go Array so we can index it
 	a := (*[1 << 28]*C.char)(unsafe.Pointer(cArray))[:size:size]
 
-	for idx, link := range gostrings {
-		a[idx] = C.CString(link)
+	for idx, str := range gostrings {
+		a[idx] = C.CString(str)
 	}
 
 	// put a nul-terminator in the end of array
@@ -438,8 +438,8 @@ func GoEndpointsToC(endpoint []EndPoint) **C.EndPoint {
 		pData := (*C.EndPoint)(C.malloc(C.size_t(unsafe.Sizeof(C.EndPoint{}))))
 		pData.url = C.CString(data.url)
 		pData.nStatusCode = C.int(data.status)
-		pData.bInScope = C.char(
-			func() int8 {
+		pData.bInScope = C.uchar(
+			func() uint8 {
 				if data.in_scope {
 					return 1
 				} else {

@@ -1,6 +1,62 @@
 
 #include "Subfinder.h"
 
+
+static int SubFinderResult_init(SubFinderResult *self, PyObject *args, PyObject* kwds)
+{
+    /* Initialize our parent */
+    if ( PyList_Type.tp_init((PyObject *) self, args, kwds) < 0 )
+        return -1;
+
+    self->lNumberOfSubdomains = 0;
+
+    return 0;
+}
+
+static PyObject *SubFinderResult_GetNumberOfSubdomains(SubFinderResult *self, PyObject *Py_UNUSED(ignored))
+{
+    return PyLong_FromLong( self->lNumberOfSubdomains );
+}
+
+static PyObject *SubFinderResult_Transform(SubFinderResult *self, PyObject *Py_UNUSED(ignored))
+{
+    PyObject *pDict, *pList;
+
+    /* Initialize our dictionary that hold the data */
+    if ( !(pDict = PyDict_New()) )
+    {
+        PyErr_SetString(PyExc_Exception, "an error occured when initializing the dict");
+        return NULL;
+    }
+
+    /* Initialize the subdomains list */
+    if ( !(pList = PyList_New(0)) )
+    {
+        PyErr_SetString(PyExc_Exception, "an error occured when initializing the subdomains list");
+        return NULL;
+    }
+
+    for (Py_ssize_t lIdx = 0; lIdx < self->lNumberOfSubdomains; lIdx++)
+    {
+        if ( PyList_Append(pList, PyObject_CallMethod( (PyObject *) self, "__getitem__", "n", lIdx )) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when appending results to the list");
+            return NULL;
+        }
+    }
+
+    /* Insert the subdomains list to the dict */
+    if ( PyDict_SetItemString(pDict, "subdomains", pList) != 0 )
+    {
+        PyErr_SetString(PyExc_Exception, "an error occurred when inserting subdomains to the dict");
+        return NULL;
+    }
+
+    return pDict;
+    
+}
+
+
 static int SubFinder_traverse(SubFinder *self, visitproc visit, void *arg)
 {
     Py_VISIT(self->domain);
@@ -361,13 +417,47 @@ static PyObject *SubFinder_Version(SubFinder *self, PyObject *Py_UNUSED(ignored)
     return py_version;
 }
 
+static PyObject *StoreSubFinderResult(char **results)
+{
+    PyObject *pObj, *pResult;
+
+    /* Check if we can create an instance from our type or not */
+    if ( !PyCallable_Check(pObj = (PyObject *)&SubFinderResultType) )
+    {
+        PyErr_SetString(PyExc_Exception, "SubFinderResultType isn't callable");
+        return NULL;
+    }
+    
+    /* Create a python instance of SubFinderResult class */
+    pResult = PyObject_CallObject(pObj, NULL);
+
+    if ( results && *results ) 
+    {
+        do
+        {
+            if ( !PyObject_CallMethod(pResult, "append", "s", *results) )
+            {
+                PyErr_SetString(PyExc_Exception, "an error occurred when appending a result to the list");
+                return NULL;
+            }
+
+            /* Count the number of subdomains */
+            ( (SubFinderResult *) pResult )->lNumberOfSubdomains++;
+
+        } while ( *( ++results ) );
+        
+    }
+
+    return pResult;
+}
+
 static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) {
 
     /* subdomains container */
     char **results;
 
-    /* declare a python list */
-    PyObject *pyresult = NULL; 
+    /* SubFinderResult object */
+    PyObject *pResult = NULL; 
 
     /* Start Enumeration */
     if(!(results = SubFinderStart(
@@ -380,12 +470,12 @@ static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored)) 
 
 
     /* Store data in a python list */
-    pyresult = StoreResults(results);
+    pResult = StoreSubFinderResult(results);
     
     /* free allocation of results */
     FreeMemory(results);
 
-    return pyresult; 
+    return pResult; 
 }
 
 
@@ -396,11 +486,26 @@ PyMODINIT_FUNC PyInit_subfinder(void)
     if (PyType_Ready(&SubFinderType) < 0)
         return NULL;
 
+    if (PyType_Ready(&SubFinderResultType) < 0)
+        return NULL;
+
     m = PyModule_Create(&subfindermodule);
     if (m == NULL)
         return NULL;
 
     Py_INCREF(&SubFinderType);
-    PyModule_AddObject(m, "SubFinder", (PyObject *) &SubFinderType);
+    Py_INCREF(&SubFinderResultType);
+
+    if (
+        PyModule_AddObject(m, "SubFinder", (PyObject *) &SubFinderType) <0 ||
+        PyModule_AddObject(m, "SubFinderResult", (PyObject *) &SubFinderResultType) < 0
+    )
+    {
+        Py_DECREF(&SubFinderType);
+        Py_DECREF(&SubFinderResultType);
+        Py_DECREF(m);
+    }
+    
+    
     return m;
 }

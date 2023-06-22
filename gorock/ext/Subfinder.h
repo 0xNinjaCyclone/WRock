@@ -14,6 +14,13 @@ typedef struct
 
 } SubFinder;
 
+/* This type inherits from the List type */
+typedef struct
+{
+    PyListObject super;
+    Py_ssize_t lNumberOfSubdomains;
+} SubFinderResult;
+
 /* Needed by Python VM */
 static int SubFinder_traverse(SubFinder *self, visitproc visit, void *arg);
 static int SubFinder_clear(SubFinder *self);
@@ -42,6 +49,15 @@ static PyObject *SubFinder_SetProperty(SubFinder *self, PyObject *args);
 static PyObject *SubFinder_GetProperty(SubFinder *self, PyObject *args);
 static PyObject *SubFinder_Version(SubFinder *self, PyObject *Py_UNUSED(ignored));
 static PyObject *SubFinder_Start(SubFinder *self, PyObject *Py_UNUSED(ignored));
+
+/* SubFinderResult -> functions needed by Python VM */
+static int SubFinderResult_init(SubFinderResult *self, PyObject *args, PyObject* kwds);
+
+/* SubFinderResult Methods */
+static PyObject *SubFinderResult_GetNumberOfSubdomains(SubFinderResult *self, PyObject *Py_UNUSED(ignored));
+static PyObject *SubFinderResult_Transform(SubFinderResult *self, PyObject *Py_UNUSED(ignored));
+
+static PyObject *StoreSubFinderResult(char **results);
 
 /* Initiate the module */
 PyMODINIT_FUNC PyInit_subfinder(void);
@@ -77,6 +93,13 @@ static PyMethodDef SubFinder_methods[] = {
     {NULL}  /* Sentinel */
 };
 
+static PyMethodDef SubFinderResult_methods[] = {
+    {"GetLength", (PyCFunction) SubFinderResult_GetNumberOfSubdomains, METH_NOARGS,
+        "Get Number Of Subdomains"},
+    {"Transform", (PyCFunction) SubFinderResult_Transform, METH_NOARGS,
+        "Transform the result to a dictionary"},
+    {NULL}  /* Sentinel */
+};
 
 static PyTypeObject SubFinderType = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -92,6 +115,18 @@ static PyTypeObject SubFinderType = {
     .tp_clear = (inquiry) SubFinder_clear,
     .tp_methods = SubFinder_methods,
     .tp_getset = SubFinder_getsetters,
+};
+
+static PyTypeObject SubFinderResultType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "subfinder.SubFinderResult",
+    .tp_doc = "SubFinder Result",
+    .tp_basicsize = sizeof(SubFinderResult),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_init = (initproc) SubFinderResult_init,
+    .tp_methods = SubFinderResult_methods,
+    .tp_base = &PyList_Type, /* <------- Inherit from the List type */
 };
 
 

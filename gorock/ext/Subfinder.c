@@ -202,7 +202,7 @@ static PyObject *SubFinder_GetDomain(SubFinder *self, void *closure)
 static int SubFinder_SetThreads(SubFinder *self, PyObject *value, void *closure) 
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the threads attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the threads attribute"); 
         return -1;
     }
 

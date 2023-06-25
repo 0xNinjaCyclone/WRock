@@ -176,13 +176,13 @@ static void SubFinder_dealloc(SubFinder *self)
 static int SubFinder_SetDomain(SubFinder *self, PyObject *value, void *closure) 
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the SubFinder_SetDomain attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the domain attribute");
         return -1;
     }
 
     if (!PyUnicode_Check(value)) {
         PyErr_SetString(PyExc_TypeError,
-                        "The SubFinder_SetDomain attribute value must be a string");
+                        "The domain attribute value must be a string");
         return -1;
     }
 
@@ -202,13 +202,13 @@ static PyObject *SubFinder_GetDomain(SubFinder *self, void *closure)
 static int SubFinder_SetThreads(SubFinder *self, PyObject *value, void *closure) 
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the SubFinder_SetThreads attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the threads attribute");
         return -1;
     }
 
     if (!PyLong_Check(value)) {
         PyErr_SetString(PyExc_TypeError,
-                        "The SubFinder_SetThreads attribute value must be an int");
+                        "The threads attribute value must be an int");
         return -1;
     }
 
@@ -228,13 +228,13 @@ static PyObject *SubFinder_GetThreads(SubFinder *self, void *closure)
 static int SubFinder_SetTimeout(SubFinder *self, PyObject *value, void *closure) 
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the SubFinder_SetTimeout attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the timeout attribute");
         return -1;
     }
 
     if (!PyLong_Check(value)) {
         PyErr_SetString(PyExc_TypeError,
-                        "The SubFinder_SetTimeout attribute value must be an int");
+                        "The timeout attribute value must be an int");
         return -1;
     }
 
@@ -254,13 +254,13 @@ static PyObject *SubFinder_GetTimeout(SubFinder *self, void *closure)
 static int SubFinder_SetMaxEnumerationTime(SubFinder *self, PyObject *value, void *closure) 
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the SubFinder_SetMaxEnumerationTime attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the maxEnumerationTime attribute");
         return -1;
     }
 
     if (!PyLong_Check(value)) {
         PyErr_SetString(PyExc_TypeError,
-                        "The SubFinder_SetMaxEnumerationTime attribute value must be an int");
+                        "The maxEnumerationTime attribute value must be an int");
         return -1;
     }
 

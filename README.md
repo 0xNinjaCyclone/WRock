@@ -1,11 +1,24 @@
-# WRock
+<h1 align="center">WRock</h1>
 
-![Image](imgs/logo.png)
+
+<p align="center">
+  <img src="imgs/logo.png" alt="Logo">
+</p>
+
+> WRock is a professional and powerful tool specifically crafted for modern web security. It provides comprehensive capabilities for advanced web scanning, intelligent web crawling, and thorough subdomain enumeration.
 
 ## Features
-- Web scanning
-- Web crawling
-- Subdomain enumeration
+
+Experience the power and versatility of WRock, a modern web security tool designed to empower your assessments:
+
+* 🔒 **Web Scanning**: Uncover vulnerabilities and enhance security with an advanced scanning capabilities. Identify potential risks and weaknesses in web applications to fortify your defenses.
+
+* 🌐 **Intelligent Web Crawling**: Explore the intricacies of website structures, uncover hidden paths, and gather valuable information. Our intelligent crawling mechanism provides comprehensive visibility into web assets.
+
+* 🌍 **Subdomain Enumeration**: Expand your attack surface by discovering associated domains and services with a modified version of Sublist3r.
+
+* 🔍 **Advanced Analysis**: Utilize the built-in analyzer module to perform comprehensive analysis of JavaScript files, identifying potential vulnerabilities and security issues. Generate detailed reports with the integrated report writer for effective documentation.
+
 
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)
@@ -13,6 +26,9 @@
 - [RockRawler](https://github.com/abdallah-elsharif/RockRawler)
 
 ## Installation
+
+**Get started with WRock by following these steps:**
+
 ```
 git clone https://github.com/abdallah-elsharif/WRock.git
 cd WRock
@@ -64,7 +80,7 @@ sudo ./install.sh
 
 
 ```
-help menu
+**Help menu**
 ```
 ┌──(user㉿hostname)-[~/path/to/WRock]
 └─$ python3 webrock.py -h
@@ -76,8 +92,8 @@ Options:
   -h, --help            show this help message and exit
   -t TARGET, --target=TARGET
                         Enter The Target Url|Domain
-  -m MODE, --mode=MODE  mode [r|recon - s|scan - c|crawl] (default mode =
-                        scan)
+  -m MODE, --mode=MODE  mode [r|recon - s|scan - c|crawl - a|jsanalyze]
+                        (default mode = scan)
   -T THREADS, --threads=THREADS
                         Set Number Of Threads (default = 5)
   -H HEADERS, --headers=HEADERS
@@ -95,6 +111,8 @@ Options:
   -o OUTPUT, --output=OUTPUT
                         Enter FileName for save output in it
   -v, --verbose         Increase verbosity
+  -l LEVEL, --level=LEVEL
+                        verbosity level [1-3]
   -V, --version         Show version
 
   Modules options:
@@ -110,7 +128,8 @@ Options:
     --depth=DEPTH       Depth to crawl. (default = 5)
     --subs              Include subdomains in crawling
     --insecure          Disable TLS verification
-    --no-crawl          Don't use crawl to scan
+    --no-crawl          Don't use crawler for scanning or analysis js files
+                        (use the main url)
     --get-sc            Get status code of crawled urls
     --no-outofscope     Exclude out of scope pages
 
@@ -128,29 +147,45 @@ Options:
     --sublist3r         Use sublist3r
     --revip             Reverse IPs all collected subdomains
 
+  Js Analyzer options:
+    --by-platform=BY_PLATFORMS
+                        Use specific extractors by comma-sperated platforms
+                        EX(Google,GitHub,General)
+    --by-key=BY_KEYS    Use specific extractors by comma-sperated keys type
+                        EX(APIKey,OAuth,JWT)
 
 
 ```
-Perform scanning
+**Perform scanning**
 ```
 python3 webrock.py -t http://target.com/
 python3 webrock.py -t http://target.com/ -i "-xss" # exclude xss
 ```
 
-Perform subdomain enumeration
+**Perform subdomain enumeration**
 ```
 python3 webrock.py -t target.com -m recon
 python3 webrock.py -t target.com -m r --sublist3r 
 ```
 
-Perform both (collect subdomains and scan each subdomain)
+**Perform both** (collect subdomains and scan each subdomain)
 ```
 python3 webrock.py -t target.com -m r+s
 python3 webrock.py -t target.com -m r+s -o results.txt
 ```
 
-Perform crawling
+**Perform crawling**
 ```
 python3 webrock.py -t http://target.com/ -m crawl
 python3 webrock.py -t http://target.com/ -m c --depth 2 --subs -o urls.txt
 ```
+
+## Important Notes
+
+* Please Note: WRock is currently under development, and additional features and enhancements will be added in future updates. We appreciate your understanding and patience as we continue to improve and expand the capabilities of the tool.
+  
+* WRock is intended for educational and security research purposes only. By using this tool, you acknowledge that you are responsible for complying with all applicable laws and regulations. The developers and contributors of WRock assume no liability and are not responsible for any misuse or damage caused by the tool. Use at your own risk.
+  
+* Contact me for any questions in my [+] email: elsharifabdallah53@gmail.com | facebook account: [+] https://www.facebook.com/abdallah.elsharif07
+
+

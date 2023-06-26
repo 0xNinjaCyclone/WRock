@@ -179,6 +179,12 @@ python3 webrock.py -t http://target.com/ -m crawl
 python3 webrock.py -t http://target.com/ -m c --depth 2 --subs -o urls.txt
 ```
 
+**Perform analysis** (collect all js files and extract sensitive data)
+```
+python3 webrock.py -t https://target.com/ -m jsanalyze
+python3 webrock.py -t https://target.com/ -m a --by-platform Google,GitHub,General
+```
+
 ## Important Notes
 
 * Please Note: WRock is currently under development, and additional features and enhancements will be added in future updates. We appreciate your understanding and patience as we continue to improve and expand the capabilities of the tool.

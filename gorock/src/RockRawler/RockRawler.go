@@ -397,6 +397,13 @@ func GoStringsToC(gostrings []string) **C.char {
 	// put a nul-terminator in the end of array
 	a[size-1] = nil
 
+	// Deallocate memory for individual C strings
+	defer func() {
+		for idx := range gostrings {
+			C.free(unsafe.Pointer(a[idx]))
+		}
+	}()
+
 	return (**C.char)(cArray)
 }
 
@@ -420,6 +427,16 @@ func GoParameterToC(params []Parameter) **C.Parameter {
 
 	// Put a nul-terminator in the end of array
 	a[size-1] = nil
+
+	// Deallocate memory for individual C Parameter structs
+	defer func() {
+		for idx := range params {
+			C.free(unsafe.Pointer(a[idx].name))
+			C.free(unsafe.Pointer(a[idx].value))
+			C.free(unsafe.Pointer(a[idx].p_type))
+			C.free(unsafe.Pointer(a[idx]))
+		}
+	}()
 
 	return (**C.Parameter)(cArray)
 }
@@ -455,8 +472,19 @@ func GoEndpointsToC(endpoint []EndPoint) **C.EndPoint {
 	// Put a nul-terminator in the end of array
 	a[size-1] = nil
 
+	// Deallocate memory for individual C EndPoint structs
+	defer func() {
+		for idx := range endpoint {
+			C.free(unsafe.Pointer(a[idx].url))
+			C.free(unsafe.Pointer(a[idx].m_type))
+			C.free(unsafe.Pointer(a[idx].params))
+			C.free(unsafe.Pointer(a[idx]))
+		}
+	}()
+
 	return (**C.EndPoint)(cArray)
 }
+
 
 func GoResultToC(result RockRawlerResult) *C.RockRawlerResult {
 	pResult := (*C.RockRawlerResult)(C.malloc(C.size_t(unsafe.Sizeof(C.RockRawlerResult{}))))

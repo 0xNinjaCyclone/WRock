@@ -11,14 +11,13 @@
 
 Experience the power and versatility of WRock, a modern web security tool designed to empower your assessments:
 
-* 🔒 **Web Scanning**: Uncover vulnerabilities and enhance security with an advanced scanning capabilities. Identify potential risks and weaknesses in web applications to fortify your defenses.
+* 🔒 **Web Scanning**: Harness the power of WRock's advanced scanning capabilities to perform comprehensive assessments of web applications. Automate the scanning process to identify potential security weaknesses and ensure the integrity of your web assets. With WRock, you can confidently evaluate the security posture of your applications and proactively protect against potential threats.
 
 * 🌐 **Intelligent Web Crawling**: Explore the intricacies of website structures, uncover hidden paths, and gather valuable information. Our intelligent crawling mechanism provides comprehensive visibility into web assets.
 
-* 🌍 **Subdomain Enumeration**: Expand your attack surface by discovering associated domains and services with a modified version of Sublist3r.
+* 🌍 **Enumeration**: Discover associated domains and services using WRock's advanced subdomain enumeration capabilities. Leverage the combined power of Subfinder and Sublist3r to expand your attack surface, identify potential entry points, and uncover hidden assets. Gain comprehensive visibility and enhance your assessment with thorough subdomain enumeration.
 
 * 🔍 **Advanced Analysis**: Utilize the built-in analyzer module to perform comprehensive analysis of JavaScript files, identifying potential vulnerabilities and security issues. Generate detailed reports with the integrated report writer for effective documentation.
-
 
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)

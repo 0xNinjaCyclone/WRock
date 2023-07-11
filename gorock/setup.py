@@ -15,6 +15,10 @@ def main():
                 Extension(
                     "subfinder", ["ext/Subfinder.c", "ext/gorock.c"],
                     extra_link_args = ["ext/subfinder.a"]
+                ),
+                Extension(
+                    "ffuf", ["ext/fuzzer.c", "ext/gorock.c"],
+                    extra_link_args = ["ext/ffuf.a"]
                 )
           ])
 

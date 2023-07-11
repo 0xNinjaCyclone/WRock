@@ -9,9 +9,11 @@ __pycache__/
 # C extensions header files
 RockRawler.h
 subfinder.h
+ffuf.h
 
 # Distribution / packaging
 build/
+ui/gui
 
 # Visual studio code files
 .vscode

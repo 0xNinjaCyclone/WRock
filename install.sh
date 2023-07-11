@@ -225,6 +225,32 @@ BuildSubFinder() {
     fi
 }
 
+IsFuzzerExtInstalled() {
+    isFileExist "$GoRockPath/ext/ffuf.a" || isFileExist "$GoRockPath/ext/ffuf.h"
+}
+
+BuildFuzzer() {
+    print_status "Build Fuzzer"
+
+    if ! IsFuzzerExtInstalled; then
+        cd "$GoRockPath/src/ffuf"
+        go get &>/dev/null
+        go build -o ../../ext -buildmode=c-archive &>/dev/null
+        cd "$CurrPath"
+
+        if IsFuzzerExtInstalled; then
+            print_succeed "Fuzzer built successfully"
+
+        else
+            print_fail "Fuzzer Build Failed"
+            exit 1
+        fi
+
+    else
+        print_indicate "Fuzzer has already been built before"
+    fi
+}
+
 SetupGoRockExtensions() {
     print_status "Setup GoRock Framework Extensions"
 
@@ -251,6 +277,7 @@ BuildGoRockFramework() {
     print_status "Build GoRock Framework"
     BuildRockRawler
     BuildSubFinder
+    BuildFuzzer
     SetupGoRockExtensions
 }
 

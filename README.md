@@ -18,7 +18,7 @@ Experience the power and versatility of WRock, a modern web security tool design
 * 🌍 **Enumeration**: Discover associated domains and services using WRock's advanced subdomain enumeration capabilities. Leverage the combined power of Subfinder and Sublist3r to expand your attack surface, identify potential entry points, and uncover hidden assets. Gain comprehensive visibility and enhance your assessment with thorough subdomain enumeration.
 
 * 🔍 **Advanced Analysis**: Utilize the built-in analyzer module to perform comprehensive analysis of JavaScript files, identifying potential vulnerabilities and security issues. Generate detailed reports with the integrated report writer for effective documentation.
-* 🎯 **Enhanced Fuzzer**: WRock integrates the powerful functionality of ffuf to enhance web application fuzzing capabilities. Utilize customizable payloads, specify target URLs with the FUZZ placeholder, and leverage wordlists to efficiently fuzz web applications. Uncover injection flaws, misconfigurations, sensitive information disclosures, and more with an optimized and efficient fuzzing engine.
+* 🎯 **Enhanced Fuzzer**: Take your web application fuzzing to the next level with WRock's integrated ffuf functionality. Customize and fuzz not only URLs but also headers, cookies, post data, and more. Uncover hidden vulnerabilities and weaknesses lurking in different parts of your application. Strengthen your security defenses with WRock's optimized and efficient fuzzing engine. Stay one step ahead of potential threats and ensure the robustness of your web applications.
 
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)

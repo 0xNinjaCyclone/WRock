@@ -96,7 +96,7 @@ func Init(
 	pFfuf.filters = make([]Filter, 0)
 
 	// prepare the default config options
-	pFfuf.opts = ffuf.NewConfigOptions()
+	pFfuf.opts, _ = ffuf.ReadDefaultConfig()
 
 	// set params
 	SetOpts(pFfuf.opts, url, headers, wordlists, threads, recursion, depth, timeout)

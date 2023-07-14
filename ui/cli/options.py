@@ -41,8 +41,8 @@ def register_jsanalyzer_options(parser):
 def register_fuzzer_options(parser):
     fuzzer_options = OptionGroup(parser,"Fuzzer options")
     fuzzer_options.add_option("--wordlists", dest="wordlists", help="Wordlist file path and (optional) keyword separated by colon. eg. '/path/to/wordlist:KEYWORD'")
-    fuzzer_options.add_option("--matchers", dest="matchers", help="comma-sperated matchers in this format 'matcherName:MatcherValue,...' EX(mc:all)")
-    fuzzer_options.add_option("--filters", dest="filters", help="comma-sperated filters in this format 'filterName:filterValue,...'")
+    fuzzer_options.add_option("--matchers", dest="matchers", help="dash-sperated matchers in this format 'matcherName:MatcherValue1,MatcherValue2-...' EX(mc:all)")
+    fuzzer_options.add_option("--filters", dest="filters", help="dash-sperated filters in this format 'filterName:filterValue1,filterValue2-...'")
     fuzzer_options.add_option("--input-mode", dest="inputMode", help="Multi-wordlist operation mode. Available modes: clusterbomb, pitchfork, sniper (default: clusterbomb)")
     fuzzer_options.add_option("--matcher-mode", dest="matcherMode", help="Matcher set operator. Either of: and, or (default: or)")
     fuzzer_options.add_option("--fuzz-recursion", action="store_true", dest="frecursion", help="Scan recursively. Only FUZZ keyword is supported.")

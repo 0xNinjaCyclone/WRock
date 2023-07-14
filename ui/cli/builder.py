@@ -278,7 +278,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.matchers:
             matchers = {}
 
-            for matcher in self.data.matchers.split(','):
+            for matcher in self.data.matchers.split('-'):
                 matcher = matcher.split(':') if ':' in matcher else [ matcher, '' ]
                 matchers[ matcher[0] ] = matcher[1]
 
@@ -287,7 +287,7 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.filters:
             filters = {}
 
-            for filter in self.data.filters.split(','):
+            for filter in self.data.filters.split('-'):
                 filter = filter.split(':') if ':' in filter else [ filter, '' ]
                 filters[ filter[0] ] = filter[1]
 

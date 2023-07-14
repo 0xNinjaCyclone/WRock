@@ -18,11 +18,13 @@ Experience the power and versatility of WRock, a modern web security tool design
 * 🌍 **Enumeration**: Discover associated domains and services using WRock's advanced subdomain enumeration capabilities. Leverage the combined power of Subfinder and Sublist3r to expand your attack surface, identify potential entry points, and uncover hidden assets. Gain comprehensive visibility and enhance your assessment with thorough subdomain enumeration.
 
 * 🔍 **Advanced Analysis**: Utilize the built-in analyzer module to perform comprehensive analysis of JavaScript files, identifying potential vulnerabilities and security issues. Generate detailed reports with the integrated report writer for effective documentation.
+* 🎯 **Enhanced Fuzzer**: WRock integrates the powerful functionality of ffuf to enhance web application fuzzing capabilities. Utilize customizable payloads, specify target URLs with the FUZZ placeholder, and leverage wordlists to efficiently fuzz web applications. Uncover injection flaws, misconfigurations, sensitive information disclosures, and more with an optimized and efficient fuzzing engine.
 
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)
 - [Subfinder](https://github.com/projectdiscovery/subfinder)
 - [RockRawler](https://github.com/abdallah-elsharif/RockRawler)
+- [Ffuf](https://github.com/ffuf/ffuf)
 
 ## Installation
 
@@ -91,8 +93,8 @@ Options:
   -h, --help            show this help message and exit
   -t TARGET, --target=TARGET
                         Enter The Target Url|Domain
-  -m MODE, --mode=MODE  mode [r|recon - s|scan - c|crawl - a|jsanalyze]
-                        (default mode = scan)
+  -m MODE, --mode=MODE  mode [r|recon - s|scan - c|crawl - a|jsanalyze -
+                        f|fuzz] (default mode = scan)
   -T THREADS, --threads=THREADS
                         Set Number Of Threads (default = 5)
   -H HEADERS, --headers=HEADERS
@@ -153,6 +155,28 @@ Options:
     --by-key=BY_KEYS    Use specific extractors by comma-sperated keys type
                         EX(APIKey,OAuth,JWT)
 
+  Fuzzer options:
+    --wordlists=WORDLISTS
+                        Wordlist file path and (optional) keyword separated by
+                        colon. eg. '/path/to/wordlist:KEYWORD'
+    --matchers=MATCHERS
+                        comma-sperated matchers in this format
+                        'matcherName:MatcherValue,...' EX(mc:all)
+    --filters=FILTERS   comma-sperated filters in this format
+                        'filterName:filterValue,...'
+    --input-mode=INPUTMODE
+                        Multi-wordlist operation mode. Available modes:
+                        clusterbomb, pitchfork, sniper (default: clusterbomb)
+    --matcher-mode=MATCHERMODE
+                        Matcher set operator. Either of: and, or (default: or)
+    --fuzz-recursion    Scan recursively. Only FUZZ keyword is supported.
+    --recursion-depth=FDEPTH
+                        Maximum recursion depth.
+    --recursion-strategy=FSTRATEGY
+                        Recursion strategy: 'default' for a redirect based,
+                        and 'greedy' to recurse on all matches (default:
+                        default)
+
 
 ```
 **Perform scanning**
@@ -184,7 +208,11 @@ python3 webrock.py -t http://target.com/ -m c --depth 2 --subs -o urls.txt
 python3 webrock.py -t https://target.com/ -m jsanalyze
 python3 webrock.py -t https://target.com/ -m a --by-platform Google,GitHub,General
 ```
-
+**Perform Fuzzing**
+```
+python3 webrock.py -t https://target.com/FUZZ -m fuzz --wordlists path/to/wordlist.txt
+python3 webrock.py -t https://target.com/FUZZ -m f --wordlists path/to/wordlist.txt --matchers mc:404,200-ms:469,5474 --matcher-mode and
+```
 ## Important Notes
 
 * Please Note: WRock is currently under development, and additional features and enhancements will be added in future updates. We appreciate your understanding and patience as we continue to improve and expand the capabilities of the tool.

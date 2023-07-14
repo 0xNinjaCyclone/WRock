@@ -38,16 +38,29 @@ def register_jsanalyzer_options(parser):
     jsanalyzer_options.add_option("--by-key", dest="by_keys", help="Use specific extractors by comma-sperated keys type EX(APIKey,OAuth,JWT)")
     parser.add_option_group(jsanalyzer_options)
 
+def register_fuzzer_options(parser):
+    fuzzer_options = OptionGroup(parser,"Fuzzer options")
+    fuzzer_options.add_option("--wordlists", dest="wordlists", help="Wordlist file path and (optional) keyword separated by colon. eg. '/path/to/wordlist:KEYWORD'")
+    fuzzer_options.add_option("--matchers", dest="matchers", help="comma-sperated matchers in this format 'matcherName:MatcherValue,...' EX(mc:all)")
+    fuzzer_options.add_option("--filters", dest="filters", help="comma-sperated filters in this format 'filterName:filterValue,...'")
+    fuzzer_options.add_option("--input-mode", dest="inputMode", help="Multi-wordlist operation mode. Available modes: clusterbomb, pitchfork, sniper (default: clusterbomb)")
+    fuzzer_options.add_option("--matcher-mode", dest="matcherMode", help="Matcher set operator. Either of: and, or (default: or)")
+    fuzzer_options.add_option("--fuzz-recursion", action="store_true", dest="frecursion", help="Scan recursively. Only FUZZ keyword is supported.")
+    fuzzer_options.add_option("--recursion-depth", dest="fdepth", help="Maximum recursion depth.", type=int, default=0)
+    fuzzer_options.add_option("--recursion-strategy", dest="fstrategy", help="Recursion strategy: 'default' for a redirect based, and 'greedy' to recurse on all matches (default: default)")
+    parser.add_option_group(fuzzer_options)
+
 def register_advanced(parser):
     register_modules_options(parser)
     register_crawler_options(parser)
     register_subdomain_options(parser)
     register_jsanalyzer_options(parser)
+    register_fuzzer_options(parser)
 
 def register():
     parser = OptionParser(f"\n\t\t./{sys.argv[0].split('/')[-1]} [-h or --help] for more options \n")
     parser.add_option('-t','--target',dest="target",help="Enter The Target Url|Domain")
-    parser.add_option('-m','--mode',dest="mode",help="mode [r|recon - s|scan - c|crawl - a|jsanalyze] (default mode = scan)",default="scan")
+    parser.add_option('-m','--mode',dest="mode",help="mode [r|recon - s|scan - c|crawl - a|jsanalyze - f|fuzz] (default mode = scan)",default="scan")
     parser.add_option('-T','--threads',dest="threads",help="Set Number Of Threads (default = 5)", type=int, default=5)
     parser.add_option('-H','--headers',dest="headers",help="Custom headers separated by two semi-colons. E.g. -h \"Cookie: foo=bar;;Referer: http://example.com/\" Or File")
     parser.add_option('-i','--include',dest="included_modules",help="Include specified vulnerabilities for scanning EX 'sqli,ssrf' (Note add minus before source to exclude EX '-xss')")

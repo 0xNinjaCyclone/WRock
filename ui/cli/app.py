@@ -1,5 +1,6 @@
 
 import os.path, threading
+from core.fuzzer.report import FuzzerReport
 from core.logger import Logger
 from ui.cli import builder, view, show
 from core.recon.subenum.enumerate import runEnumeration
@@ -8,6 +9,7 @@ from core.config.base import Mode
 from core.scan.scanner import scan
 from core.crawler.crawl import crawl
 from core.jsanalyzer.analyzer import do_analysis
+from core.fuzzer.fuzzer import fuzz
 from core.crawler.report import CrawlerReport
 from core.scan.report import ScannerReport
 from core.recon.subenum.report import EnumeratorReport
@@ -34,6 +36,11 @@ def startJsAnalysis(jsanalyzer_cfg):
     results = do_analysis(jsanalyzer_cfg)
     show.printJsAnalyzerResults(results, jsanalyzer_cfg.GetVerbosity().IsEnabled())
     return results
+
+def startFuzzing(fuzzer_cfg):
+    result = fuzz(fuzzer_cfg)
+    show.printFuzzerResult(result, fuzzer_cfg.GetVerbosity().IsEnabled())
+    return result
 
 def writeReport(output, results, Report: Type[Report]):
     if output:
@@ -108,6 +115,11 @@ def run(opts):
         results = startJsAnalysis(config.GetJsAnalyzerConfig())
         writeReport(output, results, JsAnalyzerReport)
         rock_t.finish("js analysis")
+
+    elif mode == Mode.Fuzz:
+        result = startFuzzing(config.GetFuzzerConfig())
+        writeReport(output, result, FuzzerReport)
+        rock_t.finish("fuzz")
 
     else:
         view.Print.fail("This mode is not supported !!")

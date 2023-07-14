@@ -1,10 +1,11 @@
 
 from core.config.base import *
+from core.config.fuzzer import FuzzerProxy
 from core.config.jsanlyzer import JsAnalyzerProxy
 from core.config.scanner import *
 from core.config.enumerator import *
 
-class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy):
+class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy, FuzzerProxy):
 
     def __init__(self) -> None:
         self.__mode       = None

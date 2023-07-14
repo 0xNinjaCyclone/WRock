@@ -34,6 +34,9 @@ class ConfigBuilder:
     def buildJsAnalyzer(self):
         pass
 
+    def buildFuzzer(self):
+        pass
+
     def buildScanner(self):
         scanner = ScannerConfig()
         self.buildSharedData(scanner)
@@ -89,6 +92,9 @@ class ConfigBuilder:
 
         elif mode == Mode.JsAnalyze:
             rock.SetJsAnalyzerConfig(self.buildJsAnalyzer())
+
+        elif mode == Mode.Fuzz:
+            rock.SetFuzzerConfig(self.buildFuzzer())
 
         elif mode == Mode.Both:
             rock.SetScannerConfig(self.buildScanner())

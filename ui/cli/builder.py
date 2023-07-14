@@ -1,5 +1,6 @@
 
 import yaml, os.path
+from core.config.fuzzer import FuzzerConfig
 from core.config.jsanlyzer import JsAnalyzerConfig
 from core.jsanalyzer.anlysis import ExtractorsLoader
 from core.logger import Level
@@ -168,6 +169,9 @@ class OptionsBuilder(ConfigBuilder):
         elif mode in ('a', 'jsanalyze'):
             modecfg.SetModeToJsAnalyze()
 
+        elif mode in ('f', 'fuzz'):
+            modecfg.SetModeToFuzz()
+
         return modecfg
 
     def buildExcludedModules(self):
@@ -262,3 +266,48 @@ class OptionsBuilder(ConfigBuilder):
         jsAnalyzer.SetExtractors( extLoader.GetAll() )
 
         return jsAnalyzer
+
+    def buildFuzzer(self):
+        if not self.data.wordlists:
+            raise Exception("You must pass wordlists using '--wordlists' option")
+
+        fuzzer = FuzzerConfig()
+        self.buildSharedData(fuzzer)
+        fuzzer.SetWordLists( self.data.wordlists.split(',') )
+
+        if self.data.matchers:
+            matchers = {}
+
+            for matcher in self.data.matchers.split(','):
+                matcher = matcher.split(':') if ':' in matcher else [ matcher, '' ]
+                matchers[ matcher[0] ] = matcher[1]
+
+            fuzzer.SetMatchers( matchers )
+
+        if self.data.filters:
+            filters = {}
+
+            for filter in self.data.filters.split(','):
+                filter = filter.split(':') if ':' in filter else [ filter, '' ]
+                filters[ filter[0] ] = filter[1]
+
+            fuzzer.SetFilters( filters )
+        
+        if self.data.inputMode:
+            fuzzer.SetInputMode( self.data.inputMode )
+
+        if self.data.matcherMode:
+            fuzzer.SetMatcherMode( self.data.matcherMode )
+
+        if self.data.frecursion:
+            fuzzer.EnableRecursion()
+
+        if bool( self.data.fdepth ):
+            fuzzer.GetRecursionDepth( self.data.fdepth )
+
+        if self.data.fstrategy:
+            fuzzer.GetRecursionStrategy( self.data.fstrategy )
+
+        return fuzzer
+
+        

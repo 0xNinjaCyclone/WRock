@@ -93,6 +93,7 @@ class Mode(Enum):
     Recon     = auto()
     Crawl     = auto()
     JsAnalyze = auto()
+    Fuzz      = auto()
 
 class RockMode:
 
@@ -113,6 +114,9 @@ class RockMode:
 
     def SetModeToJsAnalyze(self):
         self.__mode = Mode.JsAnalyze
+
+    def SetModeToFuzz(self):
+        self.__mode = Mode.Fuzz
 
     def GetMode(self):
         return self.__mode

@@ -55,6 +55,21 @@ def printJsAnalyzerResults(results, verbose = False):
     Print.status("Number of files that have sensitives = {}".format( results.GetNumberOfFilesHaveSensitives() ))
     Print.status("Number of sensitives = {}".format( results.GetNumberOfSensitives() ))
 
+def printFuzzerResult(result, verbose = False):
+
+    if not result:
+        Print.fail("There are no results")
+        return
+
+    Print.highlight("      Duration    -    Status - Size    -               Url ")
+
+    for item in result:
+        durationStr = item.GetTimeDuration().GetStr()
+        spaces1 = ' ' * ( 12 - len(durationStr) ) 
+        length = item.GetContentLength()
+        spaces2 = ' ' * ( 8 - len(str(length)) )
+        Print.success(f"[{durationStr}]{spaces1}\t{item.GetStatusCode()}\t{str(length)}{spaces2}\t{item.GetUrl()}")
+
 def printSubdomains(subdomains):
     Print.highlight("Subdomains :", endl="\n\n")
 

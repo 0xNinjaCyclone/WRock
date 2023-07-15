@@ -61,14 +61,29 @@ def printFuzzerResult(result, verbose = False):
         Print.fail("There are no results")
         return
 
-    Print.highlight("      Duration    -    Status - Size    -               Url ")
+    # Get largest words length
+    largest = 0
+    for item in result:
+        words = item.GetFuzzingWords()
+
+        # Get string summation of fuzzing words + 2 for each word for ', '
+        length = sum(len(i) for i in words) + ( 2 * len(words) )
+
+        if length > largest:
+            largest = length
+
+    spaces = ' ' * ( largest - len("Words") - 4 )
+
+    Print.highlight(f"    Duration            Status   Size    Words{spaces}    Url ")
 
     for item in result:
         durationStr = item.GetTimeDuration().GetStr()
         spaces1 = ' ' * ( 12 - len(durationStr) ) 
         length = item.GetContentLength()
         spaces2 = ' ' * ( 8 - len(str(length)) )
-        Print.success(f"[{durationStr}]{spaces1}\t{item.GetStatusCode()}\t{str(length)}{spaces2}\t{item.GetUrl()}")
+        words = ', '.join( item.GetFuzzingWords() )
+        spaces3 = ' ' * ( largest - len(words) )
+        Print.success(f"[{durationStr}]{spaces1}\t{item.GetStatusCode()}\t {str(length)}{spaces2}{words}{spaces3}{item.GetUrl()}")
 
 def printSubdomains(subdomains):
     Print.highlight("Subdomains :", endl="\n\n")

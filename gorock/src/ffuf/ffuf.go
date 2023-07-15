@@ -75,6 +75,7 @@ type Ffuf struct {
 }
 
 var pFfuf Ffuf
+var gErr string
 
 func Init(
 	url string,
@@ -84,7 +85,9 @@ func Init(
 	recursion bool,
 	depth int,
 	timeout int,
-) {
+) error {
+
+	var err error
 
 	// Disabling logging
 	log.SetOutput(io.Discard)
@@ -96,10 +99,12 @@ func Init(
 	pFfuf.filters = make([]Filter, 0)
 
 	// prepare the default config options
-	pFfuf.opts, _ = ffuf.ReadDefaultConfig()
+	pFfuf.opts, err = ffuf.ReadDefaultConfig()
 
 	// set params
 	SetOpts(pFfuf.opts, url, headers, wordlists, threads, recursion, depth, timeout)
+
+	return err
 }
 
 //export FfufInit
@@ -118,7 +123,14 @@ func FfufInit(
 	gowordlists := CStrArrToGo(wordlists, wordlistsSize)
 
 	// Initialize ffuf
-	Init(url, goheaders, gowordlists, threads, recursion, depth, timeout)
+	err := Init(url, goheaders, gowordlists, threads, recursion, depth, timeout)
+
+	if err != nil {
+		gErr = err.Error()
+	} else {
+		gErr = ""
+	}
+
 }
 
 func SetOpts(
@@ -314,6 +326,15 @@ func FfufAddFilter(name string, value string) {
 	})
 }
 
+//export FfufGetLastError
+func FfufGetLastError() *C.char {
+	if gErr == "" {
+		return nil
+	}
+
+	return C.CString(gErr)
+}
+
 func Start() ([]ffuf.Result, error) {
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
@@ -359,6 +380,7 @@ func FfufStart() **C.FfufResult {
 
 	// return NULL to C if error occurred
 	if err != nil {
+		gErr = err.Error()
 		return nil
 	}
 

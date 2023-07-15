@@ -132,6 +132,7 @@ static PyObject *FuzzerResultItem_GetHost(FuzzerResultItem *self, PyObject *Py_U
 static PyObject *FuzzerResultItem_GetHTMLColor(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 static PyObject *FuzzerResultItem_GetScraperData(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 static PyObject *FuzzerResultItem_GetTimeDuration(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
+static PyObject *FuzzerResultItem_GetFuzzingWords(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 
 /* FuzzerResult -> functions needed by Python VM */
 static int FuzzerResult_init(FuzzerResult *self, PyObject *args, PyObject* kwds);
@@ -301,6 +302,8 @@ static PyMethodDef FuzzerResultItem_methods[] = {
         "Return the item scraperdata."},
     {"GetTimeDuration", (PyCFunction) FuzzerResultItem_GetTimeDuration, METH_NOARGS,
         "Return the item timeduration."},
+    {"GetFuzzingWords", (PyCFunction) FuzzerResultItem_GetFuzzingWords, METH_NOARGS,
+        "Return the item fuzzing words."},
 
     { NULL }  /* Sentinel */
 };

@@ -357,7 +357,7 @@ static PyObject *FuzzerResult_GetNumberOfResults(FuzzerResult *self, PyObject *P
 static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(ignored))
 {
 
-    PyObject *pDataDict, *pItemDict, *pResultItem, *pKey, *pTime;
+    PyObject *pDataDict, *pItemDict, *pResultItem, *pInputDict, *pKey, *pTime;
 
     /* Initialize our dictionary that hold the data */
     if ( !(pDataDict = PyDict_New()) )
@@ -464,9 +464,19 @@ static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(
             PyErr_SetString(PyExc_Exception, "an error occurred when inserting the timeduration to the dict");
             return NULL;
         }
+
+        /* Get InputData dict from the item object */
+        pInputDict = PyObject_GetAttrString(pResultItem, "inputdata");
+
+        /* Insert InputData to the item */
+        if ( PyDict_SetItemString(pItemDict, "InputData", pInputDict) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting the inputdata to the dict");
+            return NULL;
+        }
         
-        /* Get the encoded fuzzing word from the inputdata dict and decode it to use as a dict key */
-        pKey = PyUnicode_FromEncodedObject(PyDict_GetItemString(PyObject_GetAttrString(pResultItem, "inputdata"), "FUZZ"), NULL, NULL);
+        /* Get the encoded hash from the inputdata dict and decode it to use as a dict key */
+        pKey = PyUnicode_FromEncodedObject(PyDict_GetItemString(pInputDict, "FFUFHASH"), NULL, NULL);
         
         if ( pKey )
             /* Insert the item dict to the data dict */
@@ -975,6 +985,37 @@ static PyObject *FuzzerResultItem_GetTimeDuration(FuzzerResultItem *self, PyObje
 {
     Py_INCREF(self->pTimeDuration);
     return self->pTimeDuration;
+}
+
+static PyObject *FuzzerResultItem_GetFuzzingWords(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored))
+{
+    PyObject *pInputDict, *pWordsList, *pKey, *pValue;
+    Py_ssize_t lPos = 0;
+
+    /* Initialize the list and except error if init failed */
+    if ( !(pWordsList = PyList_New(0)) ) {
+        PyErr_SetString(PyExc_Exception, "an error occurred when initializing the list");
+        return NULL;
+    }
+
+    /* Get the InputData dict */
+    pInputDict = PyObject_GetAttrString((PyObject *) self, "inputdata");
+
+    while ( PyDict_Next(pInputDict, &lPos, &pKey, &pValue) )
+    {
+        /* Skip FFUFHASH key */
+        if ( PyUnicode_CompareWithASCIIString(pKey, "FFUFHASH") == 0 )
+            continue;
+
+        /* Insert decoded fuzzing word */
+        if( PyList_Append(pWordsList, PyUnicode_FromEncodedObject(pValue, NULL, NULL)) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting fuzzing word to the list");
+            return NULL;
+        }
+    }
+
+    return pWordsList;
 }
 
 static PyObject *Fuzzer_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -1652,12 +1693,20 @@ static PyObject *Fuzzer_Start(Fuzzer *self, PyObject *Py_UNUSED(ignored))
 {
     FfufResult **pFfufResult;
     PyObject *pResult;
-
+    char*cpError;
     
     /* Start fuzzing */
     if ( !(pFfufResult = FfufStart()) )
     {
-        PyErr_SetString(PyExc_Exception, "Fuzzer failed");
+        if ( cpError = FfufGetLastError() )
+        {
+            PyErr_SetString(PyExc_Exception, cpError);
+            PyMem_Free(cpError);
+        }
+
+        else
+            PyErr_SetString(PyExc_Exception, "Fuzzer failed");
+            
         return NULL;
     }
 

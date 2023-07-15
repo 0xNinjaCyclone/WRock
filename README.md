@@ -159,16 +159,23 @@ Options:
     --wordlists=WORDLISTS
                         Wordlist file path and (optional) keyword separated by
                         colon. eg. '/path/to/wordlist:KEYWORD'
+    --method=METHOD     HTTP method to use.
     --matchers=MATCHERS
-                        comma-sperated matchers in this format
-                        'matcherName:MatcherValue,...' EX(mc:all)
-    --filters=FILTERS   comma-sperated filters in this format
-                        'filterName:filterValue,...'
+                        dash-sperated matchers in this format
+                        'matcherName:MatcherValue1,MatcherValue2-...'
+                        EX(mc:all)
+    --filters=FILTERS   dash-sperated filters in this format
+                        'filterName:filterValue1,filterValue2-...'
     --input-mode=INPUTMODE
                         Multi-wordlist operation mode. Available modes:
                         clusterbomb, pitchfork, sniper (default: clusterbomb)
     --matcher-mode=MATCHERMODE
                         Matcher set operator. Either of: and, or (default: or)
+    --filter-mode=FILTERMODE
+                        Filter set operator. Either of: and, or (default: or)
+    --strategy=STRATEGY
+                        Autocalibration strategy: 'basic' or 'advanced'
+                        (default: basic)
     --fuzz-recursion    Scan recursively. Only FUZZ keyword is supported.
     --recursion-depth=FDEPTH
                         Maximum recursion depth.
@@ -212,6 +219,9 @@ python3 webrock.py -t https://target.com/ -m a --by-platform Google,GitHub,Gener
 ```
 python3 webrock.py -t https://target.com/FUZZ -m fuzz --wordlists path/to/wordlist.txt
 python3 webrock.py -t https://target.com/FUZZ -m f --wordlists path/to/wordlist.txt --matchers mc:404,200-ms:469,5474 --matcher-mode and
+
+# brute force 
+python3 webrock.py -t "http://hostname/dvwa/vulnerabilities/brute/?username=USER&password=PASSWD&Login=Login" -m f --wordlists path/to/users.txt:USER,path/to/pass.txt:PASSWD --matchers mc:200 --filters fr:incorrect -H "Cookie: security=low; PHPSESSID=Value
 ```
 ## Important Notes
 

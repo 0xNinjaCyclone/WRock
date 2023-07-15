@@ -20,6 +20,7 @@ class FuzzerConfig( Config ):
         self.__requestProto = str()
         self.__scrapers = str()
         self.__matcherMode = str()
+        self.__filterMode = str()
         self.__matchers = dict()
         self.__filters = dict()
         Config.__init__(self)
@@ -113,6 +114,12 @@ class FuzzerConfig( Config ):
 
     def GetMatcherMode(self):
         return self.__matcherMode
+
+    def SetFilterMode(self, mode: str):
+        self.__filterMode = mode
+
+    def GetFilterMode(self):
+        return self.__filterMode
 
     def SetMatchers(self, matchers: dict):
         self.__matchers = matchers

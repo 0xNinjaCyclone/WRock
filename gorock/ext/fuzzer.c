@@ -1402,6 +1402,32 @@ static PyObject *Fuzzer_SetMatcherMode(Fuzzer *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *Fuzzer_SetFilterMode(Fuzzer *self, PyObject *args)
+{
+    PyObject *pFilterMode = NULL;
+
+    /* Parse arguments */
+    if( !PyArg_ParseTuple(args, "U", &pFilterMode) ) 
+        return NULL;
+
+    if ( !pFilterMode )
+    {
+        PyErr_SetString(PyExc_Exception, "this method takes exactly one argument");
+        return NULL;
+    }
+
+    if ( !PyUnicode_Check(pFilterMode) )
+    {
+        PyErr_SetString(PyExc_TypeError, "The filtermode must be a string");
+        return NULL;
+    }
+
+    Py_INCREF(pFilterMode);
+    FfufSetFilterMode( BuildGoStr(pFilterMode) );
+
+    Py_RETURN_NONE;
+}
+
 static PyObject *Fuzzer_AddMatcher(Fuzzer *self, PyObject *args)
 {
     PyObject *pMatcherName, *pMatcherVal;

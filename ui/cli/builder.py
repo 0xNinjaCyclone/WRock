@@ -275,6 +275,16 @@ class OptionsBuilder(ConfigBuilder):
         self.buildSharedData(fuzzer)
         fuzzer.SetWordLists( self.data.wordlists.split(',') )
 
+        # Set post params
+        if self.data.post:
+            if '|' in self.data.post:
+                raise ValueError("parameter type not required in the fuzz mode")
+
+            fuzzer.SetData( self.data.post )
+
+        if self.data.method:
+            fuzzer.SetMethod( self.data.method.upper() )
+
         if self.data.matchers:
             matchers = {}
 
@@ -298,6 +308,12 @@ class OptionsBuilder(ConfigBuilder):
 
         if self.data.matcherMode:
             fuzzer.SetMatcherMode( self.data.matcherMode )
+
+        if self.data.filterMode:
+            fuzzer.SetFilterMode( self.data.filterMode )
+
+        if self.data.strategy:
+            fuzzer.SetAutoCalibrationStrategy( self.data.strategy )
 
         if self.data.frecursion:
             fuzzer.EnableRecursion()

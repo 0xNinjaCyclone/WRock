@@ -273,6 +273,15 @@ func FfufSetMatcherMode(mode string) {
 	SetMatcherMode(mode)
 }
 
+func SetFilterMode(mode string) {
+	pFfuf.opts.Filter.Mode = mode
+}
+
+//export FfufSetFilterMode
+func FfufSetFilterMode(mode string) {
+	SetFilterMode(mode)
+}
+
 func SetMatchers(matchers []Matcher) {
 	pFfuf.matchers = matchers
 }

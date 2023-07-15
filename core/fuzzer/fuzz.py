@@ -74,13 +74,18 @@ class WebFuzzer( Fuzzer ):
         if bool( mMode ):
             self.SetMatcherMode(mMode)
 
+        fMode = config.GetFilterMode()
+
+        if bool( fMode ):
+            self.SetFilterMode(fMode)
+
         # Set All Matchers
         for name, value in config.GetMatchers().items():
             self.AddMatcher(name, value)
 
         # Set All Filters
         for name, value in config.GetFilters().items():
-            self.AddFilter(filter)
+            self.AddFilter(name, value)
 
 
     def Start(self) -> FuzzerResult:

@@ -76,6 +76,7 @@ static PyObject *Fuzzer_SetRecursionStrategy(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_SetRequestProto(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_SetScrapers(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_SetMatcherMode(Fuzzer *self, PyObject *args);
+static PyObject *Fuzzer_SetFilterMode(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_AddMatcher(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_AddFilter(Fuzzer *self, PyObject *args);
 static PyObject *Fuzzer_Start(Fuzzer *self, PyObject *Py_UNUSED(ignored));
@@ -259,6 +260,8 @@ static PyMethodDef Fuzzer_methods[] = {
         "Set Scrapers."},
     {"SetMatcherMode", (PyCFunction) Fuzzer_SetMatcherMode, METH_VARARGS,
         "Set Matcher Mode."},
+    {"SetFilterMode", (PyCFunction) Fuzzer_SetFilterMode, METH_VARARGS,
+        "Set Filter Mode."},
     {"AddMatcher", (PyCFunction) Fuzzer_AddMatcher, METH_VARARGS,
         "Add Matcher."},
     {"AddFilter", (PyCFunction) Fuzzer_AddFilter, METH_VARARGS,

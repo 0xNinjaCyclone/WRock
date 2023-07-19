@@ -243,6 +243,9 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.noOutOfScope:
             crawler.enableNoOutOfScope()
 
+        if self.data.disallowed:
+            crawler.SetDisallowed( self.data.disallowed.split(',') )
+
         return crawler
 
     def buildJsAnalyzer(self):

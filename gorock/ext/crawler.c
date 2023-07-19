@@ -44,7 +44,8 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             (self->insecure = PyBool_FromLong(0)) &&
             (self->rawHeaders = PyUnicode_FromString("")) &&
             (self->sc = PyBool_FromLong(0)) &&
-            (self->noOutOfScope = PyBool_FromLong(0))
+            (self->noOutOfScope = PyBool_FromLong(0)) &&
+            (self->pDisallowdList = PyList_New(0))
         ))
         {
             /* initialization failed */
@@ -60,15 +61,27 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
 {
-    static char *kwlist[] = { "url", "threads", "depth", "subsInScope", "insecure", "rawHeaders", "sc", "noOutOfScope", NULL };
-    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *tmp;
+    static char *kwlist[] = {
+        "url", 
+        "threads", 
+        "depth", 
+        "subsInScope", 
+        "insecure", 
+        "rawHeaders", 
+        "sc", 
+        "noOutOfScope", 
+        "disallowd",
+        NULL
+    };
+
+    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *pDisallowdList, *tmp;
     int nThreads,nDepth, nSubsInScope, nInsecure, nSc, nNoOutOfScope;
 
     url = rawHeaders = NULL;
     nThreads = nDepth = nSubsInScope = nInsecure = nSc = nNoOutOfScope = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UiiiiUii", 
-                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|iiiiUiiO", 
+                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope, &pDisallowdList))
     {
         return -1;
     }
@@ -134,6 +147,16 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         self->noOutOfScope = noOutOfScope;
         Py_DECREF(tmp);
     }
+
+    if (pDisallowdList) {
+        if ( !PyList_Check(pDisallowdList) )
+            return -1;
+
+        tmp = self->pDisallowdList;
+        Py_INCREF(pDisallowdList);
+        self->pDisallowdList = pDisallowdList;
+        Py_DECREF(tmp);
+    } 
 
     return 0;
 }
@@ -673,6 +696,11 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     /* CrawlerResult */
     PyObject *pResult; 
 
+    char **cpDisallowed;
+
+    /* Convert the disallowed list to char** type */
+    cpDisallowed = PyListToArray(self->pDisallowdList);
+
     /* Start Crawler */
     result = CStartCrawler(
             BuildGoStr(self->url), 
@@ -682,8 +710,13 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoUint8) PyLong_AsLong(self->insecure), 
             BuildGoStr(self->rawHeaders),
             (GoUint8) PyLong_AsLong(self->sc),
-            (GoUint8) PyLong_AsLong(self->noOutOfScope)
+            (GoUint8) PyLong_AsLong(self->noOutOfScope),
+            cpDisallowed,
+            (GoInt) PyList_Size(self->pDisallowdList)
     );
+
+    /* Deallocated the disallowed array */
+    FreeMemory(cpDisallowed);
 
     /* returns CrawlerResult object */
     pResult = StoreCrawlerResult(result);

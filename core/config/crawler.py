@@ -10,6 +10,7 @@ class CrawlerConfig(Config):
         self.__nocrawl          = False
         self.__getstatuscode    = False
         self.__noOutOfScope     = False
+        self.__disallowed       = []
         Config.__init__(self)
 
 
@@ -57,6 +58,12 @@ class CrawlerConfig(Config):
 
     def enableNoOutOfScope(self):
         self.__noOutOfScope = True
+
+    def SetDisallowed(self, disallowed):
+        self.__disallowed = disallowed
+
+    def GetDisallowed(self):
+        return self.__disallowed
     
 
 class CrawlerProxy:

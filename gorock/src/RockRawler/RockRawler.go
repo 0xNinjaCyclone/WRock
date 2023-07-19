@@ -50,6 +50,7 @@ type RockRawlerConfig struct {
 	rawHeaders   string
 	sc           bool // Get urls status code flag
 	noOutOfScope bool
+	disallowd    []string
 }
 
 type Parameter struct {
@@ -132,6 +133,17 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 
 	// Set parallelism
 	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: config.threads})
+
+	// Filter out unnecessary urls
+	c.DisallowedURLFilters = func() []*regexp.Regexp {
+		var f []*regexp.Regexp
+		f = make([]*regexp.Regexp, 0)
+		for _, filter := range config.disallowd {
+			f = append(f, regexp.MustCompile(filter))
+		}
+
+		return f
+	}()
 
 	// Search about emails in html content
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -292,6 +304,14 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement,
 		}
 	}())
 
+	// Skip disallowed urls
+	for _, filter := range config.disallowd {
+		r := regexp.MustCompile(filter)
+		if r.MatchString(fullUrl) {
+			return
+		}
+	}
+
 	// Check if the obtained url is in scope
 	in_scope := IsInScope(config.url, fullUrl)
 
@@ -400,6 +420,16 @@ func GoStringsToC(gostrings []string) **C.char {
 	return (**C.char)(cArray)
 }
 
+func CStrArrToGo(arr **C.char, size int) []string {
+	tmpslice := (*[1 << 28]*C.char)(unsafe.Pointer(arr))[:size:size]
+	gostrings := make([]string, size)
+	for i, s := range tmpslice {
+		gostrings[i] = C.GoString(s)
+	}
+
+	return gostrings
+}
+
 func GoParameterToC(params []Parameter) **C.Parameter {
 	// Get size of params to allocate memory for c results
 	size := len(params) + 1
@@ -476,6 +506,8 @@ func CStartCrawler(
 	rawHeaders string,
 	sc bool,
 	noOutOfScope bool,
+	cpDisallowd **C.char,
+	size int,
 ) *C.RockRawlerResult {
 
 	// Config
@@ -488,6 +520,7 @@ func CStartCrawler(
 		rawHeaders:   rawHeaders,
 		sc:           sc,
 		noOutOfScope: noOutOfScope,
+		disallowd:    CStrArrToGo(cpDisallowd, size),
 	}
 
 	// Pass the supplied parameters from C to the crawler

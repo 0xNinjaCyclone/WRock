@@ -30,6 +30,7 @@ def register_crawler_options(parser):
     crawler_options.add_option("--no-crawl",action="store_true",dest="nocrawl",help="Don't use crawler for scanning or analysis js files (use the main url)")
     crawler_options.add_option("--get-sc",action="store_true",dest="sc",help="Get status code of crawled urls")
     crawler_options.add_option("--no-outofscope",action="store_true",dest="noOutOfScope",help="Exclude out of scope pages")
+    crawler_options.add_option("--disallowed",dest="disallowed",help="comma-separated disallowed urls filter, accept regex")
     parser.add_option_group(crawler_options)
 
 def register_jsanalyzer_options(parser):
@@ -42,8 +43,8 @@ def register_fuzzer_options(parser):
     fuzzer_options = OptionGroup(parser,"Fuzzer options")
     fuzzer_options.add_option("--wordlists", dest="wordlists", help="Wordlist file path and (optional) keyword separated by colon. eg. '/path/to/wordlist:KEYWORD'")
     fuzzer_options.add_option("--method", dest="method", help="HTTP method to use.")
-    fuzzer_options.add_option("--matchers", dest="matchers", help="dash-sperated matchers in this format 'matcherName:MatcherValue1,MatcherValue2-...' EX(mc:all)")
-    fuzzer_options.add_option("--filters", dest="filters", help="dash-sperated filters in this format 'filterName:filterValue1,filterValue2-...'")
+    fuzzer_options.add_option("--matchers", dest="matchers", help="dash-separated matchers in this format 'matcherName:MatcherValue1,MatcherValue2-...' EX(mc:all)")
+    fuzzer_options.add_option("--filters", dest="filters", help="dash-separated filters in this format 'filterName:filterValue1,filterValue2-...'")
     fuzzer_options.add_option("--input-mode", dest="inputMode", help="Multi-wordlist operation mode. Available modes: clusterbomb, pitchfork, sniper (default: clusterbomb)")
     fuzzer_options.add_option("--matcher-mode", dest="matcherMode", help="Matcher set operator. Either of: and, or (default: or)")
     fuzzer_options.add_option("--filter-mode", dest="filterMode", help="Filter set operator. Either of: and, or (default: or)")

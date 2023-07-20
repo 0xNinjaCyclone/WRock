@@ -50,7 +50,7 @@ type RockRawlerConfig struct {
 	rawHeaders   string
 	sc           bool // Get urls status code flag
 	noOutOfScope bool
-	disallowd    []string
+	disallowed   []string
 }
 
 type Parameter struct {
@@ -138,7 +138,7 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 	c.DisallowedURLFilters = func() []*regexp.Regexp {
 		var f []*regexp.Regexp
 		f = make([]*regexp.Regexp, 0)
-		for _, filter := range config.disallowd {
+		for _, filter := range config.disallowed {
 			f = append(f, regexp.MustCompile(filter))
 		}
 
@@ -305,7 +305,7 @@ func appendEndPoint(link string, result *RockRawlerResult, e *colly.HTMLElement,
 	}())
 
 	// Skip disallowed urls
-	for _, filter := range config.disallowd {
+	for _, filter := range config.disallowed {
 		r := regexp.MustCompile(filter)
 		if r.MatchString(fullUrl) {
 			return
@@ -506,7 +506,7 @@ func CStartCrawler(
 	rawHeaders string,
 	sc bool,
 	noOutOfScope bool,
-	cpDisallowd **C.char,
+	cpDisallowed **C.char,
 	size int,
 ) *C.RockRawlerResult {
 
@@ -520,7 +520,7 @@ func CStartCrawler(
 		rawHeaders:   rawHeaders,
 		sc:           sc,
 		noOutOfScope: noOutOfScope,
-		disallowd:    CStrArrToGo(cpDisallowd, size),
+		disallowed:   CStrArrToGo(cpDisallowed, size),
 	}
 
 	// Pass the supplied parameters from C to the crawler

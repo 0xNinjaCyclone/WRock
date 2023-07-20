@@ -11,6 +11,8 @@ static int Crawler_traverse(Crawler *self, visitproc visit, void *arg)
     Py_VISIT(self->rawHeaders);
     Py_VISIT(self->sc);
     Py_VISIT(self->noOutOfScope);
+    Py_VISIT(self->pDisallowedList);
+    
     return 0;
 }
 
@@ -24,6 +26,8 @@ static int Crawler_clear(Crawler *self)
     Py_CLEAR(self->rawHeaders);
     Py_CLEAR(self->sc);
     Py_CLEAR(self->noOutOfScope);
+    Py_CLEAR(self->pDisallowedList);
+
     return 0;
 }
 
@@ -45,7 +49,7 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             (self->rawHeaders = PyUnicode_FromString("")) &&
             (self->sc = PyBool_FromLong(0)) &&
             (self->noOutOfScope = PyBool_FromLong(0)) &&
-            (self->pDisallowdList = PyList_New(0))
+            (self->pDisallowedList = PyList_New(0))
         ))
         {
             /* initialization failed */
@@ -70,18 +74,18 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         "rawHeaders", 
         "sc", 
         "noOutOfScope", 
-        "disallowd",
+        "disallowed",
         NULL
     };
 
-    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *pDisallowdList, *tmp;
+    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *pDisallowedList, *tmp;
     int nThreads,nDepth, nSubsInScope, nInsecure, nSc, nNoOutOfScope;
 
     url = rawHeaders = NULL;
     nThreads = nDepth = nSubsInScope = nInsecure = nSc = nNoOutOfScope = 0;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|iiiiUiiO", 
-                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope, &pDisallowdList))
+                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope, &pDisallowedList))
     {
         return -1;
     }
@@ -148,13 +152,13 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         Py_DECREF(tmp);
     }
 
-    if (pDisallowdList) {
-        if ( !PyList_Check(pDisallowdList) )
+    if (pDisallowedList) {
+        if ( !PyList_Check(pDisallowedList) )
             return -1;
 
-        tmp = self->pDisallowdList;
-        Py_INCREF(pDisallowdList);
-        self->pDisallowdList = pDisallowdList;
+        tmp = self->pDisallowedList;
+        Py_INCREF(pDisallowedList);
+        self->pDisallowedList = pDisallowedList;
         Py_DECREF(tmp);
     } 
 
@@ -699,7 +703,7 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     char **cpDisallowed;
 
     /* Convert the disallowed list to char** type */
-    cpDisallowed = PyListToArray(self->pDisallowdList);
+    cpDisallowed = PyListToArray(self->pDisallowedList);
 
     /* Start Crawler */
     result = CStartCrawler(
@@ -712,7 +716,7 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoUint8) PyLong_AsLong(self->sc),
             (GoUint8) PyLong_AsLong(self->noOutOfScope),
             cpDisallowed,
-            (GoInt) PyList_Size(self->pDisallowdList)
+            (GoInt) PyList_Size(self->pDisallowedList)
     );
 
     /* Deallocated the disallowed array */

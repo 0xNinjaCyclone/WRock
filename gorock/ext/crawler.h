@@ -15,7 +15,7 @@ typedef struct
     PyObject *rawHeaders;
     PyObject *sc; // status_code -> PyBool
     PyObject *noOutOfScope;
-    PyObject *pDisallowdList; 
+    PyObject *pDisallowedList; 
 
 } Crawler;
 

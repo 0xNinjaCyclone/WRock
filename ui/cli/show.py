@@ -39,9 +39,11 @@ def printModuleInfo(modInfo):
     for i in vulnInfo.vulnerables:
         for key , val in i.items():
             if key and val:
-                v += f"{key}:{val}, "
+                v += f" {key}:{val}"
+
+        v += ','
     
-    v = v[:-2]
+    v = v[:-1]
     Print.success(f"[VulnInfo = {v}]")
 
 def printExtraInfo(modInfo):
@@ -68,6 +70,7 @@ def printExtraInfo(modInfo):
 
 def printScanResults(results: ScanResults, verbose = False):
     Print.highlight("Scanner Results :", endl="\n\n")
+    bVulnerable = False
 
     for vulnName in results.GetAllVulnNames():
         for modInfo in results.GetResultByVuln(vulnName):
@@ -75,11 +78,17 @@ def printScanResults(results: ScanResults, verbose = False):
 
             if modInfo.GetVulnInfo().status == Status.NotVulnerable:
                 continue
+
+            else:
+                bVulnerable = True
             
             if verbose:
                 printExtraInfo(modInfo)
 
-            Print.normal() # new line                
+            Print.normal() # new line  
+
+    if not bVulnerable:
+        Print.fail("There are no vulnz detected !!!")              
 
 
 def printJsAnalyzerResults(results, verbose = False):

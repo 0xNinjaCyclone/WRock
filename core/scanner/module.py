@@ -198,26 +198,26 @@ class HeadersScanner(GeneralScanner):
         return True
 
     def run(self):
-        for i in self.GetPayloads():
-            for hname, payload in i.items():
-                headers = self.GetHeaders()
-                headers[hname] = payload 
+        for payload in self.GetPayloads():
+            headers = self.GetHeaders()
+            headers.update( payload )
 
-                try:
-                    req = self.GetRequester()
-                    req.SetHeaders( headers )
-                    res = req.Send( **self.request_args )
+            try:
+                req = self.GetRequester()
+                req.SetHeaders( headers )
+                res = req.Send( **self.request_args )
 
-                except KeyboardInterrupt:
-                        # Stop activities because user want that
-                        raise KeyboardInterrupt("Stop !!!")
+            except KeyboardInterrupt:
+                    # Stop activities because user want that
+                    raise KeyboardInterrupt("Stop !!!")
 
-                except:
-                    # Because http requests for scanning activities often get weird
-                    # in this case we should continue in our scanning activities 
-                    continue
+            except:
+                # Because http requests for scanning activities often get weird
+                # in this case we should continue in our scanning activities 
+                continue
 
-                if self.is_vulnerable(res):
-                    self.vulnInfo.register_vuln(hname, payload)
+            if self.is_vulnerable(res):
+                for hname, value in payload.items():
+                    self.vulnInfo.register_vuln(hname, value)
 
         return self.GetModuleInfo()

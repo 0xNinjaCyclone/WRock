@@ -1,6 +1,7 @@
 
+from urllib.parse import urlencode
 from core.logger import *
-from core.scan.result import *
+from core.scanner.result import *
 from core.crawler.crawler import CrawlerResult
 from ui.cli.view import Color, Print
 from core.data import rockVERSION
@@ -15,21 +16,71 @@ def displayError(err):
     Print.fail(f"Error type => {err.__class__.__name__}", startl="\n")
     Print.fail(f"Error msg  => {err}")
 
+def printModuleInfo(modInfo):
+    vulnInfo = modInfo.GetVulnInfo()   
+    vulnName = vulnInfo.vulnName
+
+    if vulnInfo.status == Status.Vulnerable:
+        Print.success(f"{vulnName} Detected")
+
+    elif vulnInfo.status == Status.Maybe:
+        Print.warn(f"{vulnName} Maybe Vulnerable")
+
+    else:
+        return
+
+    Print.success(f"[Method: {vulnInfo.endpoint.GetMethodType()}, Url: {vulnInfo.endpoint.GetFullUrl()}]")
+    
+    if vulnInfo.endpoint.GetMethodType() == 'POST' and vulnInfo.endpoint.GetData():
+        Print.success(f"[POST Params: {urlencode(vulnInfo.endpoint.GetData())}]")
+
+    v = ""
+
+    for i in vulnInfo.vulnerables:
+        for key , val in i.items():
+            if key and val:
+                v += f"{key}:{val}, "
+    
+    v = v[:-2]
+    Print.success(f"[VulnInfo = {v}]")
+
+def printExtraInfo(modInfo):
+    Print.highlight(f"Authors: {', '.join(modInfo.GetAuthors())}", startl=" "*4)
+    Print.highlight(f"Description: {modInfo.GetDescription()}", startl=" "*4)
+
+    risk = "Unknown"
+
+    if modInfo.GetRisk() == Risk.Critical:
+        risk = "Critical"
+    elif modInfo.GetRisk() == Risk.High:
+        risk = "High"
+    elif modInfo.GetRisk() == Risk.Medium:
+        risk = "Medium"
+    elif modInfo.GetRisk() == Risk.Low:
+        risk = "Low"
+
+    Print.highlight(f"Risk: {risk}", startl=" "*4)
+
+    ref = modInfo.GetReferances()
+    if ref:
+        Print.highlight("Refrences:", startl=" "*4, endl="\n\t")
+        Print.normal("\n\t".join(ref))
+
 def printScanResults(results: ScanResults, verbose = False):
-    Print.highlight("Results :")
+    Print.highlight("Scanner Results :", endl="\n\n")
 
     for vulnName in results.GetAllVulnNames():
-        Print.status(f"{vulnName} results :", startl="\n")
-        
-        for vulnInfo in results.GetResultByVuln(vulnName):
-            if vulnInfo.status == Status.Vulnerable:
-                Print.success(vulnInfo.url)
+        for modInfo in results.GetResultByVuln(vulnName):
+            printModuleInfo(modInfo)
 
-            elif vulnInfo.status == Status.Maybe:
-                Print.warn(vulnInfo.url)
+            if modInfo.GetVulnInfo().status == Status.NotVulnerable:
+                continue
+            
+            if verbose:
+                printExtraInfo(modInfo)
 
-            else:
-                Print.fail(vulnInfo.url, verbose = verbose)
+            Print.normal() # new line                
+
 
 def printJsAnalyzerResults(results, verbose = False):
     Print.highlight("Js sensitive data :", endl="\n\n", startl="\n")

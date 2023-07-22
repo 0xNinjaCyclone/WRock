@@ -2,9 +2,9 @@
 import sys, os, inspect, requests
 from concurrent.futures import ThreadPoolExecutor
 from core.config.scanner import ScannerConfig
-from core.scan.module import *
-from core.scan.result import ScanResults
-from core.scan.endpoint import EndPoint
+from core.scanner.module import *
+from core.scanner.result import ScanResults
+from core.scanner.endpoint import EndPoint
 from core.crawler.crawl import crawl
 from core.data import rockPATH
 from core.utils import rduplicate
@@ -36,10 +36,7 @@ class ScanExecutor:
         
 
     def LoadAllModules(self):
-        self.__loadmodules__(os.path.join(self.rock_path, 'modules', self.scantype.MODPATH))
-            
-        # Common modules
-        self.__loadmodules__(os.path.join(self.rock_path, 'modules', CommonScanner.MODPATH))
+        self.__loadmodules__(os.path.join(self.rock_path, 'modules'))
 
     
     def run(self, endpoint, Module):
@@ -71,13 +68,13 @@ class ScanExecutor:
 
     def __loadmodules__(self, path):
         for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
-            mod = __import__('.'.join(['modules', path.split('/')[-1], py]), fromlist=[py])
+            mod = __import__('.'.join(['modules', py]), fromlist=[py])
             classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
             for cls in classes:
                 setattr(sys.modules[__name__], cls.__name__, cls)
 
     def __isabstractscanner__(self, cls):
-        return 'core/scan' in inspect.getfile(cls)
+        return 'core/scanner' in inspect.getfile(cls)
 
 class GeneralScanExecutor(ScanExecutor):
 
@@ -94,11 +91,9 @@ class GeneralScanExecutor(ScanExecutor):
             endpoints = [self.config.GetModuleConfig().GetTarget()]
 
         for MODULE in self.GetAllModules():
-            # for endpoint in endpoints:
-            #     self.run(EndPoint(endpoint), MODULE)
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 for endpoint in endpoints:
-                    executor.submit(self.run, EndPoint(endpoint), MODULE)
+                    executor.submit(self.run, EndPoint.Load(endpoint), MODULE)
 
         return self.results
 

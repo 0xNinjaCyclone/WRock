@@ -1,16 +1,24 @@
 
 import socket, struct
-from core.scan.module import *
+from core.scanner.module import *
 
 
 # Great blog
 # https://pravinponnusamy.medium.com/ssrf-payloads-f09b2a86a8b4
 
 
-class SSRF(GeneralScanner):
+class SSRF(ParamsScanner):
 
-    def __init__(self, config) -> None:
-        GeneralScanner.__init__(self, config)
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "Server Side Request Forgery",
+        "Description": 'The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination.',
+        "Risk": Risk.High,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/918.html"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
         self.ssrf_receiver_server = self.options.get('collaborator')
 
 
@@ -19,10 +27,9 @@ class SSRF(GeneralScanner):
         params = endpoint.GetAllParams()
 
         if bool(params):
-            for param , values in params.items():
-                value = values.__getitem__(0)
+            for param , value in params.items():
                 if value.startswith("http://") or value.startswith("https://") or endpoint.GetParamTypeByName(param) == "url":
-                    self.may_vulnerable_params.append(param)
+                    self.InsertParamToScan(param)
                     return True
 
         
@@ -47,9 +54,9 @@ class SSRF(GeneralScanner):
         if self.ssrf_receiver_server:
             GeneralScanner.run(self)
             
-        self.vulnInfo.register_maybe(self.may_vulnerable_params)
+        self.vulnInfo.register_maybe(self.GetMayVulnerableParams())
 
-        return self.GetVulnInfo()
+        return self.GetModuleInfo()
 
 
     def is_vulnerable(self, response) -> bool:

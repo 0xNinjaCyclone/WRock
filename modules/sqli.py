@@ -1,29 +1,32 @@
 
 from os.path import *
-from core.scan.module import *
+from core.scanner.module import *
 
 
-class SQLi(GeneralScanner):
+class SQLi(ParamsScanner):
 
-    def __init__(self, config) -> None:
-        GeneralScanner.__init__(self, config)
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "SQL Injection",
+        "Description": 'The product constructs all or part of an SQL command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended SQL command when it is sent to a downstream component.',
+        "Risk": Risk.Critical,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/89.html",
+            "https://owasp.org/www-community/attacks/SQL_Injection"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
         self.save_sqlmap_format = self.options.get('sqlmap')
         self.response = None
-
-    def check(self):
-        # check if url has parameters
-        # we cannot scan SQLi without parameters
-        # put all prameters to vulnerable_params for scan it with payloads
         
-        self.InsertAllParamsToScan()
-        return bool(self.may_vulnerable_params)
 
     def GetPayloads(self):
         return list("'")
 
     def run(self):
         
-        vulnerable = GeneralScanner.run(self)
+        result = ParamsScanner.run(self)
+        vulnerable = result.GetVulnInfo()
             
         if vulnerable.status == Status.Vulnerable:
             if self.save_sqlmap_format and self.response != None:
@@ -31,11 +34,11 @@ class SQLi(GeneralScanner):
                 uri = self.GetEndPoint().GetUri()
                 vulnerableFileName = basename(uri.path)
                 host = uri.hostname
-                fileName = f"{vulnerableFileName if vulnerableFileName else host}-{self.vulnInfo.vulnerable_params[0]['param']}.sqlmap"
+                fileName = f"{vulnerableFileName if vulnerableFileName else host}-{self.vulnInfo.vulnerables[0]['param']}.sqlmap"
                 http_version = '.'.join(list(str(res.raw.version)))
                 self.ExportSqlmapFormat(fileName, http_version)
             
-        return vulnerable
+        return result
 
     def is_vulnerable(self, res):
         self.response = res
@@ -55,8 +58,7 @@ class SQLi(GeneralScanner):
     def ExportSqlmapFormat(self, fileName, http_version):
         if not isfile(fileName):
             with open(fileName,'w+') as f:
-                req = self.GetRequester()
-                headers = req.headers
+                headers = self.GetHeaders()
                 endpoint = self.GetEndPoint()
                 uri = endpoint.GetUri()
                 query = endpoint.GetQuery()

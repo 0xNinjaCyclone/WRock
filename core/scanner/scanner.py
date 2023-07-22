@@ -1,5 +1,5 @@
 
-from core.scan.factory import executorFactory
+from core.scanner.factory import executorFactory
 
 
 def scan(config):

@@ -1,5 +1,5 @@
 
-from core.scan.executor import *
+from core.scanner.executor import *
 
 def executorFactory(config: ScannerConfig):
     return GeneralScanExecutor(config)

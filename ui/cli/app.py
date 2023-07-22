@@ -4,14 +4,14 @@ from core.fuzzer.report import FuzzerReport
 from core.logger import Logger
 from ui.cli import builder, view, show
 from core.recon.subenum.enumerate import runEnumeration
-from core.scan.result import ScanResults
+from core.scanner.result import ScanResults
 from core.config.base import Mode
-from core.scan.scanner import scan
+from core.scanner.scanner import scan
 from core.crawler.crawl import crawl
 from core.jsanalyzer.analyzer import do_analysis
 from core.fuzzer.fuzzer import fuzz
 from core.crawler.report import CrawlerReport
-from core.scan.report import ScannerReport
+from core.scanner.report import ScannerReport
 from core.recon.subenum.report import EnumeratorReport
 from core.jsanalyzer.report import JsAnalyzerReport
 from core.output import Report, ReportWriter, Type

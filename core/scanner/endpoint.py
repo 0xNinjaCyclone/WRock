@@ -5,18 +5,37 @@ from core.request import Get, Headers, Post
 
 class EndPoint:
 
-    def __init__(self, endpoint: dict) -> None:
-        self.__uri          = urlparse(endpoint['url'])
-        self.__m_type       = endpoint['m_type'].upper()
-        self.__rawparams    = endpoint['params']
+    @classmethod
+    def Load(cls, endpoint: dict):
+        return EndPoint(
+            endpoint['url'],
+            endpoint['m_type'].upper(),
+            endpoint['params']
+        )
+
+
+    def __init__(self, url,  method = 'GET', params = {}) -> None:
+        self.__uri          = urlparse(url)
+        self.__m_type       = method
+        self.__rawparams    = params
         self.__params       = self.__parse_params__()  # url params
         self.__data         = self.__parse_data__()    # body params
+        
 
     def GetUri(self):
         return self.__uri
 
+    def GetPath(self):
+        return self.__uri.path
+
+    def GetHost(self):
+        return self.__uri.hostname
+
     def GetUrl(self):
         return f"{self.__uri.scheme}://{self.__uri.netloc + self.__uri.path}"
+
+    def GetUrlWithoutPath(self):
+        return f"{self.__uri.scheme}://{self.__uri.netloc}"
 
     def GetFullUrl(self):
         query = self.GetQuery()
@@ -32,10 +51,13 @@ class EndPoint:
         return unquote(urlencode(self.GetData()))
 
     def GetParams(self):
-        return self.__params
+        return self.__params.copy()
+
+    def GetRawParams(self):
+        return self.__rawparams.copy()
 
     def GetData(self):
-        return self.__data
+        return self.__data.copy()
 
     def SetParam(self, pname, pvalue):
         if pname in self.__params:
@@ -52,7 +74,7 @@ class EndPoint:
             self.SetParam(pname, pvalue)
 
     def GetAllParams(self):
-        return self.__params | self.__data
+        return self.GetParams() | self.GetData()
 
     def GetAllParamNames(self):
         return list(self.__params.keys()) + list(self.__data.keys())

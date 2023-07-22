@@ -1,7 +1,7 @@
 
 from core.config.base import Format
 from core.output import *
-from core.scan.result import *
+from core.scanner.result import *
 
 
 class ScannerReportInText(TxtOutput):

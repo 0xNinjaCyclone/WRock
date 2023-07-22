@@ -107,6 +107,18 @@ class Request:
         self.headers            = headers
         self.session            = self.GetReqSession()
 
+    def SetUrl(self, url):
+        self.url = url
+
+    def SetParams(self, params: dict):
+        self.params = params
+
+    def SetData(self, data):
+        self.data = data
+
+    def SetHeaders(self, headers: Headers):
+        self.headers = headers
+
     def GetReqSession(self) -> requests.Session:
         return requests.Session()
 

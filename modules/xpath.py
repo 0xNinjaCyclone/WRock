@@ -1,19 +1,20 @@
 
-from core.scan.module import *
+from core.scanner.module import *
 
 
-class XPath(GeneralScanner):
+class XPath(ParamsScanner):
 
-    def __init__(self, config) -> None:
-        GeneralScanner.__init__(self, config)
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "XPath Injection",
+        "Description": "The product uses external input to dynamically construct an XPath expression used to retrieve data from an XML database, but it does not neutralize or incorrectly neutralizes that input. This allows an attacker to control the structure of the query.",
+        "Risk": Risk.High,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/643.html"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
 
-    def check(self):
-        # check if url has parameters
-        # we cannot scan XPath without parameters
-        # put all prameters to vulnerable_params for scan it with payloads
-        
-        self.InsertAllParamsToScan()
-        return bool(self.may_vulnerable_params)
 
     def GetPayloads(self):
         return [

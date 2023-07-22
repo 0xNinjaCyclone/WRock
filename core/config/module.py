@@ -84,14 +84,10 @@ class ExcludedModules:
         # Exclude all of modules
         modules = list()
         path = os.path.join(rockPATH(), "modules")
-        dirs = os.listdir(path)
-        for dir in dirs:
-            modules_path = os.path.join(path, dir)
-            if os.path.isdir(modules_path):
-                files = os.listdir(modules_path)
-                for file in files:
-                    if file.endswith('.py'):
-                        modules.append(file)
+        files = os.listdir(path)
+        for file in files:
+            if file.endswith('.py'):
+                modules.append(file)
 
         self.excludeL(modules)
         

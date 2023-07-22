@@ -1,10 +1,18 @@
 
-from core.scan.module import GeneralScanner
+from core.scanner.module import ParamsScanner, Risk
 
-class LFI(GeneralScanner):
+class LFI(ParamsScanner):
 
-    def __init__(self, config) -> None:
-        GeneralScanner.__init__(self, config)
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "Local File Inclusion",
+        "Description": 'The PHP application receives input from an upstream component, but it does not restrict or incorrectly restricts the input before its usage in "require," "include," or similar functions. ',
+        "Risk": Risk.High,
+        "Referances": [
+            "https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
 
     def check(self):
         endpoint = self.GetEndPoint()
@@ -15,9 +23,9 @@ class LFI(GeneralScanner):
             if value.startswith("http") or endpoint.GetParamTypeByName(param) in ('submit', 'file', 'url'):
                 continue
             
-            self.may_vulnerable_params.append(param)
+            self.InsertParamToScan(param)
 
-        return bool(self.may_vulnerable_params)
+        return self.HaveParamsToScan()
 
     def GetPayloads(self) -> list:
         return [

@@ -13,6 +13,15 @@ class SubdomainEnumeratorReportInText(TxtOutput):
             TxtOutput.write(self, domain)
 
 
+class SubdomainEnumeratorReportInJson(JsonOutput):
+
+    def __init__(self, fileName):
+        JsonOutput.__init__(self, fileName)
+
+    def write(self, subdomains):
+        JsonOutput.write(self, {"Subdomains": subdomains})
+
+
 class EnumeratorReport(Report):
 
     def __init__(self, config: OutputConfig) -> None:
@@ -24,5 +33,9 @@ class EnumeratorReport(Report):
         if fmt == Format.Text:
             return SubdomainEnumeratorReportInText(self.fileName)
 
+        elif fmt== Format.Json:
+            return SubdomainEnumeratorReportInJson(self.fileName)
+
         else:
             raise TypeError(f"Invalid report format")
+            

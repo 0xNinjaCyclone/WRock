@@ -117,6 +117,36 @@ class AnalysisResults( list ):
 
         return sensitives
 
+    def Transform(self) -> dict:
+        dResult = dict()
+        key = "Items"
+        ctr = 1
+
+        for result in self.GetFilesHaveSensitives():
+            dResult2 = dict()
+            dResult2["JsLink"] = result.GetJsLink()
+            
+            if not key in dResult:
+                dResult2[key] = list()
+
+            for i in result.GetItems():
+                x = i.GetExtractor()
+
+                dResult2[key].append({
+                    "Extractor": {
+                        "Platform":   x.GetPlatform(),
+                        "KeyType":    x.GetKeyType(),
+                        "Expression": x.GetExpression(),
+                        "Source":     x.GetSource()
+                    },
+                    "Data":      i.GetData()
+                })
+
+            dResult[ str(ctr) ] = dResult2
+            ctr += 1
+
+        return dResult
+
 
 class Analyzer:
 

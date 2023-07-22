@@ -13,6 +13,14 @@ class FuzzerReportInText(TxtOutput):
             TxtOutput.write(self, item.GetUrl())
 
 
+class FuzzerReportInJson(JsonOutput):
+    def __init__(self, fileName):
+        JsonOutput.__init__(self, fileName)
+
+    def write(self, result):
+        JsonOutput.write(self, result.Transform())
+
+
 class FuzzerReport(Report):
 
     def __init__(self, config: OutputConfig) -> None:
@@ -24,5 +32,9 @@ class FuzzerReport(Report):
         if fmt == Format.Text:
             return FuzzerReportInText(self.fileName)
 
+        elif fmt == Format.Json:
+            return FuzzerReportInJson(self.fileName)
+
         else:
             raise TypeError(f"Invalid report format")
+            

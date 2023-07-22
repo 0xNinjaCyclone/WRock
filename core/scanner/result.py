@@ -116,6 +116,15 @@ class ModuleInfo:
     def GetVulnInfo(self) -> VulnerabilityInfo:
         return self.__vuln
 
+    def Transform(self):
+        return {
+            "Authors": self.__authors,
+            "Module Name": self.__name,
+            "Description": self.__description,
+            "Risk": "Critical" if self.__risk == Risk.Critical else "High" if self.__risk == Risk.High else "Medium" if self.__risk == Risk.Medium else "Low" if self.__risk == Risk.Low else "Unknown",
+            "Referances": self.__referances
+        }
+
 
 class ScanResults:
 
@@ -136,6 +145,31 @@ class ScanResults:
 
     def GetAllVulnNames(self):
         return self.__results.keys()
+
+    def Transform(self) -> dict:
+        dResult = dict()
+
+        for vulnName in self.GetAllVulnNames():
+            for modInfo in self.GetResultByVuln(vulnName):
+                vulnInfo = modInfo.GetVulnInfo()
+
+                # Skip not vulnerable endpoints
+                if vulnInfo.status == Status.NotVulnerable:
+                    continue
+
+                if not vulnName in dResult:
+                    dResult[ vulnName ] = []
+
+                dResult[ vulnName ].append({
+                    "Module info":  modInfo.Transform(),
+                    "Method":       vulnInfo.endpoint.GetMethodType(),
+                    "Url":          vulnInfo.endpoint.GetFullUrl(),
+                    "Get params":   vulnInfo.endpoint.GetParams(),
+                    "Post params":  vulnInfo.endpoint.GetData(),
+                    "Vulnerables":  vulnInfo.vulnerables
+                })
+
+        return dResult
 
     def merge(self, o):
         for vulnName in o.GetAllVulnNames():

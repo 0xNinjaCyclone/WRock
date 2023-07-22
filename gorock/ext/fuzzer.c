@@ -354,6 +354,30 @@ static PyObject *FuzzerResult_GetNumberOfResults(FuzzerResult *self, PyObject *P
     return PyLong_FromLong( self->lNumberOfResults );
 }
 
+static PyObject *InputDataInNewDict(PyObject *pInputData)
+{
+    PyObject *pNewDataDict, *pKey, *pValue;
+    Py_ssize_t lPos = 0;
+
+    /* Initialize our dictionary that hold the data */
+    if ( !(pNewDataDict = PyDict_New()) )
+    {
+        PyErr_SetString(PyExc_Exception, "an error occurred when initializing the dict");
+        return NULL;
+    }
+
+    while ( PyDict_Next(pInputData, &lPos, &pKey, &pValue) )
+    {
+        if ( PyDict_SetItem(pNewDataDict, pKey, PyUnicode_FromEncodedObject(pValue, NULL, NULL)) != 0 )
+        {
+            PyErr_SetString(PyExc_Exception, "an error occurred when inserting to the dict");
+            return NULL;
+        }
+    }
+
+    return pNewDataDict;
+}
+
 static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(ignored))
 {
 
@@ -469,7 +493,7 @@ static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(
         pInputDict = PyObject_GetAttrString(pResultItem, "inputdata");
 
         /* Insert InputData to the item */
-        if ( PyDict_SetItemString(pItemDict, "InputData", pInputDict) != 0 )
+        if ( PyDict_SetItemString(pItemDict, "InputData", InputDataInNewDict(pInputDict)) != 0 )
         {
             PyErr_SetString(PyExc_Exception, "an error occurred when inserting the inputdata to the dict");
             return NULL;

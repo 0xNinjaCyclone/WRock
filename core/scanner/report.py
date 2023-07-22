@@ -23,6 +23,25 @@ class ScannerReportInText(TxtOutput):
                     TxtOutput.write(self, f"{vulnInfo.vulnName} - {vulnInfo.url}")
 
 
+class ScannerReportInJson(JsonOutput):
+
+    def __init__(self, fileName):
+        JsonOutput.__init__(self, fileName)
+
+    def write(self, results: ScanResults | list[ScanResults]):
+        if isinstance(results, ScanResults):
+            return JsonOutput.write(self, results.Transform())
+
+        dResult = dict()
+        ctr = 1
+
+        for result in results:
+            dResult[ str(ctr) ] = result.Transform()
+            ctr += 1
+
+        return JsonOutput.write(self, dResult)
+
+
 class ScannerReport(Report):
 
     def __init__(self, config: OutputConfig):
@@ -33,6 +52,9 @@ class ScannerReport(Report):
 
         if fmt == Format.Text:
             return ScannerReportInText(self.fileName)
+
+        if fmt == Format.Json:
+            return ScannerReportInJson(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

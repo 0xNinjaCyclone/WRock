@@ -184,6 +184,9 @@ static PyObject *StoreFuzzerResult(FfufResult **pFfufResults);
 static void FreeFuzzerMemory(FfufResult **pFfufResults);
 
 
+/* FuzzerResult utils */
+static PyObject *InputDataInNewDict(PyObject *pInputData);
+
 static PyGetSetDef FuzzerResultItem_getsetters[] = {
     {"inputdata", (getter) FuzzerResultItem_GetInputDataAttr, (setter) FuzzerResultItem_SetInputDataAttr,
         "The item inputdata.", NULL},

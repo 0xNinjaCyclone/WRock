@@ -57,6 +57,7 @@ class Config:
 
 class Format(Enum):
     Text    = auto()
+    Json    = auto()
 
 class OutputConfig:
 

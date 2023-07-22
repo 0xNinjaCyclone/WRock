@@ -1,4 +1,5 @@
 
+import json
 from typing import Type
 from core.config.base import OutputConfig
 
@@ -42,6 +43,7 @@ class ReportWriter:
 class Output:
 
     def __init__(self, fileName) -> None:
+        self.data = None
         self.fileName = fileName
         self.file = open(self.fileName, 'w+')
 
@@ -65,8 +67,8 @@ class Output:
 class TxtOutput(Output):
 
     def __init__(self, fileName):
-        self.data = str()
         Output.__init__(self, fileName)
+        self.data = str()
 
     def write(self, data, newline = True):
         self.data += data
@@ -76,3 +78,15 @@ class TxtOutput(Output):
         return (data in open(self.fileName, 'r').read() or data in self.data)
 
 
+class JsonOutput(Output):
+
+    def __init__(self, fileName):
+        Output.__init__(self, fileName)
+
+    def write(self, data: dict):
+        self.data = data
+
+    def save(self):
+        json.dump(self.data, self.file)
+        self.file.close()
+        

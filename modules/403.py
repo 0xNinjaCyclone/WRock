@@ -2,7 +2,7 @@
 from core.scanner.module import *
 
 
-class HeadersBased403Bypasser( HeadersScanner ):
+class HeadersBased403Bypass( HeadersScanner ):
 
     def __init__(self, config: ModuleConfig, info = {
         "Authors": ["Abdallah Mohamed"],
@@ -15,6 +15,9 @@ class HeadersBased403Bypasser( HeadersScanner ):
         ]
     }) -> None:
         HeadersScanner.__init__(self, config, info)
+
+        # Stop attacking when find a bypass
+        self.StopOnSuccess()
 
     def check(self) -> bool:
         try:
@@ -59,7 +62,7 @@ class HeadersBased403Bypasser( HeadersScanner ):
         return response.status_code >= 200 and response.status_code < 400
 
 
-class UriBased403Bypasser( UriScanner ):
+class UriBased403Bypass( UriScanner ):
 
     def __init__(self, config: ModuleConfig, info = {
         "Authors": ["Abdallah Mohamed"],
@@ -75,6 +78,9 @@ class UriBased403Bypasser( UriScanner ):
 
         # To overwrite the beginning of path with malicious inputs 'http://host..;/path'
         self.AllowPathManipulation()
+
+        # Stop attacking when find a bypass
+        self.StopOnSuccess()
 
     def check(self) -> bool:
         try:

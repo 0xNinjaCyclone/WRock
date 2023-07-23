@@ -18,6 +18,9 @@ class BaseScanner:
         self.moduleInfo.SetVulnInfo(self.GetVulnInfo())
         self.options.setKey(self.__class__.__name__.lower())
 
+        # flags
+        self.__stoponsuccess = False
+
         
     def GetPayloads(self) -> list:
         # should override
@@ -30,6 +33,12 @@ class BaseScanner:
     def is_vulnerable(self, response) -> bool:
         # should override
         pass
+
+    def StopOnSuccess(self):
+        self.__stoponsuccess = True
+
+    def ShouldStop(self):
+        return self.__stoponsuccess
 
     def GetEndPoint(self):
         return self.endpoint
@@ -130,6 +139,10 @@ class ParamsScanner(GeneralScanner):
                     # remove param from __may_vulnerable_params
                     self.__may_vulnerable_params.remove(pname)
 
+                    # stop scanning activities against this endpoint if required
+                    if self.ShouldStop():
+                        return self.GetModuleInfo()
+
         return self.GetModuleInfo()
 
 
@@ -183,6 +196,10 @@ class UriScanner(GeneralScanner):
             if self.is_vulnerable(res):
                 self.vulnInfo.register_vuln(endpoint.GetUri().path, payload)
 
+                # stop scanning activities against this endpoint if required
+                if self.ShouldStop():
+                    break
+
         return self.GetModuleInfo()
 
 
@@ -219,5 +236,9 @@ class HeadersScanner(GeneralScanner):
             if self.is_vulnerable(res):
                 for hname, value in payload.items():
                     self.vulnInfo.register_vuln(hname, value)
+
+                # stop scanning activities against this endpoint if required
+                if self.ShouldStop():
+                    break
 
         return self.GetModuleInfo()

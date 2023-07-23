@@ -14,6 +14,9 @@ class CRLF(UriScanner):
         ]
     }) -> None:
         UriScanner.__init__(self, config, info)
+
+        # Stop attacking when find a valid way to control the response
+        self.StopOnSuccess()
         
 
     def GetPayloads(self) -> list:

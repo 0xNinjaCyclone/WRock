@@ -23,7 +23,8 @@ class Upload(ParamsScanner):
             if endpoint.GetParamTypeByName(pname) == 'file':
                 self.InsertParamToScan(pname)
                 self.GetVulnInfo().register_maybe(pname)
-                return True
+                
+        return self.HaveParamsToScan()
 
     def run(self):
         return self.GetModuleInfo()

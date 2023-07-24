@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 def main():
     setup(name="gorock",
-          version="1.0",
+          version="2.0",
           description="Python interface for GoRock Framework",
           author="Abdallah Mohamed",
           author_email="elsharifabdallah53@gmail.com",

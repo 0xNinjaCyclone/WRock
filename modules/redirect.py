@@ -23,9 +23,8 @@ class OpenRedirect(ParamsScanner):
             for param, value in params.items():
                 if value.startswith("http://") or value.startswith("https://") or endpoint.GetParamTypeByName(param) == "url":
                     self.InsertParamToScan(param)
-                    return True
 
-        return False
+        return self.HaveParamsToScan()
 
     def GetPayloads(self):
         return [

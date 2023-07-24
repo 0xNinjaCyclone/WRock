@@ -210,8 +210,11 @@ python3 webrock.py -t https://target.com/FUZZ -m fuzz --wordlists path/to/wordli
 python3 webrock.py -t https://target.com/FUZZ -m f --wordlists path/to/wordlist.txt --matchers mc:404,200-ms:469,5474 --matcher-mode and
 
 # brute force 
-python3 webrock.py -t "http://hostname/dvwa/vulnerabilities/brute/?username=USER&password=PASSWD&Login=Login" -m f --wordlists path/to/users.txt:USER,path/to/pass.txt:PASSWD --matchers mc:200 --filters fr:incorrect -H "Cookie: security=low; PHPSESSID=Value
+python3 webrock.py -t "http://hostname/dvwa/vulnerabilities/brute/?username=USER&password=PASSWD&Login=Login" -m f --wordlists path/to/users.txt:USER,path/to/pass.txt:PASSWD --matchers mc:200 --filters fr:incorrect -H "Cookie: security=low; PHPSESSID=Value"
 ```
+
+Read [the official documentation](https://github.com/abdallah-elsharif/WRock/wiki) for more details.
+
 ## Important Notes
 
 * Please Note: WRock is currently under development, and additional features and enhancements will be added in future updates. We appreciate your understanding and patience as we continue to improve and expand the capabilities of the tool.

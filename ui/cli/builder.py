@@ -2,6 +2,7 @@
 import yaml, os.path
 from core.config.fuzzer import FuzzerConfig
 from core.config.jsanlyzer import JsAnalyzerConfig
+from core.scanner.excluder import Excluder
 from core.jsanalyzer.anlysis import ExtractorsLoader
 from core.logger import Level
 from core.utils import *
@@ -174,8 +175,8 @@ class OptionsBuilder(ConfigBuilder):
 
         return modecfg
 
-    def buildExcludedModules(self):
-        excluded_modules = ExcludedModules()
+    def buildExcluder(self):
+        excluder = Excluder()
 
         if self.data.included_modules:
             included     = self.data.included_modules.split(',') if ',' in self.data.included_modules else [self.data.included_modules]
@@ -188,12 +189,12 @@ class OptionsBuilder(ConfigBuilder):
                     excluded.append(module[1:])
 
             if exclude_case:
-                excluded_modules.excludeL(excluded)
+                excluder.excludeL(excluded)
 
             else:
-                excluded_modules.includeL(included)
+                excluder.includeL(included)
 
-        return excluded_modules
+        return excluder
 
     def buildModulesOptions(self):
         options = ModulesOptions()

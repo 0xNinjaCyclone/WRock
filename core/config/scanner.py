@@ -7,7 +7,7 @@ from core.config.enumerator import *
 
 class ScannerConfig(Config, CrawlerProxy):
     def __init__(self) -> None:
-        self.__excluded_modules   = None
+        self.__excluder           = None
         self.__module_config      = None
         Config.__init__(self)
         CrawlerProxy.__init__(self)
@@ -22,11 +22,11 @@ class ScannerConfig(Config, CrawlerProxy):
 
         Config.SetTarget(self, target)
     
-    def SetExcludedModules(self, excluded: ExcludedModules):
-        self.__excluded_modules = excluded
+    def SetExcluder(self, excluder):
+        self.__excluder = excluder
 
-    def GetExcludedModules(self):
-        return self.__excluded_modules
+    def GetExcluder(self):
+        return self.__excluder
 
     def SetModuleConfig(self, module: ModuleConfig):
         self.__module_config = module

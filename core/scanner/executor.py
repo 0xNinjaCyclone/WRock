@@ -18,7 +18,7 @@ class ScanExecutor:
         self.url        = self.config.GetTarget()
         self.headers    = self.config.GetHeaders()
         self.threads    = self.config.GetThreads()
-        self.excludedM  = self.config.GetExcludedModules()
+        self.excluder   = self.config.GetExcluder()
         self.rock_path  = rockPATH()
         self.scantype   = scantype
         self.LoadAllModules()
@@ -67,7 +67,7 @@ class ScanExecutor:
         pass
 
     def __loadmodules__(self, path):
-        for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excludedM.included(f)]:
+        for py in [f[:-3] for f in os.listdir(path) if f.endswith('.py') and self.excluder.included(f)]:
             mod = __import__('.'.join(['modules', py]), fromlist=[py])
             classes = [getattr(mod, x) for x in dir(mod) if isinstance(getattr(mod, x), type)]
             for cls in classes:

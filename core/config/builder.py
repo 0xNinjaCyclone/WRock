@@ -22,7 +22,7 @@ class ConfigBuilder:
     def buildHeaders(self):
         pass
 
-    def buildExcludedModules(self):
+    def buildExcluder(self):
         pass
 
     def buildOutput(self):
@@ -41,7 +41,7 @@ class ConfigBuilder:
         scanner = ScannerConfig()
         self.buildSharedData(scanner)
         scanner.SetModuleConfig(self.buildModule())
-        scanner.SetExcludedModules(self.buildExcludedModules())
+        scanner.SetExcluder(self.buildExcluder())
         scanner.SetCrawlerConfig(self.buildCrawler())
         return scanner
 

@@ -326,10 +326,10 @@ class OptionsBuilder(ConfigBuilder):
             fuzzer.EnableRecursion()
 
         if bool( self.data.fdepth ):
-            fuzzer.GetRecursionDepth( self.data.fdepth )
+            fuzzer.SetRecursionDepth( self.data.fdepth )
 
         if self.data.fstrategy:
-            fuzzer.GetRecursionStrategy( self.data.fstrategy )
+            fuzzer.SetRecursionStrategy( self.data.fstrategy )
 
         return fuzzer
 

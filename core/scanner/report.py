@@ -9,7 +9,7 @@ class ScannerReportInText(TxtOutput):
     def __init__(self, fileName):
         TxtOutput.__init__(self, fileName)
 
-    def write(self, results: ScanResults | list[ScanResults]):
+    def write(self, results):
         resultsList = [ results ] if isinstance(results, ScanResults) else results
 
         for results in resultsList:
@@ -28,7 +28,7 @@ class ScannerReportInJson(JsonOutput):
     def __init__(self, fileName):
         JsonOutput.__init__(self, fileName)
 
-    def write(self, results: ScanResults | list[ScanResults]):
+    def write(self, results):
         if isinstance(results, ScanResults):
             return JsonOutput.write(self, results.Transform())
 

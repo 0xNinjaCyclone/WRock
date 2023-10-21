@@ -26,8 +26,8 @@ class OsCommandInjection(ParamsScanner):
         return commands
 
     
-    def is_vulnerable(self, response):
-        return bool(re.findall("icmp|64 bytes from|min/avg/max/mdev", response.text, re.I))
+    def is_vulnerable(self, response) -> Status:
+        return Status.Vulnerable if bool(re.findall("icmp|64 bytes from|min/avg/max/mdev", response.text, re.I)) else Status.NotVulnerable
 
 
 class PHPCodeInjection(ParamsScanner):
@@ -53,5 +53,5 @@ class PHPCodeInjection(ParamsScanner):
 
         return commands
     
-    def is_vulnerable(self,response):
-        return "d091985aa0f4e2a2936490e2b978e057" in response.text
+    def is_vulnerable(self,  response) -> Status:
+        return Status.Vulnerable if "d091985aa0f4e2a2936490e2b978e057" in response.text else Status.NotVulnerable

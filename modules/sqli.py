@@ -40,7 +40,7 @@ class SQLi(ParamsScanner):
             
         return result
 
-    def is_vulnerable(self, res):
+    def is_vulnerable(self, res) -> Status:
         self.response = res
 
         expected_errors = [
@@ -51,9 +51,9 @@ class SQLi(ParamsScanner):
 
         for err in expected_errors:
             if err.lower() in res.text.lower():
-                return True
+                return Status.Vulnerable
 
-        return False
+        return Status.NotVulnerable
 
     def ExportSqlmapFormat(self, fileName, http_version):
         if not isfile(fileName):

@@ -33,13 +33,13 @@ class OpenRedirect(ParamsScanner):
             "/\\/" + self.__malicious_loc[7:]
         ]
 
-    def is_vulnerable(self, response) -> bool:
+    def is_vulnerable(self, response) -> Status:
 
-        return (
+        return Status.Vulnerable if (
 
             response.status_code >= 300 and
             response.status_code < 400 and
             "Location" in response.headers and
             response.headers["Location"] in self.__malicious_loc
             
-        )
+        ) else Status.NotVulnerable

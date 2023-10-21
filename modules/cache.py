@@ -26,13 +26,13 @@ class WebCachePoisoning( HeadersScanner ):
             { "X-Forwarded-Server": self.__canary }
         ]
 
-    def is_vulnerable(self, response) -> bool:
+    def is_vulnerable(self, response) -> Status:
         if not self.__canary in response.text:
-            return False
+            return Status.NotVulnerable
 
         req = self.GetRequester()
         res = req.Send()
-        return self.__canary in res.text
+        return Status.Vulnerable if self.__canary in res.text else Status.NotVulnerable
 
     def __random_str__(self):
         return ''.join( random.choice(string.ascii_lowercase) for _ in range(8) )

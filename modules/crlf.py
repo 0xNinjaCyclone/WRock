@@ -30,5 +30,5 @@ class CRLF(UriScanner):
 
         return payloads
 
-    def is_vulnerable(self, response) -> bool:
-        return 'wrock' in response.headers
+    def is_vulnerable(self, response) -> Status:
+        return Status.Vulnerable if 'wrock' in response.headers else Status.NotVulnerable

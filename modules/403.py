@@ -58,8 +58,14 @@ class HeadersBased403Bypass( HeadersScanner ):
 
         return payloads
 
-    def is_vulnerable(self, response) -> bool:
-        return response.status_code >= 200 and response.status_code < 400
+    def is_vulnerable(self, response) -> Status:
+        if response.status_code == 200:
+            return Status.Vulnerable
+
+        if response.status_code > 200 and response.status_code < 400:
+            return Status.Maybe
+
+        return Status.NotVulnerable
 
 
 class UriBased403Bypass( UriScanner ):
@@ -122,4 +128,10 @@ class UriBased403Bypass( UriScanner ):
         return payloads
 
     def is_vulnerable(self, response) -> bool:
-        return response.status_code >= 200 and response.status_code < 400
+        if response.status_code == 200:
+            return Status.Vulnerable
+
+        if response.status_code > 200 and response.status_code < 400:
+            return Status.Maybe
+
+        return Status.NotVulnerable

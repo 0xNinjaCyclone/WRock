@@ -52,11 +52,9 @@ class SSRF(ParamsScanner):
         if self.ssrf_receiver_server:
             GeneralScanner.run(self)
             
-        self.vulnInfo.register_maybe(self.GetMayVulnerableParams())
-
         return self.GetModuleInfo()
 
 
-    def is_vulnerable(self, response) -> bool:
-        return False
+    def is_vulnerable(self, response) -> Status:
+        return Status.Maybe
     

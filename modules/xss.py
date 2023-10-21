@@ -73,12 +73,12 @@ class XSS(ParamsScanner):
 
         return payloads
 
-    def is_vulnerable(self, res) -> bool:
+    def is_vulnerable(self, res) -> Status:
         for payload in self.GetPayloads():
             if payload in res.text and self._is_valid_xss_response(res):
-                return True
+                return Status.Vulnerable
 
-        return False
+        return Status.NotVulnerable
 
     def _is_valid_xss_response(self,response):
         return 'text' in response.headers.get('Content-Type')

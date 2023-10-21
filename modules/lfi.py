@@ -1,5 +1,5 @@
 
-from core.scanner.module import ParamsScanner, Risk
+from core.scanner.module import *
 
 class LFI(ParamsScanner):
 
@@ -34,7 +34,7 @@ class LFI(ParamsScanner):
             "C:\\boot.ini"
         ]
               
-    def is_vulnerable(self,res):
+    def is_vulnerable(self,res) -> Status:
         expected_response = [
             "LFIB00M", "Volume Serial",
             "root:x:0:0","/root:/bin/bash","daemon","/usr/sbin/nologin" 
@@ -42,7 +42,7 @@ class LFI(ParamsScanner):
 
         for text in expected_response:
             if text.lower() in res.text.lower():
-                return True
+                return Status.Vulnerable
 
-        return False
+        return Status.NotVulnerable
         

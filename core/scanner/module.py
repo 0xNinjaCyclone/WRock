@@ -30,7 +30,7 @@ class BaseScanner:
         # should override
         pass
 
-    def is_vulnerable(self, response) -> bool:
+    def is_vulnerable(self, response) -> Status:
         # should override
         pass
 
@@ -112,8 +112,7 @@ class ParamsScanner(GeneralScanner):
 
     def run(self):
         for payload in self.GetPayloads():
-            for pname, _ in self.endpoint.GetAllParams().items():
-                if pname not in self.__may_vulnerable_params: continue
+            for pname in self.GetMayVulnerableParams():
 
                 # Get a new endpoint object copied from self.endpoint
                 endpoint = self.DeepCloneEndpoint()
@@ -133,8 +132,14 @@ class ParamsScanner(GeneralScanner):
                     # in this case we should continue in our scanning activities 
                     continue
 
-                if self.is_vulnerable(res):
-                    self.vulnInfo.register_vuln(pname, payload)
+                status = self.is_vulnerable(res)
+
+                if status != Status.NotVulnerable:
+                    if status == Status.Vulnerable:
+                        self.vulnInfo.register_vuln(pname, payload)
+
+                    else:
+                        self.vulnInfo.register_maybe(pname, payload)
 
                     # remove param from __may_vulnerable_params
                     self.__may_vulnerable_params.remove(pname)
@@ -193,8 +198,16 @@ class UriScanner(GeneralScanner):
                 # in this case we should continue in our scanning activities 
                 continue
 
-            if self.is_vulnerable(res):
-                self.vulnInfo.register_vuln(endpoint.GetUri().path, payload)
+            status = self.is_vulnerable(res)
+
+            if status != Status.NotVulnerable:
+                path = endpoint.GetUri().path
+
+                if status == Status.Vulnerable:
+                    self.vulnInfo.register_vuln(path, payload)
+
+                else:
+                    self.vulnInfo.register_maybe(path, payload)
 
                 # stop scanning activities against this endpoint if required
                 if self.ShouldStop():
@@ -233,9 +246,15 @@ class HeadersScanner(GeneralScanner):
                 # in this case we should continue in our scanning activities 
                 continue
 
-            if self.is_vulnerable(res):
+            status = self.is_vulnerable(res)
+
+            if status != Status.NotVulnerable:
                 for hname, value in payload.items():
-                    self.vulnInfo.register_vuln(hname, value)
+                    if status == Status.Vulnerable:
+                        self.vulnInfo.register_vuln(hname, value)
+
+                    else:
+                        self.vulnInfo.register_maybe(hname, value)
 
                 # stop scanning activities against this endpoint if required
                 if self.ShouldStop():

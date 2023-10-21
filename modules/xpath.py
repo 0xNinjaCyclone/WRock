@@ -23,7 +23,7 @@ class XPath(ParamsScanner):
             "search=Har') and contains(../password,'c"
         ]
 
-    def is_vulnerable(self, res):
+    def is_vulnerable(self, res) -> Status:
         expected_errors = [
             "SimpleXMLElement::xpath():", "Invalid expression", "evaluation failed",
             "xmlXPathEval:", "SimpleXMLElement", "xpath", "DOMXPath::query()", "Invalid predicate",
@@ -32,6 +32,6 @@ class XPath(ParamsScanner):
 
         for err in expected_errors:
             if err.lower() in res.text.lower():
-                return True
+                return Status.Vulnerable
 
-        return False
+        return Status.NotVulnerable

@@ -26,5 +26,8 @@ class Upload(ParamsScanner):
                 
         return self.HaveParamsToScan()
 
+    def is_vulnerable(self, response) -> Status:
+        return Status.Maybe
+
     def run(self):
         return self.GetModuleInfo()

@@ -69,6 +69,9 @@ class BaseScanner:
     def SetRequestArgs(self, **args):
         self.request_args = args
 
+    def UpdateRequestArgs(self, **args):
+        self.request_args |= args
+
     def run(self) -> ModuleInfo:
         return self.GetModuleInfo()
 

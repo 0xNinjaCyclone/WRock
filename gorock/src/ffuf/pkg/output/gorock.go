@@ -102,6 +102,7 @@ func (s *GoRockOutput) Result(resp ffuf.Response) {
 		Duration:         resp.Time,
 		ResultFile:       resp.ResultFile,
 		Host:             resp.Request.Host,
+		Content:          resp.Body,
 	}
 
 	s.CurrentResults = append(s.CurrentResults, sResult)

@@ -531,8 +531,9 @@ static int FuzzerResultItem_traverse(FuzzerResultItem *self, visitproc visit, vo
     Py_VISIT(self->puHTMLColor);
     Py_VISIT(self->pScraperData);
     Py_VISIT(self->pTimeDuration);
+    Py_VISIT(self->pContent);
     
-   return 0;
+    return 0;
 }
 
 static int FuzzerResultItem_clear(FuzzerResultItem *self)
@@ -551,6 +552,7 @@ static int FuzzerResultItem_clear(FuzzerResultItem *self)
     Py_CLEAR(self->puHTMLColor);
     Py_CLEAR(self->pScraperData);
     Py_CLEAR(self->pTimeDuration);
+    Py_CLEAR(self->pContent);
     
     return 0;
 }
@@ -577,7 +579,8 @@ static PyObject *FuzzerResultItem_new(PyTypeObject *type, PyObject *args, PyObje
             (self->puHost = PyUnicode_FromString("")) ||
             (self->puHTMLColor = PyUnicode_FromString("")) ||
             (self->pScraperData = PyDict_New()) ||
-            (self->pTimeDuration = Py_None)
+            (self->pTimeDuration = Py_None) ||
+            (self->pContent = PyBytes_FromString(""))
         )) {
             /* initialization failed */
 
@@ -927,6 +930,25 @@ static PyObject *FuzzerResultItem_GetTimeDurationAttr(FuzzerResultItem *self, vo
     return self->pTimeDuration;
 }
 
+static int FuzzerResultItem_SetContentAttr(FuzzerResultItem *self, PyObject *value, void *closure)
+{
+    if (value == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the content attribute");
+        return -1;
+    }
+
+    Py_INCREF(value);
+    Py_CLEAR(self->pContent);
+    self->pContent = value;
+    return 0;
+}
+
+static PyObject *FuzzerResultItem_GetContentAttr(FuzzerResultItem *self, void *closure)
+{
+    Py_INCREF(self->pContent);
+    return self->pContent;
+}
+
 static PyObject *FuzzerResultItem_GetInputData(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored))
 {
     Py_INCREF(self->pInput);
@@ -1009,6 +1031,12 @@ static PyObject *FuzzerResultItem_GetTimeDuration(FuzzerResultItem *self, PyObje
 {
     Py_INCREF(self->pTimeDuration);
     return self->pTimeDuration;
+}
+
+static PyObject *FuzzerResultItem_GetContent(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored))
+{
+    Py_INCREF(self->pContent);
+    return self->pContent;
 }
 
 static PyObject *FuzzerResultItem_GetFuzzingWords(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored))
@@ -1651,6 +1679,7 @@ static PyObject *StoreFuzzerResult(FfufResult **pFfufResults)
         PyObject_SetAttrString(pResultItem, "htmlcolor", PyUnicode_FromString(pFfufResult->cpHTMLColor));
         PyObject_SetAttrString(pResultItem, "scraperdata", StoreScraperData(pFfufResult->pScraperData));
         PyObject_SetAttrString(pResultItem, "timeduration", StoreTimeDuration(pFfufResult->pTimeDuration));
+        PyObject_SetAttrString(pResultItem, "content", PyBytes_FromStringAndSize((const char *)pFfufResult->pContent->pData, (Py_ssize_t)pFfufResult->pContent->lSize));
 
         /* Append item to the main result object */
         if ( !PyObject_CallMethod(pResult, "append", "O", pResultItem) )
@@ -1701,6 +1730,8 @@ static void FreeFuzzerMemory(FfufResult **pFfufResults)
             PyMem_Free( ( *pTempResults )->pTimeDuration );
         }
 
+        PyMem_Free( ( *pTempResults )->pContent->pData );
+        PyMem_Free( ( *pTempResults )->pContent );
         PyMem_Free( ( *pTempResults )->cpContentType );
         PyMem_Free( ( *pTempResults )->cpHost );
         PyMem_Free( ( *pTempResults )->cpHTMLColor );

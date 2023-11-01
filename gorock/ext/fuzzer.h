@@ -29,6 +29,7 @@ typedef struct
     PyObject *puHTMLColor;
     PyObject *pScraperData;
     PyObject *pTimeDuration;
+    PyObject *pContent;
 
 } FuzzerResultItem;
 
@@ -116,6 +117,8 @@ static int FuzzerResultItem_SetScraperDataAttr(FuzzerResultItem *self, PyObject 
 static PyObject *FuzzerResultItem_GetScraperDataAttr(FuzzerResultItem *self, void *closure);
 static int FuzzerResultItem_SetTimeDurationAttr(FuzzerResultItem *self, PyObject *value, void *closure);
 static PyObject *FuzzerResultItem_GetTimeDurationAttr(FuzzerResultItem *self, void *closure);
+static int FuzzerResultItem_SetContentAttr(FuzzerResultItem *self, PyObject *value, void *closure);
+static PyObject *FuzzerResultItem_GetContentAttr(FuzzerResultItem *self, void *closure);
 
 /* FuzzerResultItem -> Methods */
 static PyObject *FuzzerResultItem_GetInputData(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
@@ -132,6 +135,7 @@ static PyObject *FuzzerResultItem_GetHost(FuzzerResultItem *self, PyObject *Py_U
 static PyObject *FuzzerResultItem_GetHTMLColor(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 static PyObject *FuzzerResultItem_GetScraperData(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 static PyObject *FuzzerResultItem_GetTimeDuration(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
+static PyObject *FuzzerResultItem_GetContent(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 static PyObject *FuzzerResultItem_GetFuzzingWords(FuzzerResultItem *self, PyObject *Py_UNUSED(ignored));
 
 /* FuzzerResult -> functions needed by Python VM */
@@ -216,6 +220,8 @@ static PyGetSetDef FuzzerResultItem_getsetters[] = {
         "The item scraperdata.", NULL},
     {"timeduration", (getter) FuzzerResultItem_GetTimeDurationAttr, (setter) FuzzerResultItem_SetTimeDurationAttr,
         "The item timeduration.", NULL},
+    {"content", (getter) FuzzerResultItem_GetContentAttr, (setter) FuzzerResultItem_SetContentAttr,
+        "The item response content.", NULL},
 
     { NULL }  /* Sentinel */
 };
@@ -305,6 +311,8 @@ static PyMethodDef FuzzerResultItem_methods[] = {
         "Return the item scraperdata."},
     {"GetTimeDuration", (PyCFunction) FuzzerResultItem_GetTimeDuration, METH_NOARGS,
         "Return the item timeduration."},
+    {"GetContent", (PyCFunction) FuzzerResultItem_GetContent, METH_NOARGS,
+        "Return the item response content."},
     {"GetFuzzingWords", (PyCFunction) FuzzerResultItem_GetFuzzingWords, METH_NOARGS,
         "Return the item fuzzing words."},
 

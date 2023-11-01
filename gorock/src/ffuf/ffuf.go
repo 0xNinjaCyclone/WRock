@@ -9,6 +9,11 @@ package main
 /*
 
 typedef struct {
+	void *pData;
+	signed long lSize; // Py_ssize_t
+} Content;
+
+typedef struct {
 	char *cpName;
 	void *pData;
 	signed long lSize; // Py_ssize_t
@@ -36,6 +41,7 @@ typedef struct {
 	char *cpContentType, *cpRedirectLocation, *cpUrl, *cpResultFile, *cpHost, *cpHTMLColor;
 	ScraperData **pScraperData;
 	TimeDuration *pTimeDuration;
+	Content *pContent;
 } FfufResult;
 
 */
@@ -410,6 +416,7 @@ func FfufStart() **C.FfufResult {
 		pResult.cpHTMLColor = C.CString(result.HTMLColor)
 		pResult.pScraperData = GoScraperDataToC(result.ScraperData)
 		pResult.pTimeDuration = GoTimeDurationToC(result.Duration)
+		pResult.pContent = GoContentToC(result.Content)
 		a[idx] = pResult
 	}
 
@@ -647,6 +654,13 @@ func GoInputDataToC(inpdata map[string][]byte) **C.InputData {
 	a[size-1] = nil
 
 	return (**C.InputData)(cArray)
+}
+
+func GoContentToC(content []byte) *C.Content {
+	pContent := (*C.Content)(C.malloc(C.size_t(unsafe.Sizeof(C.Content{}))))
+	pContent.pData = C.CBytes(content)
+	pContent.lSize = C.long(len(content))
+	return pContent
 }
 
 func GoScraperDataToC(scdata map[string][]string) **C.ScraperData {

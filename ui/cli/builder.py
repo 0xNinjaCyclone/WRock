@@ -7,7 +7,7 @@ from core.jsanalyzer.anlysis import ExtractorsLoader
 from core.logger import Level
 from core.utils import *
 from core.config.builder import ConfigBuilder
-from core.request import Headers
+from core.http.headers import Headers
 from core.config.module import *
 from core.config.rock import *
 

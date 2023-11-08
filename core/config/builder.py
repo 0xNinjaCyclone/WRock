@@ -71,10 +71,14 @@ class ConfigBuilder:
         enumerator.SetReverseIPConfig(self.buildReverseIPConfig())
         return enumerator
 
+    def buildProxy(self):
+        return ProxyConfig()
+
     def buildRock(self):
         rock = RockConfig()
         rock.SetMode(self.buildMode())
         rock.SetVerbosity(self.buildVerbosity())
+        rock.SetProxyConfig(self.buildProxy())
         mode = rock.GetMode()
         output = self.buildOutput()
         

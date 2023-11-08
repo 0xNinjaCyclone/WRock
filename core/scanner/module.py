@@ -1,6 +1,6 @@
 
 from core.config.module import *
-from core.request import *
+from core.http.request import *
 from core.scanner.endpoint import EndPoint
 from core.scanner.result import *
 from core.data import *

@@ -1,6 +1,6 @@
 
 from urllib.parse import unquote, urlencode, urlparse, parse_qsl
-from core.request import Get, Headers, Post
+from core.http.request import Get, Headers, Post
 
 
 class EndPoint:
@@ -15,7 +15,7 @@ class EndPoint:
 
 
     def __init__(self, url,  method = 'GET', params = {}) -> None:
-        self.__uri          = urlparse(url)
+        self._uri          = urlparse(url)
         self.__m_type       = method
         self.__rawparams    = params
         self.__params       = self.__parse_params__()  # url params
@@ -23,19 +23,19 @@ class EndPoint:
         
 
     def GetUri(self):
-        return self.__uri
+        return self._uri
 
     def GetPath(self):
-        return self.__uri.path
+        return self._uri.path
 
     def GetHost(self):
-        return self.__uri.hostname
+        return self._uri.hostname
 
     def GetUrl(self):
-        return f"{self.__uri.scheme}://{self.__uri.netloc + self.__uri.path}"
+        return f"{self._uri.scheme}://{self._uri.netloc + self._uri.path}"
 
     def GetUrlWithoutPath(self):
-        return f"{self.__uri.scheme}://{self.__uri.netloc}"
+        return f"{self._uri.scheme}://{self._uri.netloc}"
 
     def GetFullUrl(self):
         query = self.GetQuery()
@@ -93,7 +93,7 @@ class EndPoint:
         # Avoid using parse_qs because it represents values as a list like => {'param': ['value']}
         # We expect result as => {'param': 'value'}
         # For this reason we used parse_qsl then cast to a dict
-        params = dict(parse_qsl(self.__uri.query))
+        params = dict(parse_qsl(self._uri.query))
 
         if self.GetMethodType() == 'GET':
             for param in self.__rawparams:

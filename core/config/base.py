@@ -1,6 +1,6 @@
 
 from enum import Enum, auto
-from core.request import Headers
+from core.http.headers import Headers
 
 
 class Verbosity:

@@ -17,3 +17,6 @@ ui/gui
 
 # Visual studio code files
 .vscode
+
+# SSL Certificates dir
+core/http/certs

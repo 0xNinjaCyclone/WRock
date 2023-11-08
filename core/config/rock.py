@@ -2,6 +2,7 @@
 from core.config.base import *
 from core.config.fuzzer import FuzzerProxy
 from core.config.jsanlyzer import JsAnalyzerProxy
+from core.config.proxy import ProxyConfig
 from core.config.scanner import *
 from core.config.enumerator import *
 
@@ -11,6 +12,7 @@ class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy, FuzzerProxy):
         self.__mode       = None
         self.__output     = None
         self.__enumerator = None
+        self.__proxy      = None
         self.__verbose    = None
 
     def SetMode(self, mode: RockMode):
@@ -30,6 +32,12 @@ class RockConfig(ScannerProxy, CrawlerProxy, JsAnalyzerProxy, FuzzerProxy):
 
     def GetEnumeratorConfig(self):
         return self.__enumerator
+
+    def SetProxyConfig(self, proxy: ProxyConfig):
+        self.__proxy = proxy
+
+    def GetProxyConfig(self):
+        return self.__proxy
 
     def SetVerbosity(self, v: Verbosity):
         self.__verbose = v

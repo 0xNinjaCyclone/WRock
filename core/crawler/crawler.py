@@ -1,6 +1,6 @@
 
 from core.config.crawler import CrawlerConfig
-from core.request import Headers
+from core.http.headers import Headers
 from gorock.rockrawler import Crawler, CrawlerResult
      
 

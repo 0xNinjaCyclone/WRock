@@ -1,7 +1,7 @@
 
 import socket
 from urllib.parse import *
-from core.request import Headers
+from core.http.headers import Headers
 
 
 def GetAddrsFromHosts(hosts):

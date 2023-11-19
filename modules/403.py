@@ -36,7 +36,7 @@ class HeadersBased403Bypass( HeadersScanner ):
                 "X-Original-URL": path
             },
             {
-                "X-Rewrite-URL", path
+                "X-Rewrite-URL": path
             }
         ]
 

@@ -21,10 +21,6 @@ class BaseScanner:
         # flags
         self.__stoponsuccess = False
 
-        
-    def GetPayloads(self) -> list:
-        # should override
-        pass
 
     def check(self) -> bool:
         # should override
@@ -82,7 +78,16 @@ class GeneralScanner(BaseScanner):
         BaseScanner.__init__(self, config, info)
 
 
-class ParamsScanner(GeneralScanner):
+class AttackScan( GeneralScanner ):
+
+    def __init__(self, config: ModuleConfig, info={}) -> None:
+        GeneralScanner.__init__(self, config, info)
+
+    def GetPayloads(self) -> list:
+        # should override
+        pass
+
+class ParamsScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
         GeneralScanner.__init__(self, config, info) 
@@ -154,7 +159,7 @@ class ParamsScanner(GeneralScanner):
         return self.GetModuleInfo()
 
 
-class UriScanner(GeneralScanner):
+class UriScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
         GeneralScanner.__init__(self, config, info)
@@ -219,7 +224,7 @@ class UriScanner(GeneralScanner):
         return self.GetModuleInfo()
 
 
-class HeadersScanner(GeneralScanner):
+class HeadersScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
         GeneralScanner.__init__(self, config, info)
@@ -262,5 +267,100 @@ class HeadersScanner(GeneralScanner):
                 # stop scanning activities against this endpoint if required
                 if self.ShouldStop():
                     break
+
+        return self.GetModuleInfo()
+
+
+class DataExposureScanner( GeneralScanner ):
+
+    def __init__(self, config: ModuleConfig, info={}) -> None:
+        GeneralScanner.__init__(self, config, info)
+
+        self.__data = str()
+
+    def InitVulnInfo(self) -> VulnerabilityInfo:
+        return DataExposureInfo(self.GetEndPoint(), self.__class__.__name__)
+
+    def SetData(self, data):
+        self.__data = data
+
+    def GetData(self):
+        return self.__data
+
+    def check(self) -> bool:
+        return True
+
+    def Check(self, data) -> Status:
+        pass
+
+    
+class BodyBasedDataExposure( DataExposureScanner ):
+
+    def __init__(self, config: ModuleConfig, info={}) -> None:
+        DataExposureScanner.__init__(self, config, info)
+
+    def run(self) -> ModuleInfo:
+        try:
+            req = self.GetRequester()
+            res = req.Send( **self.request_args )
+            inf = self.Check( res.text )
+
+            if inf == Status.Vulnerable:
+                self.vulnInfo.register_vuln( "BODY", self.GetData() )
+
+            elif inf == Status.Maybe:
+                self.vulnInfo.register_maybe( "BODY", self.GetData() )
+
+        except:
+            pass
+
+        return self.GetModuleInfo()
+
+
+class HeadersBasedDataExposure( DataExposureScanner ):
+
+    def __init__(self, config: ModuleConfig, info={}) -> None:
+        DataExposureScanner.__init__(self, config, info)
+
+        self.__headerName = "HEADER"
+
+    def SetHeaderName(self, name):
+        self.__headerName = name
+
+    def GetHeaderName(self):
+        return self.__headerName
+
+    def run(self) -> ModuleInfo:
+        try:
+            req = self.GetRequester()
+            res = req.Send( **self.request_args )
+            inf = self.Check( res.headers )
+
+            if inf == Status.Vulnerable:
+                self.vulnInfo.register_vuln( self.GetHeaderName(), self.GetData() )
+
+            elif inf == Status.Maybe:
+                self.vulnInfo.register_maybe( self.GetHeaderName(), self.GetData() )
+
+        except:
+            pass
+
+        return self.GetModuleInfo()
+
+
+class UrlBasedDataExposure( DataExposureScanner ):
+
+    def __init__(self, config: ModuleConfig, info={}) -> None:
+        DataExposureScanner.__init__(self, config, info)
+
+    def run(self) -> ModuleInfo:
+        fullurl = self.GetEndPoint().GetFullUrl()
+        inf = self.Check( fullurl )
+
+        if inf == Status.Vulnerable:
+            self.vulnInfo.register_vuln( "URL", self.GetData() )
+
+        elif inf == Status.Maybe:
+            self.vulnInfo.register_maybe( "URL", self.GetData() )
 
         return self.GetModuleInfo()

@@ -4,6 +4,7 @@ from core.http.request import *
 from core.scanner.endpoint import EndPoint
 from core.scanner.result import *
 from core.data import *
+from gorock import helper
 
 
 class BaseScanner:
@@ -92,9 +93,16 @@ class ParamsScanner( AttackScan ):
     def __init__(self, config: ModuleConfig, info={}) -> None:
         GeneralScanner.__init__(self, config, info) 
         self.__may_vulnerable_params  = []
+        self.__value_with_payload = False
 
     def InitVulnInfo(self):
         return ParamsVulnInfo(self.endpoint, self.__class__.__name__)
+
+    def AppendPayloadToDefaultValue(self):
+        self.__value_with_payload = True
+
+    def ValueWithPayload(self):
+        return self.__value_with_payload
 
     def InsertParamToScan(self, pname):
         if self.endpoint.GetParamTypeByName(pname) != 'submit':
@@ -103,6 +111,14 @@ class ParamsScanner( AttackScan ):
     def InsertAllParamsToScan(self):
         for pname in self.endpoint.GetAllParamNames():
             self.InsertParamToScan(pname)
+
+    def SetPayload(self, endpoint, pname, payload):
+        if self.ValueWithPayload():
+            default_value = endpoint.GetParamValueByName(pname)
+            endpoint.SetParam(pname, default_value + payload)
+
+        else:
+            endpoint.SetParam(pname, payload)
 
     def GetMayVulnerableParams(self) -> list:
         return self.__may_vulnerable_params
@@ -126,7 +142,7 @@ class ParamsScanner( AttackScan ):
                 endpoint = self.DeepCloneEndpoint()
 
                 # Set payload in param
-                endpoint.SetParam(pname, payload)
+                self.SetPayload( endpoint, pname, payload )
 
                 try:
                     request = self.GetRequester(endpoint)

@@ -19,6 +19,10 @@ def main():
                 Extension(
                     "ffuf", ["ext/fuzzer.c", "ext/gorock.c"],
                     extra_link_args = ["ext/ffuf.a"]
+                ),
+                Extension(
+                    "helper", ["ext/helper.c", "ext/gorock.c", "src/helper/levenshtein.c"],
+                    include_dirs=["src/helper/"]
                 )
           ])
 

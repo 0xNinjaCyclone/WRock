@@ -35,6 +35,9 @@ class XSS(ParamsScanner):
         counter = 0
 
         for p in params:
+            if endpoint.GetParamTypeByName(p) in ( "submit", "password" ):
+                continue
+            
             params[p] = f"Hello{str(counter)}"
             counter += 1
 

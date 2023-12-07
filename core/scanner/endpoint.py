@@ -93,6 +93,13 @@ class EndPoint:
 
         return ''
 
+    def GetParamNameByValue(self, value):
+        for p in self.__rawparams:
+            if p['value'] == value:
+                return p['name']
+
+        return ''
+
     def GetRequester(self, headers: Headers):
         return Get(self.GetUrl(), self.GetParams(), self.GetData(), headers) if self.GetMethodType() == 'GET' else Post(self.GetUrl(), self.GetParams(), self.GetData(), headers) 
 

@@ -26,7 +26,7 @@ class HeadersBased403Bypass( HeadersScanner ):
         except:
             return False
 
-        return res.status_code == 403
+        return res.status_code in ( 401, 403 )
 
     def GetPayloads(self):
         path = self.endpoint.GetPath()
@@ -95,7 +95,7 @@ class UriBased403Bypass( UriScanner ):
         except:
             return False
 
-        return res.status_code == 403
+        return res.status_code in ( 401, 403 )
 
     def GetPayloads(self) -> list:
         payloads = list()

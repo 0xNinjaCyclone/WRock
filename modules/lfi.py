@@ -41,7 +41,7 @@ class LFI(ParamsScanner):
         ]
 
         for text in expected_response:
-            if text.lower() in res.text.lower():
+            if text in res.text:
                 return Status.Vulnerable
 
         return Status.NotVulnerable

@@ -31,7 +31,7 @@ class XPath(ParamsScanner):
         ]
 
         for err in expected_errors:
-            if err.lower() in res.text.lower():
+            if err in res.text:
                 return Status.Vulnerable
 
         return Status.NotVulnerable

@@ -79,4 +79,4 @@ class ASPCodeInjection(ParamsScanner):
         ]
 
     def is_vulnerable(self, response) -> Status:
-        return Status.Vulnerable if self.__rock_msg in response.text else Status.NotVulnerable
+        return Status.Vulnerable if self.__rock_msg in response.text and all([p not in response.text for p in self.GetPayloads()]) else Status.NotVulnerable

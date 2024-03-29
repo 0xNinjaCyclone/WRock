@@ -17,7 +17,7 @@ First, you'll need to [install go](https://golang.org/doc/install).
 
 Then run this command to download + compile RockRawler:
 ```
-go install github.com/abdallah-elsharif/RockRawler@latest
+go install github.com/0xNinjaCyclone/RockRawler@latest
 ```
 
 You can now run `~/go/bin/RockRawler`. If you'd like to just run `RockRawler` without the full path, you'll need to `export PATH="/go/bin/:$PATH"`. You can also add this line to your `~/.bashrc` file if you'd like this to persist.

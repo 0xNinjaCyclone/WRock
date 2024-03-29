@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf"
 )
 
 func TestNewStatusFilter(t *testing.T) {

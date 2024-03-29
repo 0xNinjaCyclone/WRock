@@ -1,4 +1,4 @@
-module github.com/abdallah-elsharif/RockRawler
+module github.com/0xNinjaCyclone/RockRawler
 
 go 1.17
 

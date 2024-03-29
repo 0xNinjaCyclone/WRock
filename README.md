@@ -23,7 +23,7 @@ Experience the power and versatility of WRock, a modern web security tool design
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)
 - [Subfinder](https://github.com/projectdiscovery/subfinder)
-- [RockRawler](https://github.com/abdallah-elsharif/RockRawler)
+- [RockRawler](https://github.com/0xNinjaCyclone/RockRawler)
 - [Ffuf](https://github.com/ffuf/ffuf)
 
 ## Installation
@@ -31,7 +31,7 @@ Experience the power and versatility of WRock, a modern web security tool design
 **Get started with WRock by following these steps:**
 
 ```
-git clone https://github.com/abdallah-elsharif/WRock.git
+git clone https://github.com/0xNinjaCyclone/WRock.git
 cd WRock
 chmod 755 install.sh
 sudo ./install.sh
@@ -213,7 +213,7 @@ python3 webrock.py -t https://target.com/FUZZ -m f --wordlists path/to/wordlist.
 python3 webrock.py -t "http://hostname/dvwa/vulnerabilities/brute/?username=USER&password=PASSWD&Login=Login" -m f --wordlists path/to/users.txt:USER,path/to/pass.txt:PASSWD --matchers mc:200 --filters fr:incorrect -H "Cookie: security=low; PHPSESSID=Value"
 ```
 
-Read [the official documentation](https://github.com/abdallah-elsharif/WRock/wiki) for more details.
+Read [the official documentation](https://github.com/0xNinjaCyclone/WRock/wiki) for more details.
 
 ## Important Notes
 

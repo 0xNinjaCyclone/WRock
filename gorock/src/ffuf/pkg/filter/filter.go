@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf"
 )
 
 // MatcherManager handles both filters and matchers.

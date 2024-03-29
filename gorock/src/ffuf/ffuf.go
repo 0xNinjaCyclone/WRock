@@ -55,12 +55,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf"
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/filter"
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/input"
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/output"
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/runner"
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/scraper"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/filter"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/input"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/output"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/runner"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/scraper"
 )
 
 type Matcher struct {

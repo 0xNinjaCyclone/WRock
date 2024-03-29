@@ -1,4 +1,4 @@
-module github.com/abdallah-elsharif/WRock/gorock/src/ffuf
+module github.com/0xNinjaCyclone/WRock/gorock/src/ffuf
 
 go 1.17
 

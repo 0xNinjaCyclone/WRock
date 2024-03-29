@@ -10,7 +10,7 @@ builds:
     gcflags:
       - all=-trimpath={{.Env.GOPATH}}
     ldflags: |
-      -s -w -X github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf.VERSION_APPENDIX= -extldflags '-static'
+      -s -w -X github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf.VERSION_APPENDIX= -extldflags '-static'
     goos:
       - linux
       - windows

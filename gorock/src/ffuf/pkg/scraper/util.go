@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf"
 )
 
 func headerString(headers map[string][]string) string {

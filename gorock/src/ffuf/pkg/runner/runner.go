@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"github.com/abdallah-elsharif/WRock/gorock/src/ffuf/pkg/ffuf"
+	"github.com/0xNinjaCyclone/WRock/gorock/src/ffuf/pkg/ffuf"
 )
 
 func NewRunnerByName(name string, conf *ffuf.Config, replay bool) ffuf.RunnerProvider {

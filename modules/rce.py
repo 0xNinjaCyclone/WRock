@@ -1,5 +1,5 @@
 
-import re
+import re, random
 from core.scanner.module import *
 
 class OsCommandInjection(ParamsScanner):
@@ -55,3 +55,28 @@ class PHPCodeInjection(ParamsScanner):
     
     def is_vulnerable(self,  response) -> Status:
         return Status.Vulnerable if "d091985aa0f4e2a2936490e2b978e057" in response.text else Status.NotVulnerable
+
+
+class ASPCodeInjection(ParamsScanner):
+
+    def __init__(self, config, info = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "ASP Code Injection",
+        "Risk": Risk.Critical,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/94.html"
+        ]
+    }) -> None:
+        ParamsScanner.__init__(self, config, info)
+
+        self.__rock_msg = "WRock" + str( random.randint(1111, 9999) )
+
+    def GetPayloads(self) -> list:
+        return [
+            f"response.write({self.__rock_msg})",
+            f"'+response.write({self.__rock_msg})+'",
+            f"\"+response.write({self.__rock_msg})+\""
+        ]
+
+    def is_vulnerable(self, response) -> Status:
+        return Status.Vulnerable if self.__rock_msg in response.text else Status.NotVulnerable

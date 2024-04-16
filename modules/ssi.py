@@ -13,14 +13,15 @@ class SSI( ParamsScanner ):
         "Risk": Risk.Critical,
         "Referances": [
             "https://cwe.mitre.org/data/definitions/97.html",
-            "https://owasp.org/www-community/attacks/Server-Side_Includes_(SSI)_Injection"
+            "https://owasp.org/www-community/attacks/Server-Side_Includes_(SSI)_Injection",
+            "https://medium.com/@yasmeena_rezk/server-side-includes-ssi-edge-side-includes-esi-13a8fc042e81"
         ]
     }) -> None:
         ParamsScanner.__init__(self, config, info)
 
     def check(self):
         path = self.GetEndPoint().GetPath()
-        return False if not path.endswith(".shtml") else ParamsScanner.check(self)
+        return False if not path.endswith( (".shtml", ".shtm", ".stm") ) else ParamsScanner.check(self)
 
     def GetPayloads(self) -> list:
         u_payload = "<!--#EXEC cmd=\"ls /\"-->"

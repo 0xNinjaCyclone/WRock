@@ -55,7 +55,7 @@ class BlindLDAP( ParamsScanner ):
         # Send a request with random values to check stability of the response
         self.orgResponse = self.send_request( endpoint )
         
-        if not self.orgResponse:
+        if not ( self.orgResponse and self.orgResponse.ok ):
             return False
 
         # Set different random params
@@ -65,7 +65,7 @@ class BlindLDAP( ParamsScanner ):
         res = self.send_request( endpoint )
 
         if (
-            res and self.percent_response_change( self.orgResponse.text, res.text ) in range( 5 ) 
+            res and res.ok and self.percent_response_change( self.orgResponse.text, res.text ) in range( 5 ) 
         ):
             for pname in params:
                 if endpoint.GetParamTypeByName(pname) in ( 'text', 'password' ):
@@ -83,7 +83,7 @@ class BlindLDAP( ParamsScanner ):
 
     def is_vulnerable(self, response) -> Status:
         return Status.Vulnerable \
-            if self.percent_response_change( self.orgResponse.text, response.text ) not in range(40) \
+            if response.ok and self.percent_response_change( self.orgResponse.text, response.text ) not in range(40) \
                 else \
                     Status.NotVulnerable
 

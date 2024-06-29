@@ -5,7 +5,7 @@
   <img src="imgs/logo.png" alt="Logo">
 </p>
 
-> WRock is a professional and powerful tool specifically crafted for modern web security. It provides comprehensive capabilities for advanced web scanning, intelligent web crawling, and thorough subdomain enumeration.
+> WRock is a professional and powerful tool specifically crafted for modern web security. It provides comprehensive capabilities for advanced web scanning, intelligent web crawling, and thorough subdomain enumeration. As supports sophisticated fuzzing capabilities.
 
 ## Features
 
@@ -107,8 +107,6 @@ Options:
     --burp-collaborator=COLLABORATOR
                         Set Collaborator server host to detect blind vulns EX
                         (host.burpcollaborator.net)
-    --sqlmap-format     Save output of vulnerable urls with sqlmap format
-                        (will be saved in this format page-param.sqlmap)
     --xsshunter=XSSHUNTER
                         xsshunter url EX (https://hacker.xss.ht)
 
@@ -220,7 +218,5 @@ Read [the official documentation](https://github.com/0xNinjaCyclone/WRock/wiki) 
 * Please Note: WRock is currently under development, and additional features and enhancements will be added in future updates. We appreciate your understanding and patience as we continue to improve and expand the capabilities of the tool.
   
 * WRock is intended for educational and security research purposes only. By using this tool, you acknowledge that you are responsible for complying with all applicable laws and regulations. The developers and contributors of WRock assume no liability and are not responsible for any misuse or damage caused by the tool. Use at your own risk.
-  
-* Contact me for any questions in my [+] email: elsharifabdallah53@gmail.com | facebook account: [+] https://www.facebook.com/abdallah.elsharif07
 
 

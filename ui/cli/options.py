@@ -6,7 +6,6 @@ from optparse import *
 def register_modules_options(parser):
     modules_options = OptionGroup(parser,"Modules options")
     modules_options.add_option('--burp-collaborator',dest="collaborator",help="Set Collaborator server host to detect blind vulns EX (host.burpcollaborator.net)")
-    modules_options.add_option('--sqlmap-format',action="store_true",dest="sqlmap",help="Save output of vulnerable urls with sqlmap format (will be saved in this format page-param.sqlmap)")
     modules_options.add_option('--xsshunter',dest="xsshunter",help="xsshunter url EX (https://hacker.xss.ht)")
     parser.add_option_group(modules_options)
 

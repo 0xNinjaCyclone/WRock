@@ -202,9 +202,6 @@ class OptionsBuilder(ConfigBuilder):
         if self.data.collaborator: # It's shared between modules
             options.register_common('collaborator', self.data.collaborator)
 
-        if self.data.sqlmap:
-            options.register('sqli', 'sqlmap', self.data.sqlmap)
-
         if self.data.xsshunter:
             options.register('xss', 'xsshunter', self.data.xsshunter)
 

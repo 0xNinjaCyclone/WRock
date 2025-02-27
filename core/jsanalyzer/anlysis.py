@@ -1,5 +1,5 @@
 
-import csv, requests, re, os.path
+import csv, requests, re, os.path, urllib.parse
 from core.data import rockPATH
 from core.crawler.crawl import crawl
 from core.config.jsanlyzer import *
@@ -8,6 +8,48 @@ from concurrent.futures import ThreadPoolExecutor
 
 # src => https://github.com/odomojuli/RegExAPI/blob/master/regex.csv
 EXTRACTORS = os.path.join(rockPATH(), "core/jsanalyzer/regex.csv")
+
+# src => https://github.com/GerbenJavado/LinkFinder/blob/1debac5dace4724fd6187c06f133578dae51c86f/linkfinder.py#L28
+LINK_EXTRACTOR = r"""
+
+  (?:"|')                               # Start newline delimiter
+
+  (
+    ((?:[a-zA-Z]{1,10}://|//)           # Match a scheme [a-Z]*1-10 or //
+    [^"'/]{1,}\.                        # Match a domainname (any character + dot)
+    [a-zA-Z]{2,}[^"']{0,})              # The domainextension and/or path
+
+    |
+
+    ((?:/|\.\./|\./)                    # Start with /,../,./
+    [^"'><,;| *()(%%$^/\\\[\]]          # Next character can't be...
+    [^"'><,;|()]{1,})                   # Rest of the characters can't be
+
+    |
+
+    ([a-zA-Z0-9_\-/]{1,}/               # Relative endpoint with /
+    [a-zA-Z0-9_\-/.]{1,}                # Resource name
+    \.(?:[a-zA-Z]{1,4}|action)          # Rest + extension (length 1-4 or action)
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+
+    |
+
+    ([a-zA-Z0-9_\-/]{1,}/               # REST API (no extension) with /
+    [a-zA-Z0-9_\-/]{3,}                 # Proper REST endpoints usually have 3+ chars
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+
+    |
+
+    ([a-zA-Z0-9_\-]{1,}                 # filename
+    \.(?:php|asp|aspx|jsp|json|
+         action|html|js|txt|xml)        # . + extension
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+
+  )
+
+  (?:"|')                               # End newline delimiter
+
+"""
 
 
 class Extractor:
@@ -77,8 +119,9 @@ class SensitiveDataItem:
 
 class AnalysisResult:
     def __init__(self, jslink: str) -> None:
-        self.__jslink = jslink
-        self.__items  = list()
+        self.__jslink    = jslink
+        self.__items     = list()
+        self.__endpoints = list() # Had better be compatible with Crawler.endpoints
 
     def GetJsLink(self) -> str:
         return self.__jslink
@@ -89,6 +132,20 @@ class AnalysisResult:
     def AppendItem(self, item: SensitiveDataItem):
         self.__items.append(item)
 
+    def GetEndPoints(self) -> list[ dict ]:
+        return self.__endpoints
+    
+    def AppendEndPoint(self, url, in_scope=False):
+        self.__endpoints.append(
+            {
+                "url": url,
+                "status_code": 0,
+                "in_scope": in_scope,
+                "m_type": "GET",
+                "params": []
+            }
+        )
+
 
 class AnalysisResults( list ):
     def __init__(self, iterable):
@@ -96,9 +153,20 @@ class AnalysisResults( list ):
 
     def GetFilesHaveSensitives(self) -> list[ AnalysisResult ]:
         return [ sensitive for sensitive in self if bool( sensitive.GetItems() ) ]
+    
+    def GetAllEndPoints(self) -> list[ dict ]:
+        return [ endpoint for result in self for endpoint in result.GetEndPoints() ]
 
     def GetNumberOfJsLinks(self) -> int:
         return len( self )
+    
+    def GetNumberOfEndpoints(self) -> int:
+        ctr = 0
+
+        for result in self:
+            ctr += len( result.GetEndPoints() )
+
+        return ctr
 
     def GetNumberOfFilesHaveSensitives(self) -> int:
         ctr = 0
@@ -122,9 +190,10 @@ class AnalysisResults( list ):
         key = "Items"
         ctr = 1
 
-        for result in self.GetFilesHaveSensitives():
+        for result in self:
             dResult2 = dict()
             dResult2["JsLink"] = result.GetJsLink()
+            dResult2["EndPoints"] = result.GetEndPoints()
             
             if not key in dResult:
                 dResult2[key] = list()
@@ -157,12 +226,18 @@ class Analyzer:
         result  = AnalysisResult(jsLink)
         content = self.__getjscontent__(jsLink)
 
+        target_host = urllib.parse.urlparse(self.__config.GetTarget()).hostname
+        prog = re.compile(LINK_EXTRACTOR, re.VERBOSE)
+        all_matches = list( dict.fromkeys( [ match.group(1) for match in re.finditer(prog, content) ] ) )
+        for match in all_matches:
+            result.AppendEndPoint(match, urllib.parse.urlparse(match).hostname == target_host)
+
         for extractor in self.__config.GetExtractors():
             prog = re.compile(extractor.GetExpression(), re.X | re.I)
             all_matches = list( dict.fromkeys( [ match.group(0) for match in re.finditer(prog, content) ] ) )
 
             for match in all_matches:
-                results = re.findall(match, content, re.I)
+                results = list( dict.fromkeys(re.findall(match, content, re.I)) )
 
                 if bool(results):
                     result.AppendItem( SensitiveDataItem(results, extractor) )

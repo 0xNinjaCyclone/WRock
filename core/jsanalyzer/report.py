@@ -12,20 +12,30 @@ class JsAnalyzerReportInText(TxtOutput):
         line = "*" * 50
 
 
-        for result in results.GetFilesHaveSensitives():
+        for result in results:
             TxtOutput.write(self, line)
             TxtOutput.write(self, f"JsLink:  {result.GetJsLink()}")
 
-            for item in result.GetItems():
-                TxtOutput.write(self, "") # Empty Line as a seperator between items
+            endpoints = result.GetEndPoints()
+            if bool(endpoints):
+                TxtOutput.write(self, "EndPoints :-")
+                for endpoint in endpoints:
+                    TxtOutput.write(self, endpoint['url'])
 
-                TxtOutput.write(self, f"Platform :  {item.GetPlatform()}")
-                TxtOutput.write(self, f"KeyType :  {item.GetKeyType()}")
-                TxtOutput.write(self, f"Expression :  {item.GetExpression()}")
+            items = result.GetItems()
+            if bool(items):
+                TxtOutput.write(self, "Sensitives :-")
+                for item in items:
+                    TxtOutput.write(self, "") # Empty Line as a seperator between items
+                    extractor = item.GetExtractor()
 
-                TxtOutput.write(self, "Data :-")
-                data = "\n\t->  ".join( item.GetData() )
-                TxtOutput.write(self, f"\t-> {data}")
+                    TxtOutput.write(self, f"Platform :  {extractor.GetPlatform()}")
+                    TxtOutput.write(self, f"KeyType :  {extractor.GetKeyType()}")
+                    TxtOutput.write(self, f"Expression :  {extractor.GetExpression()}")
+
+                    TxtOutput.write(self, "Data :-")
+                    data = "\n\t->  ".join( item.GetData() )
+                    TxtOutput.write(self, f"\t-> {data}")
                 
 
             TxtOutput.write(self, line)

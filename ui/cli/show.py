@@ -114,9 +114,12 @@ def printJsAnalyzerResults(results, verbose = False):
     for result in results:
         Print.success(result.GetJsLink(), verbose=verbose)
 
+    printCrawledEndpoints(results.GetAllEndPoints())
+
     Print.status("Total processed js files = {}".format( results.GetNumberOfJsLinks() ), startl="\n")
     Print.status("Number of files that have sensitives = {}".format( results.GetNumberOfFilesHaveSensitives() ))
     Print.status("Number of sensitives = {}".format( results.GetNumberOfSensitives() ))
+    Print.status("Number of endpoints = {}".format( results.GetNumberOfEndpoints() ))
 
 def printFuzzerResult(result, verbose = False):
 

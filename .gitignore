@@ -13,6 +13,8 @@ ffuf.h
 
 # Distribution / packaging
 build/
+gorock/dist/
+gorock/gorock.egg-info
 ui/gui
 
 # Visual studio code files

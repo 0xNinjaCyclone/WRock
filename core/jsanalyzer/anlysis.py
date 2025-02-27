@@ -162,7 +162,7 @@ class Analyzer:
             all_matches = list( dict.fromkeys( [ match.group(0) for match in re.finditer(prog, content) ] ) )
 
             for match in all_matches:
-                results = re.findall(f".+?{match}.+?", content, re.I)
+                results = re.findall(match, content, re.I)
 
                 if bool(results):
                     result.AppendItem( SensitiveDataItem(results, extractor) )

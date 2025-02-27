@@ -94,14 +94,17 @@ def printScanResults(results: ScanResults, verbose = False):
 def printJsAnalyzerResults(results, verbose = False):
     Print.highlight("Js sensitive data :", endl="\n\n", startl="\n")
 
-    for result in results.GetFilesHaveSensitives():
-        Print.success(f"Js Link -> {result.GetJsLink()}")
+    sensitives = results.GetFilesHaveSensitives()
 
-        for item in result.GetItems():
-            extractor = item.GetExtractor()
-            data = ', '.join( item.GetData() )
+    if bool(sensitives):
+        for result in sensitives:
+            Print.success(f"Js Link -> {result.GetJsLink()}")
 
-            Print.success(f"Data => {data} - Platform => {extractor.GetPlatform()} - Key type => {extractor.GetKeyType()} - Regex => {extractor.GetExpression()}")
+            for item in result.GetItems():
+                extractor = item.GetExtractor()
+                data = ', '.join( item.GetData() )
+
+                Print.success(f"Data     => {data}\n    Platform => {extractor.GetPlatform()}\n    Key type => {extractor.GetKeyType()}\n    Regex    => {extractor.GetExpression()}", endl='\n'*2)
 
     else:
         Print.fail("No sensitive data found !!!")

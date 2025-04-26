@@ -9,16 +9,11 @@
 
 ## Features
 
-Experience the power and versatility of WRock, a modern web security tool designed to empower your assessments:
-
-* 🔒 **Web Scanning**: Harness the power of WRock's advanced scanning capabilities to perform comprehensive assessments of web applications. Automate the scanning process to identify potential security weaknesses and ensure the integrity of your web assets. With WRock, you can confidently evaluate the security posture of your applications and proactively protect against potential threats.
-
-* 🌐 **Intelligent Web Crawling**: Explore the intricacies of website structures, uncover hidden paths, and gather valuable information. Our intelligent crawling mechanism provides comprehensive visibility into web assets.
-
-* 🌍 **Enumeration**: Discover associated domains and services using WRock's advanced subdomain enumeration capabilities. Leverage the combined power of Subfinder and Sublist3r to expand your attack surface, identify potential entry points, and uncover hidden assets. Gain comprehensive visibility and enhance your assessment with thorough subdomain enumeration.
-
-* 🔍 **Advanced Analysis**: Utilize the built-in analyzer module to perform comprehensive analysis of JavaScript files, identifying potential vulnerabilities and security issues. Generate detailed reports with the integrated report writer for effective documentation.
-* 🎯 **Enhanced Fuzzer**: Take your web application fuzzing to the next level with WRock's integrated ffuf functionality. Customize and fuzz not only URLs but also headers, cookies, post data, and more. Uncover hidden vulnerabilities and weaknesses lurking in different parts of your application. Strengthen your security defenses with WRock's optimized and efficient fuzzing engine. Stay one step ahead of potential threats and ensure the robustness of your web applications.
+- Scan web applications to detect vulnerabilities with fast, automated assessments, supporting customizable vulnerability inclusion/exclusion
+- Crawl websites to map structures, uncover hidden paths, and extract insights using a smart, configurable engine with adjustable depth and subdomain support
+- Enumerate subdomains using Subfinder and Sublist3r to expand attack surfaces, with options for recursive discovery and source customization
+- Analyze JavaScript files for sensitive data and vulnerabilities, with platform- and key-specific extractors, plus detailed report generation
+- Fuzz URLs, headers, cookies, and post data with ffuf-powered, high-performance fuzzing, offering customizable wordlists, matchers, and recursion strategies
 
 ## Uses modified versions of
 - [Sublist3r](https://github.com/aboul3la/Sublist3r)

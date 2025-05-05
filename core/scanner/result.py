@@ -74,6 +74,14 @@ class HeadersVulnInfo(VulnerabilityInfo):
         else:
             self.vulnerables.append({"headername": position, "payload": payload})
 
+class BodyVulnInfo(VulnerabilityInfo):
+
+    def __init__(self, url, vulnName) -> None:
+        VulnerabilityInfo.__init__(self, url, vulnName)
+
+    def _add_vuln_(self, position, payload):
+        self.vulnerables.append( {"payload": payload} )
+
 class DataExposureInfo(VulnerabilityInfo):
 
     def __init__(self, endpoint, vulnName) -> None:

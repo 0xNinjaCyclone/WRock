@@ -286,6 +286,46 @@ class HeadersScanner( AttackScan ):
 
         return self.GetModuleInfo()
 
+class BodyScanner( AttackScan ):
+    def __init__(self, config, info={}):
+        GeneralScanner.__init__(self, config, info)
+
+    def InitVulnInfo(self):
+        return BodyVulnInfo(self.endpoint, self.__class__.__name__)
+    
+    def run(self):
+        for payload in self.GetPayloads():
+
+
+            try:
+                req = self.GetRequester()
+                req.SetData( payload )
+                res = req.Send( **self.request_args )
+
+            except KeyboardInterrupt:
+                    # Stop activities because user want that
+                    raise KeyboardInterrupt("Stop !!!")
+
+            except:
+                # Because http requests for scanning activities often get weird
+                # in this case we should continue in our scanning activities 
+                continue
+
+            status = self.is_vulnerable(res)
+
+            if status != Status.NotVulnerable:
+                if status == Status.Vulnerable:
+                    self.vulnInfo.register_vuln(None, payload)
+
+                else:
+                    self.vulnInfo.register_maybe(None, payload)
+
+                # stop scanning activities against this endpoint if required
+                if self.ShouldStop():
+                    break
+
+        return self.GetModuleInfo()
+
 
 class DataExposureScanner( GeneralScanner ):
 

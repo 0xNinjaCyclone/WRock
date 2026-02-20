@@ -381,10 +381,10 @@ static PyObject *InputDataInNewDict(PyObject *pInputData)
 static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(ignored))
 {
 
-    PyObject *pDataDict, *pItemDict, *pResultItem, *pInputDict, *pKey, *pTime;
+    PyObject *pResultList, *pItemDict, *pResultItem, *pInputDict, *pTime;
 
     /* Initialize our dictionary that hold the data */
-    if ( !(pDataDict = PyDict_New()) )
+    if ( !(pResultList = PyList_New(self->lNumberOfResults)) )
     {
         PyErr_SetString(PyExc_Exception, "an error occured when initializing the data dict");
         return NULL;
@@ -499,20 +499,12 @@ static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(
             return NULL;
         }
         
-        /* Get the encoded hash from the inputdata dict and decode it to use as a dict key */
-        pKey = PyUnicode_FromEncodedObject(PyDict_GetItemString(pInputDict, "FFUFHASH"), NULL, NULL);
-        
-        if ( pKey )
-            /* Insert the item dict to the data dict */
-            if ( PyDict_SetItem(pDataDict, pKey, pItemDict) != 0 )
-            {
-                PyErr_SetString(PyExc_Exception, "an error occurred when inserting the item to the dict");
-                return NULL;
-            }
+        PyList_SET_ITEM( pResultList, lIdx, pItemDict );
+
     }
     
     
-    return pDataDict;
+    return pResultList;
 }
 
 static int FuzzerResultItem_traverse(FuzzerResultItem *self, visitproc visit, void *arg)

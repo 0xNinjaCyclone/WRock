@@ -300,7 +300,7 @@ class XXEBodyBased( IXXEScanner, BodyScanner ):
             return "", -1
         
         str_start = idx = idx + 1
-        while idx < len(content) and content[idx] != '"':
+        while idx < len(content) and content[idx] != q:
             idx += 1
 
         if idx >= len(content):

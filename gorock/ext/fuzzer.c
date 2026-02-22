@@ -383,10 +383,10 @@ static PyObject *FuzzerResult_Transform(FuzzerResult *self, PyObject *Py_UNUSED(
 
     PyObject *pResultList, *pItemDict, *pResultItem, *pInputDict, *pTime;
 
-    /* Initialize our dictionary that hold the data */
+    /* Initialize our list that hold the data */
     if ( !(pResultList = PyList_New(self->lNumberOfResults)) )
     {
-        PyErr_SetString(PyExc_Exception, "an error occured when initializing the data dict");
+        PyErr_SetString(PyExc_Exception, "an error occured when initializing the data list");
         return NULL;
     }
 

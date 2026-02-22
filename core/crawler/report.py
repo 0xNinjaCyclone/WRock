@@ -21,6 +21,14 @@ class CrawlerReportInJson(JsonOutput):
         JsonOutput.write(self, crawler_result.Transform())
 
 
+class CrawlerReportInHtml(HtmlOutput):
+    def __init__(self, fileName):
+        HtmlOutput.__init__(self, fileName)
+
+    def write(self, crawler_result):
+        HtmlOutput.write(self, crawler_result.Transform())
+
+
 class CrawlerReport(Report):
 
     def __init__(self, config: OutputConfig) -> None:
@@ -34,6 +42,9 @@ class CrawlerReport(Report):
 
         elif fmt == Format.Json:
             return CrawlerReportInJson(self.fileName)
+        
+        elif fmt == Format.Html:
+            return CrawlerReportInHtml(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

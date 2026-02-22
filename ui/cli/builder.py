@@ -219,6 +219,9 @@ class OptionsBuilder(ConfigBuilder):
             elif self.data.format == "json":
                 output.SetFormat(Format.Json)
 
+            elif self.data.format == "html":
+                output.SetFormat(Format.Html)
+
             else:
                 return None
             

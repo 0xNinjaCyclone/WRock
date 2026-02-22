@@ -185,23 +185,22 @@ class AnalysisResults( list ):
 
         return sensitives
 
-    def Transform(self) -> dict:
-        dResult = dict()
+    def Transform(self) -> list:
+        analyzer_result = []
         key = "Items"
-        ctr = 1
 
         for result in self:
-            dResult2 = dict()
-            dResult2["JsLink"] = result.GetJsLink()
-            dResult2["EndPoints"] = result.GetEndPoints()
+            dResult = dict()
+            dResult["JsLink"] = result.GetJsLink()
+            dResult["EndPoints"] = result.GetEndPoints()
             
             if not key in dResult:
-                dResult2[key] = list()
+                dResult[key] = list()
 
             for i in result.GetItems():
                 x = i.GetExtractor()
 
-                dResult2[key].append({
+                dResult[key].append({
                     "Extractor": {
                         "Platform":   x.GetPlatform(),
                         "KeyType":    x.GetKeyType(),
@@ -211,10 +210,9 @@ class AnalysisResults( list ):
                     "Data":      i.GetData()
                 })
 
-            dResult[ str(ctr) ] = dResult2
-            ctr += 1
+            analyzer_result.append( dResult )
 
-        return dResult
+        return analyzer_result
 
 
 class Analyzer:

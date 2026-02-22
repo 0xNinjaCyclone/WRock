@@ -49,6 +49,14 @@ class JsAnalyzerReportInJson(JsonOutput):
     def write(self, results):
         JsonOutput.write(self, results.Transform())
 
+class JsAnalyzerReportInHtml(HtmlOutput):
+
+    def __init__(self, fileName):
+        HtmlOutput.__init__(self, fileName)
+
+    def write(self, results):
+        HtmlOutput.write(self, results.Transform())
+
 
 class JsAnalyzerReport(Report):
 
@@ -63,6 +71,9 @@ class JsAnalyzerReport(Report):
 
         elif fmt == Format.Json:
             return JsAnalyzerReportInJson(self.fileName)
+        
+        elif fmt == Format.Html:
+            return JsAnalyzerReportInHtml(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

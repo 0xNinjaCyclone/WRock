@@ -40,6 +40,14 @@ class ScannerReportInJson(JsonOutput):
             ctr += 1
 
         return JsonOutput.write(self, dResult)
+    
+class ScannerReportInHtml(HtmlOutput):
+
+    def __init__(self, fileName):
+        HtmlOutput.__init__(self, fileName)
+
+    def write(self, results):
+        return HtmlOutput.write(self, results.Transform())
 
 
 class ScannerReport(Report):
@@ -55,6 +63,9 @@ class ScannerReport(Report):
 
         if fmt == Format.Json:
             return ScannerReportInJson(self.fileName)
+        
+        if fmt == Format.Html:
+            return ScannerReportInHtml(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

@@ -1,5 +1,6 @@
 
 import json
+from json2html import json2html
 from typing import Type
 from core.config.base import OutputConfig
 
@@ -90,3 +91,16 @@ class JsonOutput(Output):
         json.dump(self.data, self.file)
         self.file.close()
         
+
+class HtmlOutput(Output):
+
+    def __init__(self, fileName):
+        Output.__init__(self, fileName)
+
+    def write(self, data):
+        self.data = "<!DOCTYPE html>"
+        self.data += "<html>"
+        self.data += "<body>"
+        self.data += json2html.convert(data)
+        self.data += "</body>"
+        self.data += "</html>"

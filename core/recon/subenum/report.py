@@ -19,7 +19,12 @@ class SubdomainEnumeratorReportInJson(JsonOutput):
         JsonOutput.__init__(self, fileName)
 
     def write(self, subdomains):
-        JsonOutput.write(self, {"Subdomains": subdomains})
+        JsonOutput.write(self, subdomains)
+
+class SubdomainEnumeratorReportInHtml(HtmlOutput):
+
+    def __init__(self, fileName):
+        HtmlOutput.__init__(self, fileName)
 
 
 class EnumeratorReport(Report):
@@ -35,6 +40,9 @@ class EnumeratorReport(Report):
 
         elif fmt== Format.Json:
             return SubdomainEnumeratorReportInJson(self.fileName)
+        
+        elif fmt == Format.Html:
+            return SubdomainEnumeratorReportInHtml(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

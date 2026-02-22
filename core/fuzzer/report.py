@@ -20,6 +20,16 @@ class FuzzerReportInJson(JsonOutput):
     def write(self, result):
         JsonOutput.write(self, result.Transform())
 
+class FuzzerReportInHtml(HtmlOutput):
+    def __init__(self, fileName):
+        HtmlOutput.__init__(self, fileName)
+
+    def write(self, result):
+        output = result.Transform()
+        for i in output:
+            i[ "TimeDuration" ] = i[ "TimeDuration" ][ "Str" ]
+        HtmlOutput.write(self, output)
+
 
 class FuzzerReport(Report):
 
@@ -34,6 +44,9 @@ class FuzzerReport(Report):
 
         elif fmt == Format.Json:
             return FuzzerReportInJson(self.fileName)
+        
+        elif fmt == Format.Html:
+            return FuzzerReportInHtml(self.fileName)
 
         else:
             raise TypeError(f"Invalid report format")

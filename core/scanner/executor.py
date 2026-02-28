@@ -83,17 +83,22 @@ class GeneralScanExecutor(ScanExecutor):
 
 
     def start(self):
+        target_endpoint = self.config.GetModuleConfig().GetTarget()
         crawler_cfg = self.config.GetCrawlerConfig()
         if crawler_cfg.isEnabled():
             crawler_result = crawl(crawler_cfg)
             endpoints = rduplicate(crawler_result.GetEndPoints())
         else:
-            endpoints = [self.config.GetModuleConfig().GetTarget()]
+            endpoints = [ target_endpoint ]
 
-        for MODULE in self.GetAllModules():
+        for Module in self.GetAllModules():
+            if issubclass(Module, GlobalLevelScanner):
+                self.run( EndPoint.Load(target_endpoint), Module )
+                continue
+
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 for endpoint in endpoints:
-                    executor.submit(self.run, EndPoint.Load(endpoint), MODULE)
+                    executor.submit(self.run, EndPoint.Load(endpoint), Module)
 
         return self.results
 

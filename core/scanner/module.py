@@ -1,4 +1,5 @@
 
+import string, random # Used by modules
 from core.config.module import *
 from core.http.request import *
 from core.scanner.endpoint import EndPoint
@@ -91,7 +92,7 @@ class AttackScan( GeneralScanner ):
 class ParamsScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
-        GeneralScanner.__init__(self, config, info) 
+        AttackScan.__init__(self, config, info) 
         self.__may_vulnerable_params  = []
         self.__value_with_payload = False
 
@@ -178,7 +179,7 @@ class ParamsScanner( AttackScan ):
 class UriScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
-        GeneralScanner.__init__(self, config, info)
+        AttackScan.__init__(self, config, info)
         self.__manipulate_path = False
 
     def AllowPathManipulation(self):
@@ -208,7 +209,7 @@ class UriScanner( AttackScan ):
 
                 else:
                     # Set our payload at the end of url
-                    req.SetUrl( endpoint.GetUrl() + payload )
+                    req.SetUrl( urljoin(endpoint.GetUrl(), payload) )
 
                 # Send HTTP Request ( request_args for user if need to set any additional request option )
                 res = req.Send( **self.request_args )
@@ -243,7 +244,7 @@ class UriScanner( AttackScan ):
 class HeadersScanner( AttackScan ):
 
     def __init__(self, config: ModuleConfig, info={}) -> None:
-        GeneralScanner.__init__(self, config, info)
+        AttackScan.__init__(self, config, info)
         
     def InitVulnInfo(self):
         return HeadersVulnInfo(self.endpoint, self.__class__.__name__)
@@ -288,7 +289,7 @@ class HeadersScanner( AttackScan ):
 
 class BodyScanner( AttackScan ):
     def __init__(self, config, info={}):
-        GeneralScanner.__init__(self, config, info)
+        AttackScan.__init__(self, config, info)
 
     def InitVulnInfo(self):
         return BodyVulnInfo(self.endpoint, self.__class__.__name__)
@@ -420,3 +421,10 @@ class UrlBasedDataExposure( DataExposureScanner ):
             self.vulnInfo.register_maybe( "URL", self.GetData() )
 
         return self.GetModuleInfo()
+    
+class GlobalLevelScanner( BaseScanner ):
+    def __init__(self, config, info={}):
+        BaseScanner.__init__(self, config, info)
+
+    def check(self):
+        return True

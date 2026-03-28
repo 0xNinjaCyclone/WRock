@@ -49,7 +49,10 @@ class ScanExecutor:
 
     def reachable(self):
         try:
-            requests.get(self.url, timeout=30)
+            r = Get( self.url, headers=self.config.GetHeaders(), proxy=self.config.GetProxy() )
+            r.Send( timeout=30, verify=False )
+            return True
+        except requests.exceptions.SSLError: # To give the TLS/SSL scanner a chance
             return True
         except:
             return False

@@ -91,6 +91,7 @@ func Init(
 	recursion bool,
 	depth int,
 	timeout int,
+	proxy string,
 ) error {
 
 	var err error
@@ -108,7 +109,7 @@ func Init(
 	pFfuf.opts, err = ffuf.ReadDefaultConfig()
 
 	// set params
-	SetOpts(pFfuf.opts, url, headers, wordlists, threads, recursion, depth, timeout)
+	SetOpts(pFfuf.opts, url, headers, wordlists, threads, recursion, depth, timeout, proxy)
 
 	return err
 }
@@ -124,12 +125,13 @@ func FfufInit(
 	recursion bool,
 	depth int,
 	timeout int,
+	proxy string,
 ) {
 	goheaders := CStrArrToGo(headers, headersSize)
 	gowordlists := CStrArrToGo(wordlists, wordlistsSize)
 
 	// Initialize ffuf
-	err := Init(url, goheaders, gowordlists, threads, recursion, depth, timeout)
+	err := Init(url, goheaders, gowordlists, threads, recursion, depth, timeout, proxy)
 
 	if err != nil {
 		gErr = err.Error()
@@ -148,6 +150,7 @@ func SetOpts(
 	recursion bool,
 	depth int,
 	timeout int,
+	proxy string,
 ) {
 	opts.HTTP.URL = url
 	opts.HTTP.Headers = headers
@@ -156,6 +159,7 @@ func SetOpts(
 	opts.HTTP.RecursionDepth = depth
 	opts.HTTP.Timeout = timeout
 	opts.Input.Wordlists = wordlists
+	opts.HTTP.ProxyURL = proxy
 }
 
 func ConfigFromFile(opts *ffuf.ConfigOptions) (*ffuf.ConfigOptions, error) {
@@ -178,6 +182,7 @@ func ConfigFromFile(opts *ffuf.ConfigOptions) (*ffuf.ConfigOptions, error) {
 		opts.HTTP.Recursion,
 		opts.HTTP.RecursionDepth,
 		opts.HTTP.Timeout,
+		opts.HTTP.ProxyURL,
 	)
 
 	return newopts, nil

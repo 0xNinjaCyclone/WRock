@@ -16,7 +16,8 @@ class WebFuzzer( Fuzzer ):
             config.GetThreads(),
             config.IsRecursionEnabled(),
             config.GetRecursionDepth(),
-            config.GetTimeout()
+            config.GetTimeout(),
+            config.GetProxy()
         )
 
         method = config.GetMethod()

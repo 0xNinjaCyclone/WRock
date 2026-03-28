@@ -17,7 +17,8 @@ class WebCrawler(Crawler):
             Headers.Parser.toRaw(config.GetHeaders()),
             config.isGetStatusCodeEnabled(),
             config.isNoOutOfScopeEnabled(),
-            config.GetDisallowed()
+            config.GetDisallowed(),
+            config.GetProxy()
         )
 
     def Start(self) -> CrawlerResult:

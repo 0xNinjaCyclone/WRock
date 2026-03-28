@@ -68,7 +68,7 @@ sudo ./install.sh
 ┌──(user㉿hostname)-[~/path/to/WRock]
 └─$ python3 webrock.py -h
 Usage: 
-		./webrock.py [-h or --help] for more options 
+                ./webrock.py [-h or --help] for more options 
 
 
 Options:
@@ -93,6 +93,8 @@ Options:
                         Output format ('text' by default)
   -o OUTPUT, --output=OUTPUT
                         Enter FileName for save output in it
+  -P PROXY, --proxy=PROXY
+                        Use proxy in format 'type://user:pass@host:port'
   -v, --verbose         Increase verbosity
   -l LEVEL, --level=LEVEL
                         verbosity level [1-3]

@@ -1,5 +1,6 @@
 
 import csv, requests, re, os.path, urllib.parse
+from core.http.request import Get
 from core.data import rockPATH
 from core.crawler.crawl import crawl
 from core.config.jsanlyzer import *
@@ -255,7 +256,7 @@ class Analyzer:
 
     def __getjscontent__(self, jsLink) -> str:
         try:
-            response = requests.get(jsLink, headers=self.__config.GetHeaders(), timeout=30)
+            response = Get( jsLink, headers=self.__config.GetHeaders(), proxy=self.__config.GetProxy() ).Send( timeout=30 )
             retval   = response.text if response.ok else str()
         except:
             retval = str()

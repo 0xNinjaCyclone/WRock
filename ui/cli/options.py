@@ -70,6 +70,7 @@ def register():
     parser.add_option('-p','--post-params',dest="post",help="Post params ('p1=v1&p2=v2|param_type')")
     parser.add_option('-f','--format',dest="format",help="Output format ('text' by default)",default="text")
     parser.add_option('-o','--output',dest="output",help="Enter FileName for save output in it")
+    parser.add_option('-P','--proxy',dest="proxy",help="Use proxy in format 'type://user:pass@host:port'")
     parser.add_option('-v','--verbose',action="store_true",dest="verbose",help="Increase verbosity",default=False)
     parser.add_option('-l','--level',dest="level",help="verbosity level [1-3]", type=int,default=1)
     parser.add_option('-V','--version',action="store_true",dest="version",help="Show version")

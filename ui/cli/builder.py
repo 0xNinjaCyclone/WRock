@@ -26,6 +26,8 @@ class OptionsBuilder(ConfigBuilder):
         cfghandler.SetThreads(self.data.threads)
         cfghandler.SetHeaders(self.buildHeaders())
         cfghandler.SetVerbosity(self.buildVerbosity())
+        if self.data.proxy:
+            cfghandler.SetProxy( WRockProxy(self.data.proxy) )
 
     def buildSharedEnumerationData(self, cfg: EnumerationConfig):
         self.buildSharedData(cfg)

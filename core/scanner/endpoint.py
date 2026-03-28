@@ -100,8 +100,8 @@ class EndPoint:
 
         return ''
 
-    def GetRequester(self, headers: Headers):
-        return Get(self.GetUrl(), self.GetParams(), self.GetData(), headers) if self.GetMethodType() == 'GET' else Post(self.GetUrl(), self.GetParams(), self.GetData(), headers) 
+    def GetRequester(self, headers: Headers, proxy = None):
+        return Get(self.GetUrl(), self.GetParams(), self.GetData(), headers, proxy) if self.GetMethodType() == 'GET' else Post(self.GetUrl(), self.GetParams(), self.GetData(), headers, proxy) 
 
     def __parse_params__(self):
         # Avoid using parse_qs because it represents values as a list like => {'param': ['value']}

@@ -7,11 +7,12 @@ class Request:
     _sess = None
     _mutex = threading.Lock()
 
-    def __init__(self, url, params = {}, data = {}, headers: Headers = Headers()) -> None:
+    def __init__(self, url, params = {}, data = {}, headers: Headers = Headers(), proxy = None) -> None:
         self.url                = url
         self.params             = params # Url parameters
         self.data               = data   # Body parameters
         self.headers            = headers
+        self.proxy              = proxy
 
         with Request._mutex:
             if not Request._sess:
@@ -30,7 +31,10 @@ class Request:
         self.headers = headers
 
     def GetReqSession(self) -> requests.Session:
-        return requests.Session()
+        s = requests.Session()
+        if self.proxy:
+            s.proxies.update( self.proxy )
+        return s
 
     def Send(self, **args) -> requests.Response or None:
         pass
@@ -46,16 +50,16 @@ class Request:
 
 
 class Get(Request):
-    def __init__(self, url, params={}, data={}, headers: Headers = Headers()) -> None:
-        Request.__init__(self, url, params, data, headers)
+    def __init__(self, url, params={}, data={}, headers: Headers = Headers(), proxy = None) -> None:
+        Request.__init__(self, url, params, data, headers, proxy)
 
     def Send(self, **args) -> requests.Response or None:
         return Request.get(self, **args)
 
 
 class Post(Request):
-    def __init__(self, url, params={}, data={}, headers: Headers = Headers()) -> None:
-        Request.__init__(self, url, params, data, headers)
+    def __init__(self, url, params={}, data={}, headers: Headers = Headers(), proxy = None) -> None:
+        Request.__init__(self, url, params, data, headers, proxy)
 
     def Send(self, **args) -> requests.Response or None:
         return Request.post(self, **args)

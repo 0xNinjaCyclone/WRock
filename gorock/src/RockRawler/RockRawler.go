@@ -26,6 +26,15 @@ typedef struct {
 	char     **jsFiles;
 	char     **emails;
 } RockRawlerResult;
+
+ typedef struct {
+	char *cpProto;
+	char *cpServer;
+	unsigned short wPort;
+	char *cpAuthUser;
+	char *cpAuthPass;
+	char *cpPrepared;
+ } RockRawlerProxy;
 */
 import "C"
 
@@ -37,8 +46,13 @@ import (
 	"regexp"
 	"strings"
 	"unsafe"
+	"fmt"
+	"time"
+	"net"
+	"context"
 
-	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/v2"
+	"golang.org/x/net/proxy"
 )
 
 type RockRawlerConfig struct {
@@ -51,6 +65,7 @@ type RockRawlerConfig struct {
 	sc           bool // Get urls status code flag
 	noOutOfScope bool
 	disallowed   []string
+	pProxy        *C.RockRawlerProxy
 }
 
 type Parameter struct {
@@ -131,6 +146,52 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 		c.URLFilters = []*regexp.Regexp{regexp.MustCompile(".*(\\.|\\/\\/)" + strings.ReplaceAll(hostname, ".", "\\.") + "((#|\\/|\\?).*)?")}
 	}
 
+	// Skip TLS verification if -insecure flag is present
+	c.WithTransport(&http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.insecure},
+	})
+
+	if config.pProxy != nil {
+		if strings.HasPrefix(strings.ToLower(C.GoString(config.pProxy.cpProto)), "socks5") {
+			var auth *proxy.Auth = nil
+
+			user := C.GoString(config.pProxy.cpAuthUser)
+			pass := C.GoString(config.pProxy.cpAuthPass)
+			if strings.TrimSpace(user) != "" && strings.TrimSpace(pass) != "" {
+				auth = &proxy.Auth{
+					User:     user,
+					Password: pass,
+				}
+			}
+
+			dialer, err := proxy.SOCKS5("tcp", fmt.Sprintf("%s:%d", C.GoString(config.pProxy.cpServer), int(config.pProxy.wPort)), auth, proxy.Direct)
+			if err != nil {
+				return result
+			}
+
+			dialctx := func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return dialer.Dial(network, addr)
+			}
+
+			// Force ALL traffic through proxy
+			c.SetClient(&http.Client{
+				Transport: &http.Transport{
+					DialContext: dialctx,
+					TLSHandshakeTimeout: 10 * time.Second,
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: config.insecure},
+				},
+				Timeout: 10 * time.Second,
+			})
+
+		} else {
+			err := c.SetProxy(C.GoString(config.pProxy.cpPrepared))
+			if err != nil {
+				return result
+			}
+		}
+		
+	} 
+
 	// Set parallelism
 	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: config.threads})
 
@@ -174,11 +235,6 @@ func StartCrawler(config RockRawlerConfig) RockRawlerResult {
 			}
 		})
 	}
-
-	// Skip TLS verification if -insecure flag is present
-	c.WithTransport(&http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.insecure},
-	})
 
 	// Start scraping
 	c.Visit(url)
@@ -508,6 +564,7 @@ func CStartCrawler(
 	noOutOfScope bool,
 	cpDisallowed **C.char,
 	size int,
+	pProxy *C.RockRawlerProxy,
 ) *C.RockRawlerResult {
 
 	// Config
@@ -521,6 +578,7 @@ func CStartCrawler(
 		sc:           sc,
 		noOutOfScope: noOutOfScope,
 		disallowed:   CStrArrToGo(cpDisallowed, size),
+		pProxy:        pProxy,
 	}
 
 	// Pass the supplied parameters from C to the crawler

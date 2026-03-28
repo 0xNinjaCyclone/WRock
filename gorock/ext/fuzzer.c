@@ -1080,7 +1080,7 @@ static PyObject *Fuzzer_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Fuzzer_init(Fuzzer *self, PyObject *args, PyObject* kwds)
 {
-    PyObject *pUrl, *pHeaders, *pWordlists;
+    PyObject *pUrl, *pHeaders, *pWordlists, *pProxy;
     int nThreads, nRecursion, nDepth, nTimeout;
 
     char **cpHeaders, **cpWordlists;
@@ -1093,17 +1093,18 @@ static int Fuzzer_init(Fuzzer *self, PyObject *args, PyObject* kwds)
         "recursion",
         "depth",
         "timeout",
+        "proxy",
         NULL
     };
 
-    pUrl = pHeaders = pWordlists = NULL;
+    pUrl = pHeaders = pWordlists = pProxy = NULL;
     nThreads = nRecursion = nDepth = nTimeout = 0;
 
     if (
         !PyArg_ParseTupleAndKeywords(
             args,
             kwds,
-            "UOO|iiii",
+            "UOO|iiiiO",
             kwlist,
             &pUrl,
             &pHeaders,
@@ -1111,7 +1112,8 @@ static int Fuzzer_init(Fuzzer *self, PyObject *args, PyObject* kwds)
             &nThreads,
             &nRecursion,
             &nDepth,
-            &nTimeout
+            &nTimeout,
+            &pProxy
         )
     ) {
         return -1;
@@ -1132,6 +1134,17 @@ static int Fuzzer_init(Fuzzer *self, PyObject *args, PyObject* kwds)
     if ( !nTimeout )
         nTimeout = 10;
 
+    if ( pProxy && pProxy != Py_None ) {
+        Py_INCREF( pProxy );
+        
+        if ( !(pProxy = PyObject_CallMethod(pProxy, "prepare", NULL)) ) 
+            return -1;
+
+        if ( !PyUnicode_Check(pProxy) )
+            return -1;
+        
+    } else 
+        pProxy = PyUnicode_FromString( "" );
     
     Py_INCREF(pUrl);
     Py_INCREF(pHeaders);
@@ -1149,7 +1162,8 @@ static int Fuzzer_init(Fuzzer *self, PyObject *args, PyObject* kwds)
         (GoInt) nThreads,
         (GoUint8) nRecursion,
         (GoInt) nDepth,
-        (GoInt) nTimeout
+        (GoInt) nTimeout,
+        BuildGoStr(pProxy)
     );
 
     FreeMemory(cpWordlists);

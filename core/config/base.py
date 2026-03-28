@@ -20,7 +20,67 @@ class Verbosity:
 
     def GetLevel(self):
         return self.__level
+    
 
+class WRockProxy( dict ):
+
+    def __init__(self, proxy):
+        self.__proto  = None
+        self.__server = None
+        self.__port   = None
+        self.__user   = None
+        self.__pass   = None
+
+        if '://' not in proxy:
+            proxy = "http://" + proxy
+
+        self.__proto, info = proxy.split( '://' )
+
+        if '@' in info:
+            auth_info, info = info.split( '@', 1 )
+            if ':' not in auth_info:
+                raise ValueError("Invalid proxy")
+
+            self.__user, self.__pass = auth_info.split( ':', 1 ) 
+
+        if ':' not in info:
+            self.__port = {
+                "http": 80,
+                "https": 443,
+                "socks5": 1080
+            }[ self.__proto ]
+
+        else:
+            self.__server, self.__port = ( lambda x: (x[0], int(x[1])) )( info.split( ':' ) )
+
+        proxy = self.prepare()
+        self[ "http" ] = proxy
+        self[ "https" ] = proxy
+
+    def get_auth_user(self):
+        return self.__user
+
+    def get_auth_pass(self):
+        return self.__pass
+    
+    def auth_required(self):
+        return self.__user and self.__pass
+    
+    def get_server(self):
+        return self.__server
+    
+    def get_port(self):
+        return self.__port
+    
+    def get_proto(self):
+        return self.__proto
+    
+    def prepare(self):
+        return f"{self.get_proto()}://" + \
+        ( f"{self.get_auth_user()}:{self.get_auth_pass()}@" if self.auth_required() else "" ) + \
+        f"{self.get_server()}:{self.get_port()}"
+
+    
 
 class Config:
     def __init__(self) -> None:
@@ -28,6 +88,7 @@ class Config:
         self.__threads = 1
         self.__headers = None
         self.__verbose = None
+        self.__proxy   = None
         
 
     def SetTarget(self, target):
@@ -53,6 +114,12 @@ class Config:
 
     def GetVerbosity(self):
         return self.__verbose
+    
+    def SetProxy(self, proxy: WRockProxy):
+        self.__proxy = proxy
+
+    def GetProxy(self):
+        return self.__proxy
 
 
 class Format(Enum):

@@ -16,6 +16,7 @@ typedef struct
     PyObject *sc; // status_code -> PyBool
     PyObject *noOutOfScope;
     PyObject *pDisallowedList; 
+    PyObject *proxy;
 
 } Crawler;
 
@@ -61,6 +62,9 @@ static PyObject *Crawler_GetInsecure(Crawler *self, void *closure);
 static int Crawler_SetRawHeaders(Crawler *self, PyObject *value, void *closure);
 static PyObject *Crawler_GetRawHeaders(Crawler *self, void *closure);
 
+static int Crawler_SetProxy(Crawler *self, PyObject *value, void *closure);
+static PyObject *Crawler_GetProxy(Crawler *self, void *closure);
+
 static int CrawlerResult_SetEndPointsAttr(CrawlerResult *self, PyObject *value, void *closure);
 static PyObject *CrawlerResult_GetEndPointsAttr(CrawlerResult *self, void *closure);
 
@@ -80,6 +84,8 @@ static PyObject *StoreParameterResult(Parameter **params);
 static PyObject *StoreEndPointsResult(EndPoint **endpoints);
 static PyObject *StoreCrawlerResult(RockRawlerResult *result);
 static void FreeCrawlerResult(RockRawlerResult *result);
+static void *CallObjMethod(PyObject *pObj, const char *cpMethod, int nRetType);
+static void FreeRockRawlerProxy(RockRawlerProxy **ppProxy);
 
 static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored));
 PyMODINIT_FUNC PyInit_rockrawler(void);
@@ -98,6 +104,8 @@ static PyGetSetDef Crawler_getsetters[] = {
         "Disable TLS verification.", NULL},
     {"rawHeaders", (getter) Crawler_GetRawHeaders, (setter) Crawler_SetRawHeaders,
         "Custom headers separated by two semi-colons.", NULL},
+    {"proxy", (getter) Crawler_GetProxy, (setter) Crawler_SetProxy,
+        "Use a proxy.", NULL},
 
     {NULL}  /* Sentinel */
 };

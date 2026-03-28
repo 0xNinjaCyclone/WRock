@@ -108,10 +108,10 @@ InstallGolang() {
     rm -rf /usr/local/go
 
     if isMac; then
-        wget https://go.dev/dl/go1.17.8.darwin-amd64.tar.gz -O golang.tar.gz &>/dev/null
+        wget https://go.dev/dl/go1.26.1.darwin-amd64.tar.gz -O golang.tar.gz &>/dev/null
 
     else
-        wget https://go.dev/dl/go1.17.8.linux-amd64.tar.gz -O golang.tar.gz &>/dev/null    
+        wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz -O golang.tar.gz &>/dev/null    
     fi
 
 

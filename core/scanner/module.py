@@ -50,7 +50,7 @@ class BaseScanner:
 
     def GetRequester(self, endpoint=None):
         e = endpoint if endpoint else self.endpoint
-        return e.GetRequester(self.config.GetHeaders())
+        return e.GetRequester(self.config.GetHeaders(), self.config.GetProxy())
 
     def InitVulnInfo(self) -> VulnerabilityInfo:
         pass

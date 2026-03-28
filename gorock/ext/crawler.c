@@ -12,6 +12,7 @@ static int Crawler_traverse(Crawler *self, visitproc visit, void *arg)
     Py_VISIT(self->sc);
     Py_VISIT(self->noOutOfScope);
     Py_VISIT(self->pDisallowedList);
+    Py_VISIT(self->proxy);
     
     return 0;
 }
@@ -27,6 +28,7 @@ static int Crawler_clear(Crawler *self)
     Py_CLEAR(self->sc);
     Py_CLEAR(self->noOutOfScope);
     Py_CLEAR(self->pDisallowedList);
+    Py_CLEAR(self->proxy);
 
     return 0;
 }
@@ -49,7 +51,8 @@ static PyObject *Crawler_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             (self->rawHeaders = PyUnicode_FromString("")) &&
             (self->sc = PyBool_FromLong(0)) &&
             (self->noOutOfScope = PyBool_FromLong(0)) &&
-            (self->pDisallowedList = PyList_New(0))
+            (self->pDisallowedList = PyList_New(0)) &&
+            (self->proxy = Py_None)
         ))
         {
             /* initialization failed */
@@ -75,17 +78,18 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         "sc", 
         "noOutOfScope", 
         "disallowed",
+        "proxy",
         NULL
     };
 
-    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *pDisallowedList, *tmp;
+    PyObject *url, *threads, *depth, *subsInScope, *insecure, *rawHeaders, *sc, *noOutOfScope, *pDisallowedList, *proxy, *tmp;
     int nThreads,nDepth, nSubsInScope, nInsecure, nSc, nNoOutOfScope;
 
     url = rawHeaders = NULL;
     nThreads = nDepth = nSubsInScope = nInsecure = nSc = nNoOutOfScope = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|iiiiUiiO", 
-                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope, &pDisallowedList))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|iiiiUiiOO", 
+                                    kwlist, &url, &nThreads, &nDepth, &nSubsInScope, &nInsecure, &rawHeaders, &nSc, &nNoOutOfScope, &pDisallowedList, &proxy))
     {
         return -1;
     }
@@ -161,6 +165,13 @@ static int Crawler_init(Crawler *self, PyObject *args, PyObject* kwds)
         self->pDisallowedList = pDisallowedList;
         Py_DECREF(tmp);
     } 
+
+    if (proxy) {
+        tmp = self->proxy;
+        Py_INCREF(proxy);
+        self->proxy = proxy;
+        Py_DECREF(tmp);
+    }
 
     return 0;
 }
@@ -375,6 +386,26 @@ static PyObject *Crawler_GetRawHeaders(Crawler *self, void *closure)
 {
     Py_INCREF(self->rawHeaders);
     return self->rawHeaders;
+}
+
+static int Crawler_SetProxy(Crawler *self, PyObject *value, void *closure) 
+{
+    if (value == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the proxy attribute");
+        return -1;
+    }
+
+    Py_INCREF(value);
+    Py_CLEAR(self->proxy);
+    self->proxy = value;
+    return 0;
+}
+
+
+static PyObject *Crawler_GetProxy(Crawler *self, void *closure) 
+{
+    Py_INCREF(self->proxy);
+    return self->proxy;
 }
 
 static int CrawlerResult_SetEndPointsAttr(CrawlerResult *self, PyObject *value, void *closure)
@@ -692,6 +723,44 @@ static void FreeCrawlerResult(RockRawlerResult *result)
     PyMem_Free(result);
 }
 
+static void *CallObjMethod(PyObject *pObj, const char *cpMethod, int nRetType) {
+    PyObject *pResultObj;
+    void *pResult = NULL;
+
+    if ( pResultObj = PyObject_CallMethod(pObj, cpMethod, NULL) ) {
+        switch ( nRetType )
+        {
+        case 0:
+            pResult = (void *) PyLong_AsUnsignedLong( pResultObj );
+            if ( PyErr_Occurred() || (unsigned long) pResult > USHRT_MAX ) 
+                pResult = NULL;
+            break;
+        case 1:
+            if ( PyUnicode_Check(pResultObj) )
+                pResult = (void *) strdup( PyUnicode_AsUTF8(pResultObj) );
+            break;
+        
+        default:
+            break;
+        }
+        
+
+        Py_DECREF( pResultObj );
+    }
+
+    return pResult;
+}
+
+static void FreeRockRawlerProxy(RockRawlerProxy **ppProxy) {
+    PyMem_Free( (*ppProxy)->cpProto );
+    PyMem_Free( (*ppProxy)->cpServer );
+    PyMem_Free( (*ppProxy)->cpAuthUser );
+    PyMem_Free( (*ppProxy)->cpAuthPass );
+    PyMem_Free( (*ppProxy)->cpPrepared );
+    PyMem_Free( *ppProxy );
+    ( *ppProxy ) = NULL;
+}
+
 static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
 
     /* RockRawler results */
@@ -701,9 +770,21 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     PyObject *pResult; 
 
     char **cpDisallowed;
+    RockRawlerProxy *pProxy = NULL;
 
     /* Convert the disallowed list to char** type */
     cpDisallowed = PyListToArray(self->pDisallowedList);
+
+    if ( self->proxy != Py_None ) 
+        if ( pProxy = (RockRawlerProxy *) PyMem_Malloc(sizeof(RockRawlerProxy)) ) {
+            pProxy->cpProto = (char *) CallObjMethod( self->proxy, "get_proto", 1 );
+            pProxy->cpServer = (char *) CallObjMethod( self->proxy, "get_server", 1 );
+            pProxy->cpAuthUser = (char *) CallObjMethod( self->proxy, "get_auth_user", 1 );
+            pProxy->cpAuthPass = (char *) CallObjMethod( self->proxy, "get_auth_pass", 1 );
+            pProxy->cpPrepared = (char *) CallObjMethod( self->proxy, "prepare", 1 );
+            pProxy->wPort = (unsigned short) CallObjMethod( self->proxy, "get_port", 0 );
+        }
+
 
     /* Start Crawler */
     result = CStartCrawler(
@@ -716,7 +797,8 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
             (GoUint8) PyLong_AsLong(self->sc),
             (GoUint8) PyLong_AsLong(self->noOutOfScope),
             cpDisallowed,
-            (GoInt) PyList_Size(self->pDisallowedList)
+            (GoInt) PyList_Size(self->pDisallowedList),
+            pProxy
     );
 
     /* Deallocated the disallowed array */
@@ -727,6 +809,9 @@ static PyObject *Crawler_Start(Crawler *self, PyObject *Py_UNUSED(ignored)) {
     
     /* Free memory */
     FreeCrawlerResult(result);
+
+    if ( pProxy )
+        FreeRockRawlerProxy(&pProxy);
 
     return pResult; 
 }

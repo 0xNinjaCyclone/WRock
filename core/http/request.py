@@ -46,6 +46,8 @@ class Request:
         return self.SendReq(Request._sess.post, **args)
 
     def SendReq(self, reqMethod, **args):
+        if "timeout" not in args: # force specifying timeout to avoid stuck at any f*cking point
+            args[ "timeout" ] = 10
         return reqMethod(self.url, params=self.params, data=self.data, headers=self.headers, **args)
 
 

@@ -5,4 +5,6 @@ dpkt
 pyopenssl
 pycryptodome
 json2html
-
+requests[socks]
+tree_sitter
+tree_sitter_javascript

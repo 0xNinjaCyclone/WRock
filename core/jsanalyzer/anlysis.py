@@ -1,5 +1,5 @@
 
-import csv, requests, re, os.path, urllib.parse
+import csv, re, os.path, urllib.parse
 from core.http.request import Get
 from core.data import rockPATH
 from core.crawler.crawl import crawl

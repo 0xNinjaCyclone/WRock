@@ -5,6 +5,7 @@ from core.config.scanner import ScannerConfig
 from core.scanner.module import *
 from core.scanner.result import ScanResults
 from core.scanner.endpoint import EndPoint
+from core.jsanalyzer.analyzer import mine
 from core.crawler.crawl import crawl
 from core.data import rockPATH
 from core.utils import rduplicate
@@ -90,7 +91,7 @@ class GeneralScanExecutor(ScanExecutor):
         crawler_cfg = self.config.GetCrawlerConfig()
         if crawler_cfg.isEnabled():
             crawler_result = crawl(crawler_cfg)
-            endpoints = rduplicate(crawler_result.GetEndPoints())
+            endpoints = rduplicate( crawler_result.GetEndPoints() + mine(crawler_cfg, crawler_result) )
         else:
             endpoints = [ target_endpoint ]
 

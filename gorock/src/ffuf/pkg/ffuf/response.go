@@ -1,7 +1,6 @@
 package ffuf
 
 import (
-	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -9,7 +8,6 @@ import (
 
 // Response struct holds the meaningful data returned from request and is meant for passing to filters
 type Response struct {
-	Body          []byte
 	StatusCode    int64
 	Headers       map[string][]string
 	Data          []byte
@@ -83,8 +81,6 @@ func getUrlPort(url *url.URL) string {
 func NewResponse(httpresp *http.Response, req *Request) Response {
 	var resp Response
 	resp.Request = req
-	resp.Body, _ = io.ReadAll(httpresp.Body)
-	httpresp.Body.Close()
 	resp.StatusCode = int64(httpresp.StatusCode)
 	resp.ContentType = httpresp.Header.Get("Content-Type")
 	resp.Headers = httpresp.Header
